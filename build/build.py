@@ -189,9 +189,6 @@ def main(src):
     import patch_ui
     print('ui')
     patch_ui.apply(out)
-    import patch_seo
-    print('seo')
-    patch_seo.apply(out)
 
     # 6. Report and verify.
     total = sum(os.path.getsize(os.path.join(r, f))
