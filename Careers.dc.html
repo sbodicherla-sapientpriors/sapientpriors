@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/newsreader-400.woff2') format('woff2')}
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/newsreader-600.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('fonts/inter-var-latin.woff2') format('woff2')}
+  @font-face{font-family:'Cascadia Code';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/cascadia-code-var-latin.woff2') format('woff2')}
+  html,body{margin:0;padding:0;background:#F6F6F4;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:#84512E;text-decoration:none}
+  a:hover{color:#14161A}
+  @keyframes fade-up{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+  @keyframes reveal-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes rule-draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @supports (animation-timeline:view()){
+    [data-reveal]{animation:reveal-in linear both;animation-timeline:view();animation-range:entry 6% entry 54%}
+    [data-rule]{animation:rule-draw linear both;animation-timeline:view();animation-range:entry 8% entry 62%}
+  }
+  @media (max-width:1023.98px){
+    [data-nav-burger]{display:flex!important}
+    [data-footer-grid]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    [data-role-grid]{grid-template-columns:minmax(0,1fr)!important}
+    [data-detail-grid]{grid-template-columns:minmax(0,1fr)!important}
+    [data-nav-links]{display:none!important}
+    [data-section-art]{display:none!important}
+  }
+</style>
+</helmet>
+
+<div style="font-family:Inter,system-ui,sans-serif;color:#14161A;background:#F6F6F4;position:relative">
+
+  <dc-import name="SiteNav" active="Company" hint-size="100%,72px"></dc-import>
+
+  <div style="padding-top:72px">
+
+    <div style="position:relative;overflow:hidden;border-bottom:1px solid #E4E4E0;padding-block:clamp(4.5rem,6vw,7rem)">
+      <div data-section-art aria-hidden="true" style="pointer-events:none;position:absolute;right:-4%;top:-4%;width:min(85vw,1150px);aspect-ratio:2/1;background:url('art/goldfish-school.webp') center/contain no-repeat;filter:brightness(1.12) contrast(1.34) saturate(.9);mix-blend-mode:multiply;opacity:.28"></div>
+      <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+        <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;max-width:42rem;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Careers<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
+        <h1 style="margin:0;max-width:44rem;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(2.25rem,1rem + 3.6vw,4.5rem);line-height:1.04;letter-spacing:-.025em;text-wrap:balance">Come build the part that remembers.</h1>
+        <p style="margin:24px 0 0;max-width:40rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45;text-wrap:pretty">Two roles, both in Bangalore, both hybrid. Small team, so whatever you ship goes to production with your name on it. Mentorship from ML veterans with twelve years behind them.</p>
+        <div style="margin-top:32px;display:flex;flex-wrap:wrap;gap:12px">
+          <a href="#apply" style="padding:12px 28px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.9375rem;font-weight:500;text-decoration:none">Apply now</a>
+          <a href="Team.dc.html" style="padding:12px 28px;border-radius:10px;background:#FFFFFF;border:1px solid #CFCFC9;font-size:.9375rem;font-weight:500;color:#14161A;text-decoration:none">Meet the team</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:relative;background:#FFFFFF;border-bottom:1px solid #E4E4E0;padding-block:clamp(3.5rem,5vw,5rem)">
+      <div style="padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+        <div data-role-grid style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#E4E4E0">
+          <sc-for list="{{ roles }}" as="r" hint-placeholder-count="2">
+            <div data-reveal onClick="{{ r.select }}" style="display:flex;flex-direction:column;gap:14px;background:{{ r.tint }};padding:clamp(1.75rem,2.4vw,2.25rem);cursor:pointer">
+              <p style="margin:0;display:flex;align-items:center;gap:12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#84512E">{{ r.type }}<span style="height:1px;width:24px;background:#CFCFC9"></span>{{ r.location }}</p>
+              <h2 style="margin:0;font-family:Newsreader,Georgia,serif;font-weight:600;font-size:clamp(1.375rem,1rem + 1.2vw,2rem);line-height:1.18;letter-spacing:-.012em">{{ r.title }}</h2>
+              <p style="margin:0;flex:1;font-size:1rem;line-height:1.6;color:#6B7078;text-wrap:pretty">{{ r.description }}</p>
+              <p style="margin:0;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">{{ r.cue }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:relative;padding-block:clamp(3.5rem,5vw,5rem)">
+      <div style="padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+        <div style="margin-bottom:36px">
+          <p style="margin:0 0 12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">The role in full</p>
+          <h2 style="margin:0;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,3rem);line-height:1.1;letter-spacing:-.018em">{{ activeTitle }}</h2>
+        </div>
+        <div data-detail-grid style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(1.5rem,2vw,2rem)">
+          <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="4">
+            <div data-reveal style="border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF;padding:clamp(1.5rem,2vw,2rem)">
+              <p style="margin:0 0 18px;display:flex;align-items:center;gap:12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">{{ b.heading }}<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <sc-for list="{{ b.items }}" as="i" hint-placeholder-count="6">
+                  <div style="display:flex;align-items:flex-start;gap:10px;font-size:.9375rem;line-height:1.6;color:#3A3E45"><span style="flex-shrink:0;color:#84512E">·</span><span>{{ i.text }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div data-apply-form style="margin-top:56px;scroll-margin-top:96px" id="apply"></div>
+      </div>
+    </div>
+
+    <dc-import name="SiteFooter" hint-size="100%,420px"></dc-import>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const JOBS = [
+  {
+    id: 'ml-engineer-fulltime',
+    title: 'Machine Learning Engineer',
+    type: 'Full-time',
+    location: 'Bangalore, India',
+    description: 'Build core systems that power continuous learning for AI agents. Architect learning algorithms, build scalable infrastructure, and ship features that let AI systems get more intelligent over time.',
+    responsibilities: [
+      'Architect and implement the learning algorithms that let agents improve from interactions',
+      'Design scalable personalization systems that adapt to individual user patterns',
+      'Develop novel memory architectures for retention and retrieval across sessions',
+      'Research and implement state-of-the-art continual learning techniques',
+      'Build inference and learning pipelines that handle millions of interactions',
+      'Design evaluation frameworks for measuring continual learning effectiveness'
+    ],
+    requirements: [
+      'Strong ML fundamentals: algorithms, optimization, statistical learning theory',
+      '3+ years building and deploying ML systems in production',
+      'Expert Python, with PyTorch, TensorFlow or JAX',
+      'Ability to design scalable, reliable distributed systems',
+      'A track record of shipping ML features from research to production'
+    ],
+    preferred: [
+      'Continual, online, meta- or few-shot learning systems',
+      'LLM architectures, fine-tuning and inference optimization',
+      'Personalization or recommendation systems at scale',
+      'RLHF or related techniques',
+      'Vector databases, embeddings and semantic search',
+      'Publications, or time at an early-stage startup'
+    ],
+    benefits: [
+      'Competitive salary, benchmarked to experience and market',
+      'Significant equity — early team ownership',
+      'Bangalore-based with hybrid and remote flexibility',
+      'Health insurance for you and your family',
+      'Learning budget for books, courses and conferences',
+      'Whatever hardware makes you productive'
+    ]
+  },
+  {
+    id: 'ml-engineer-intern',
+    title: 'Machine Learning Engineer Intern',
+    type: 'Internship',
+    location: 'Bangalore, India',
+    description: 'Own features end to end in our continual learning infrastructure, from ideation to production. This is not the usual internship.',
+    responsibilities: [
+      'Build and own features for the Continuous Learning API',
+      'Develop personalization algorithms that carry preferences across sessions',
+      'Implement memory architectures for retaining and retrieving learned patterns',
+      'Design evaluation pipelines that measure learning effectiveness',
+      'Write real test suites: unit, integration and end to end',
+      'Deploy to production with monitoring and observability'
+    ],
+    requirements: [
+      'Pursuing or recently finished a CS, ML or related degree',
+      'Strong Python',
+      'Version control, testing and code review as habits',
+      'Able to own a project end to end without being managed',
+      'Genuine interest in systems that learn continuously'
+    ],
+    preferred: [
+      'Reinforcement learning or online learning systems',
+      'LangChain, LlamaIndex or similar frameworks',
+      'Vector databases and embedding systems',
+      'Personalization or recommendation systems',
+      'Few-shot, meta- or continual learning research',
+      'Open-source ML contributions'
+    ],
+    benefits: [
+      '6–12 months, flexible start date',
+      'Competitive stipend',
+      'Bangalore-based, hybrid and flexible',
+      'Full-time conversion on performance',
+      'Direct mentorship from ML veterans with 12+ years',
+      'High autonomy from day one'
+    ]
+  },
+  {
+    id: 'founders-office',
+    title: 'Founders Office',
+    type: 'Full-time',
+    location: 'Bangalore, India',
+    description: 'Work directly with the founders across research, go-to-market and everything that does not yet have an owner. The full description is not published yet \u2014 tell us what you would want to own and we will take it from there.',
+    responsibilities: [],
+    requirements: [],
+    preferred: [],
+    benefits: []
+  },
+  {
+    id: 'software-engineer',
+    title: 'Software Engineer',
+    type: 'Full-time',
+    location: 'Bangalore, India',
+    description: 'Build the API, the infrastructure and the tooling around the memory layer. The full description is not published yet \u2014 tell us what you have built and we will take it from there.',
+    responsibilities: [],
+    requirements: [],
+    preferred: [],
+    benefits: []
+  }
+];
+
+class Component extends DCLogic {
+  state = { active: JOBS[0].id };
+
+  renderVals() {
+    const job = JOBS.filter(j => j.id === this.state.active)[0];
+    const wrap = list => list.map(text => ({ text: text }));
+    return {
+      roles: JOBS.map(j => ({
+        title: j.title, type: j.type, location: j.location, description: j.description,
+        tint: j.id === this.state.active ? '#F8F1EC' : '#FFFFFF',
+        cue: j.id === this.state.active ? 'Showing below ↓' : 'Read the detail →',
+        select: () => this.setState({ active: j.id })
+      })),
+      activeTitle: job.title + ' · ' + job.type,
+      blocks: [
+        { heading: 'What you will do', items: wrap(job.responsibilities) },
+        { heading: 'What we need', items: wrap(job.requirements) },
+        { heading: 'Nice to have', items: wrap(job.preferred) },
+        { heading: 'What you get', items: wrap(job.benefits) }
+      ].filter(b => b.items.length > 0)
+    };
+  }
+}
+</script>
+<script>
+/* The page hydrates after parse, so the browser resolves location.hash before
+   the section ids exist, finds nothing, and never retries — every anchor link
+   lands at the top. Re-apply the hash once the target appears. */
+(function () {
+  var id = location.hash ? location.hash.slice(1) : "";
+  if (!id) return;
+  var tries = 0;
+  (function go() {
+    var el = document.getElementById(id);
+    if (el) { el.scrollIntoView(); return; }
+    if (tries++ < 90) requestAnimationFrame(go);
+  })();
+})();
+</script>
+<script src="apply-form.js" defer></script>
+</body>
+</html>

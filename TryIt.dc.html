@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/newsreader-400.woff2') format('woff2')}
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/newsreader-600.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('fonts/inter-var-latin.woff2') format('woff2')}
+  @font-face{font-family:'Cascadia Code';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/cascadia-code-var-latin.woff2') format('woff2')}
+  html,body{margin:0;padding:0;background:#F6F6F4;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:#84512E;text-decoration:none}
+  a:hover{color:#14161A}
+  @keyframes reveal-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes rule-draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes fish-drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-14px,0)}}
+  @supports (animation-timeline:view()){
+    [data-reveal]{animation:reveal-in linear both;animation-timeline:view();animation-range:entry 6% entry 54%}
+    [data-rule]{animation:rule-draw linear both;animation-timeline:view();animation-range:entry 8% entry 62%}
+  }
+  @media (max-width:1023.98px){
+    [data-split]{grid-template-columns:minmax(0,1fr)!important}
+    [data-split]>div{grid-column:auto!important}
+    [data-queue]{grid-template-columns:minmax(0,1fr)!important}
+    [data-nav-links]{display:none!important}
+    [data-nav-burger]{display:flex!important}
+    [data-section-art]{display:none!important}
+    [data-footer-grid]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  }
+</style>
+</helmet>
+
+<div style="font-family:Inter,system-ui,sans-serif;color:#14161A;background:#F6F6F4;position:relative">
+
+  <dc-import name="SiteNav" active="Product" hint-size="100%,72px"></dc-import>
+
+  <div style="padding-top:72px">
+
+    <div style="position:relative;overflow:hidden;border-bottom:1px solid #E4E4E0;padding-block:clamp(4.5rem,6vw,7rem)">
+      
+      <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+        <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;max-width:42rem;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Try it<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
+        <h1 style="margin:0;max-width:44rem;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(2.25rem,1rem + 3.6vw,4.5rem);line-height:1.04;letter-spacing:-.025em;text-wrap:balance">Built for teams running assistants in production.</h1>
+        <p style="margin:24px 0 0;max-width:40rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45;text-wrap:pretty">We onboard a handful of companies at a time so each one gets a real working session rather than a key and a docs link. Tell us what keeps forgetting and we'll come back with a slot.</p>
+        <div style="margin-top:32px;display:flex;flex-wrap:wrap;gap:12px">
+          <a href="#waitlist" style="padding:12px 28px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.9375rem;font-weight:500;text-decoration:none">Book a working session</a>
+          <a href="SapientPriors.dc.html#demo" style="padding:12px 28px;border-radius:10px;background:#FFFFFF;border:1px solid #CFCFC9;font-size:.9375rem;font-weight:500;color:#14161A;text-decoration:none">See the memory console</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:relative;background:#FFFFFF;border-bottom:1px solid #E4E4E0;padding-block:clamp(3.5rem,5vw,5rem)">
+      <div style="padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+        <div data-queue style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#E4E4E0">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+            <div data-reveal style="background:#FFFFFF;padding:clamp(1.75rem,2.4vw,2.25rem)">
+              <p style="margin:0 0 18px;display:flex;align-items:center;gap:12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078"><span style="color:#84512E">{{ s.num }}</span><span style="height:1px;width:24px;background:#CFCFC9"></span>{{ s.label }}</p>
+              <h2 style="margin:0 0 14px;font-family:Newsreader,Georgia,serif;font-weight:600;font-size:clamp(1.25rem,.95rem + 1.1vw,1.75rem);line-height:1.2;letter-spacing:-.012em;text-wrap:balance">{{ s.title }}</h2>
+              <p style="margin:0;font-size:1rem;line-height:1.6;color:#6B7078;text-wrap:pretty">{{ s.body }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div id="waitlist" style="position:relative;overflow:hidden;padding-block:clamp(4rem,6vw,6rem)">
+      
+      <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+        <div data-split style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(3rem,4vw,4rem)">
+          <div style="grid-column:span 5">
+            <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Talk to us<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
+            <h2 style="margin:0;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,3rem);line-height:1.1;letter-spacing:-.018em">Your first memory call is 30 minutes away.</h2>
+            <p style="margin:20px 0 28px;font-size:1.0625rem;line-height:1.6;color:#3A3E45;text-wrap:pretty">Bring one assistant that keeps forgetting and we will wire the memory layer into it on the call. You leave with API access and a before-and-after you can show your team.</p>
+            <div style="border-block:1px solid #E4E4E0">
+              <sc-for list="{{ facts }}" as="f" hint-placeholder-count="3">
+                <div data-reveal style="padding-block:18px;border-bottom:1px solid #E4E4E0">
+                  <p style="margin:0 0 4px;font-size:1.0625rem;font-weight:600;line-height:1.4">{{ f.title }}</p>
+                  <p style="margin:0;font-size:1rem;line-height:1.6;color:#6B7078">{{ f.detail }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="grid-column:span 7">
+            <sc-if value="{{ notSent }}"><form onSubmit="{{ submitForm }}" style="position:relative;z-index:1;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF;padding:clamp(1.75rem,2.4vw,2.25rem);box-shadow:0 1px 3px 0 rgba(20,22,26,.06)">
+              <div data-form-row="" style="margin-bottom:24px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <label for="sp-name" style="font-size:.875rem;font-weight:500">Full name *</label>
+                  <input id="sp-name" required="" placeholder="Jordan Rivera" value="{{ formName }}" onChange="{{ setName }}" style="border:1px solid {{ bdName }};border-radius:10px;padding:10px 14px;font-family:inherit;font-size:.9375rem;color:#14161A;background:#FFFFFF;outline:none">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <label for="sp-email" style="font-size:.875rem;font-weight:500">Work email *</label>
+                  <input id="sp-email" type="email" required="" placeholder="jordan@company.com" value="{{ formEmail }}" onChange="{{ setEmail }}" style="border:1px solid {{ bdEmail }};border-radius:10px;padding:10px 14px;font-family:inherit;font-size:.9375rem;color:#14161A;background:#FFFFFF;outline:none">
+                </div>
+              </div>
+              <div style="margin-bottom:24px;display:flex;flex-direction:column;gap:8px">
+                <label for="sp-phone" style="font-size:.875rem;font-weight:500">Phone number (optional)</label>
+                <input id="sp-phone" type="tel" required="" placeholder="+81 3 1234 5678" value="{{ formPhone }}" onChange="{{ setPhone }}" style="border:1px solid {{ bdPhone }};border-radius:10px;padding:10px 14px;font-family:inherit;font-size:.9375rem;color:#14161A;background:#FFFFFF;outline:none">
+              </div>
+              
+              <div style="margin-bottom:24px;display:flex;flex-direction:column;gap:8px">
+                <label for="sp-company" style="font-size:.875rem;font-weight:500">Company *</label>
+                <input id="sp-company" required="" placeholder="Acme Inc." value="{{ formCompany }}" onChange="{{ setCompany }}" style="border:1px solid {{ bdCompany }};border-radius:10px;padding:10px 14px;font-family:inherit;font-size:.9375rem;color:#14161A;background:#FFFFFF;outline:none">
+              </div>
+              
+              
+              
+              <button type="submit" style="width:100%;padding:12px 24px;border:none;border-radius:10px;background:#84512E;color:#F9F9F7;font-family:inherit;font-size:.9375rem;font-weight:500;cursor:pointer">{{ submitLabel }}</button>
+              <p style="margin:16px 0 0;text-align:center;font-size:1rem;line-height:1.6;color:{{ noteColour }}">{{ formNote }}</p>
+            </form></sc-if><sc-if value="{{ sent }}"><div style="position:relative;z-index:1;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF;padding:clamp(1.75rem,2.4vw,2.25rem);box-shadow:0 1px 3px 0 rgba(20,22,26,.06);text-align:center">
+              <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true" style="display:block;margin:0 auto 20px">
+                <circle cx="23" cy="23" r="22" fill="none" stroke="#84512E" stroke-width="1.5" opacity=".3"></circle>
+                <path d="M14 23.5l6 6 12-13" fill="none" stroke="#84512E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <h3 style="margin:0 0 14px;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.5rem,1.1rem + 1vw,1.875rem);letter-spacing:-.015em;color:#14161A">Request received.</h3>
+              <p style="margin:0 auto 26px;max-width:34rem;font-size:1.0625rem;line-height:1.65;color:#3A3E45">{{ sentBody }}</p>
+            </div></sc-if>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <dc-import name="SiteFooter" hint-size="100%,420px"></dc-import>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const STEPS = [
+  { num: '01', label: 'You write', title: 'One line about the assistant.', body: 'No form marathon. We want the product and the failure, not your org chart.' },
+  { num: '02', label: 'We reply', title: 'A slot, usually inside a week.', body: 'Thirty minutes, screens shared, your data or ours. We wire the memory layer into the thing you brought.' },
+  { num: '03', label: 'You keep', title: 'Keys, and a before-and-after.', body: 'You leave with API access and a recording of the same prompt answered with and without memory.' }
+];
+
+const FACTS = [
+  { title: 'No credit card, no trial clock', detail: 'Beta access is free while the surface is still moving.' },
+  { title: 'REST, so no migration', detail: 'Two calls beside the model you already run. No SDK, no vector store to operate.' },
+  { title: 'You set the roadmap order', detail: 'Beta partners tell us which gap to close next, and we close it in that order.' }
+];
+
+const SIZES = ['Under 1k', '1k – 10k', '10k – 100k', '100k+'];
+
+class Component extends DCLogic {
+  state = { name: '', email: '', phone: '', country: '', company: '', useCase: '', model: '', message: '', sent: false, invalid: [], status: 'idle' };
+
+  borderFor(key) {
+    return this.state.invalid.indexOf(key) === -1 ? '#CFCFC9' : '#A03030';
+  }
+
+  field(key) {
+    return e => {
+      const v = e.target.value;
+      this.setState(s => {
+        const next = {};
+        next[key] = v;
+        next.invalid = String(v || '').trim()
+          ? s.invalid.filter(k => k !== key)
+          : s.invalid;
+        next.status = s.status === 'error' && next.invalid.length === 0 ? 'idle' : s.status;
+        return next;
+      });
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    return {
+      steps: STEPS,
+      facts: FACTS,
+      formName: s.name,
+      formEmail: s.email,
+      formPhone: s.phone,
+      formCountry: s.country,
+      formCompany: s.company,
+      formUseCase: s.useCase,
+      formModel: s.model,
+      formMessage: s.message,
+      setName: this.field('name'),
+      setEmail: this.field('email'),
+      setPhone: this.field('phone'),
+      setCountry: this.field('country'),
+      setCompany: this.field('company'),
+      setUseCase: this.field('useCase'),
+      setModel: this.field('model'),
+      setMessage: this.field('message'),
+      bdName: this.borderFor('name'),
+      bdEmail: this.borderFor('email'),
+      bdPhone: this.borderFor('phone'),
+      bdCountry: this.borderFor('country'),
+      bdCompany: this.borderFor('company'),
+      bdUseCase: this.borderFor('useCase'),
+      sent: s.sent,
+      notSent: !s.sent,
+      noteColour: s.status === 'failed' ? '#A03030' : '#6B7078',
+      sentBody: (() => {
+        const first = String(s.name || '').trim().split(/\s+/)[0];
+        return (first ? 'Thank you, ' + first + '. ' : 'Thank you. ')
+          + 'We will come back to you shortly with a slot for your working session.';
+      })(),
+      submitForm: e => {
+        e.preventDefault();
+        const need = ['name', 'email', 'company'];
+        const invalid = need.filter(k => !String(s[k] || '').trim());
+        const email = String(s.email || '').trim();
+        if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email) && invalid.indexOf('email') === -1) {
+          invalid.push('email');
+        }
+        if (invalid.length) {
+          this.setState({ invalid: invalid, status: 'error' });
+          const el = document.getElementById(
+            'sp-' + (invalid[0] === 'useCase' ? 'usecase' : invalid[0]));
+          if (el) { el.focus(); el.scrollIntoView({ block: 'center' }); }
+          return;
+        }
+        this.setState({ invalid: [], status: 'sending' });
+        fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: s.name, email: s.email, phone: s.phone, country: s.country,
+            company: s.company, useCase: s.useCase, model: s.model, message: s.message
+          })
+        })
+          .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+          .then(() => this.setState({ sent: true, status: 'sent' }))
+          .catch(() => this.setState({ status: 'failed' }));
+      },
+      submitLabel: s.status === 'sending' ? 'Sending...'
+        : s.sent ? 'Request received' : 'Book a Demo',
+      formNote: s.sent
+        ? 'Thank you — we have it, and we will come back to you to book the session.'
+        : s.status === 'failed'
+          ? 'That did not send. Email team@sapientpriors.com and we will pick it up.'
+          : ''
+    };
+  }
+}
+</script>
+<script>
+/* The page hydrates after parse, so the browser resolves location.hash before
+   the section ids exist, finds nothing, and never retries — every anchor link
+   lands at the top. Re-apply the hash once the target appears. */
+(function () {
+  var id = location.hash ? location.hash.slice(1) : "";
+  if (!id) return;
+  var tries = 0;
+  (function go() {
+    var el = document.getElementById(id);
+    if (el) { el.scrollIntoView(); return; }
+    if (tries++ < 90) requestAnimationFrame(go);
+  })();
+})();
+</script>
+<script src="try-demo.js" defer></script>
+</body>
+</html>
