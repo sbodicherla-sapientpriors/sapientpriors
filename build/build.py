@@ -70,6 +70,7 @@ HASH_FIX = """<script>
 """
 
 TRY_DEMO = '<script src="try-demo.js" defer></script>\n'
+CHART_SCROLL = '<script src="chart-scroll.js" defer></script>\n'
 
 
 def run(cmd):
@@ -147,6 +148,8 @@ def main(src):
 
         i = s.rfind("</body>")
         add = HASH_FIX + (TRY_DEMO if os.path.basename(p) == "TryIt.dc.html" else "")
+        if os.path.basename(p) in ("SapientPriors.dc.html", "index.html"):
+            add += CHART_SCROLL
         if "Deploy-time fix" not in s and "hash ? location.hash" not in s:
             s = (s[:i] + add + s[i:]) if i != -1 else (s + add)
 

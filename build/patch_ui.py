@@ -521,23 +521,15 @@ def apply(out):
             "const r = el.getBoundingClientRect();\n"
             "        if (r.top < vh * 0.9 && r.bottom > 0) this.reveal(el);")
 
-        # The two charts draw themselves as you scroll through them, left to
-        # right, with each value label landing as the line reaches its point.
+        # The charts are pinned and drawn by chart-scroll.js, not by CSS.
         #
-        # Done as a clip rect scaled along x, not a stroke-dashoffset draw.
-        # Dashoffset needs stroke-dasharray, which the accuracy lines already
-        # use to be dashed - drawing that way turned them solid while the legend
-        # still showed them dashed. A clip wipe leaves every stroke exactly as
-        # designed and reveals along the timeline, which is the axis the reader
-        # is being asked to follow anyway.
+        # The first attempt put animation-timeline:view() on the <rect> inside
+        # the <clipPath>. Elements in <defs> are never laid out, so view() had
+        # no box to measure, the timeline never advanced, and nothing moved -
+        # no error, no warning, just a static chart.
         #
-        # Gated behind @supports (animation-timeline: view()). Firefox and older
-        # Safari do not have scroll-driven animations, and without the gate the
-        # ungated dashoffset:1 would leave both charts permanently blank there -
-        # a decorative animation failing closed on the section that carries the
-        # argument.
-        if "[data-wipe]" not in s:
-            s = s.replace("\n</style>", CHART_DRAW_CSS + "</style>", 1)
+        # The clip rects ship at full width, so the charts are complete without
+        # the script. It only ever subtracts.
 
         # "stick" was doing the work of "remember" without saying it.
         s = s.replace("Watch it stick.", "Watch it remember.")
@@ -1463,7 +1455,8 @@ def _split_chart(s):
     end = _close_div(s, row)
 
     acc_panel = (
-        '<div style="border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF;'
+        '<div data-chart-card data-chart="accuracy" style="border-radius:10px;'
+        'border:1px solid #E4E4E0;background:#FFFFFF;'
         'padding:20px clamp(1rem,1.6vw,1.5rem)">'
         '<p style="margin:0 0 14px;font-family:\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
         'font-size:.6875rem;letter-spacing:.14em;text-transform:uppercase;'
@@ -1495,7 +1488,8 @@ def _split_chart(s):
     )
 
     cost_panel = (
-        '<div style="margin-top:20px;border-radius:10px;border:1px solid #E4E4E0;'
+        '<div data-chart-card data-chart="cost" style="margin-top:20px;'
+        'border-radius:10px;border:1px solid #E4E4E0;'
         'background:#FFFFFF;padding:20px clamp(1rem,1.6vw,1.5rem)">'
         '<p style="margin:0 0 14px;font-family:\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
         'font-size:.6875rem;letter-spacing:.14em;text-transform:uppercase;'
@@ -1534,7 +1528,8 @@ def _split_chart(s):
         + "</div>"
     )
 
-    s = s[:row] + "<div>" + acc_panel + cost_panel + "</div>" + s[end:]
+    s = s[:row] + '<div data-chart-pin><div data-chart-sticky>' \
+        + acc_panel + cost_panel + "</div></div>" + s[end:]
 
     # one de-overlap pass per panel now, not one across both planes
     i = s.find("<div data-chart-legend")
