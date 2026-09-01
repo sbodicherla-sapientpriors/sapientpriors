@@ -531,6 +531,12 @@ def apply(out):
         # The clip rects ship at full width, so the charts are complete without
         # the script. It only ever subtracts.
 
+        # A phone-only stylesheet. Everything is inside a max-width:767.98px
+        # media query, so the desktop layout is untouched - that was the one
+        # hard constraint on this pass.
+        if "data-cols-4]>div{padding:18px" not in s:
+            s = s.replace("\n</style>", MOBILE_CSS + "</style>", 1)
+
         # "stick" was doing the work of "remember" without saying it.
         s = s.replace("Watch it stick.", "Watch it remember.")
 
@@ -1377,7 +1383,7 @@ AXIS = ("display:flex;flex-direction:column;justify-content:space-between;"
         "font-variant-numeric:tabular-nums;font-size:.6875rem;line-height:1;"
         "text-align:right")
 
-XAXIS = ('<div style="display:flex;justify-content:space-between;margin-top:8px;'
+XAXIS = ('<div data-xaxis style="display:flex;justify-content:space-between;margin-top:8px;'
          "font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6875rem;"
          'letter-spacing:.06em;text-transform:uppercase;color:#9AA0A8">'
          "<span>Week 1</span><span>Month 1</span><span>Month 3</span>"
@@ -1462,8 +1468,8 @@ def _split_chart(s):
         'font-size:.6875rem;letter-spacing:.14em;text-transform:uppercase;'
         'color:#6B7078">Recall accuracy</p>' + legend("accuracy", "a", "%", True) +
         '<div style="display:flex;gap:12px">'
-        '<span style="%s">Accuracy</span>' % VLABEL +
-        '<div style="%s;color:#C2A288">' % AXIS +
+        '<span data-vaxis style="%s">Accuracy</span>' % VLABEL +
+        '<div data-yaxis style="%s;color:#C2A288">' % AXIS +
         "<span>100%</span><span>75%</span><span>50%</span><span>25%</span></div>"
         '<div style="flex:1;min-width:0">' + PLOT_OPEN +
         SVG_OPEN % "Recall accuracy over time in production" +
@@ -1496,8 +1502,8 @@ def _split_chart(s):
         'color:#6B7078">Cost, multiple of week one</p>'
         + legend("cost", "s", "\u00d7", False) +
         '<div style="display:flex;gap:12px">'
-        '<span style="%s">Cost</span>' % VLABEL +
-        '<div style="%s;color:#9AA0A8">' % AXIS +
+        '<span data-vaxis style="%s">Cost</span>' % VLABEL +
+        '<div data-yaxis style="%s;color:#9AA0A8">' % AXIS +
         "<span>300\u00d7</span><span>30\u00d7</span><span>3\u00d7</span>"
         "<span>1\u00d7</span></div>"
         '<div style="flex:1;min-width:0">' + PLOT_OPEN +
@@ -1515,7 +1521,7 @@ def _split_chart(s):
         'stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>'
         '</sc-for></g></svg>' + (OVERLAY % "costLabels") + "</div>" +
         # the x-axis is drawn once, under the lower panel, and read by both
-        '<div style="display:flex;justify-content:space-between;margin-top:8px;'
+        '<div data-xaxis style="display:flex;justify-content:space-between;margin-top:8px;'
         'font-family:\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6875rem;'
         'letter-spacing:.06em;text-transform:uppercase;color:#9AA0A8">'
         "<span>Week 1</span><span>Month 1</span><span>Month 3</span>"
@@ -1687,3 +1693,6 @@ CHART_DRAW_CSS = """
     [data-chart-label]{opacity:1!important;animation:none!important}
   }
 """
+
+
+MOBILE_CSS = '\n  /* ---- phone only. Desktop is untouched above 767.98px. ---- */\n  @media (max-width:767.98px){\n    /* Four stat tiles stacked full-height made the section 1365px of mostly\n       air. Two across, tighter, and the figure smaller so it still leads. */\n    [data-cols-4]{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:1px!important}\n    [data-cols-4]>div{padding:18px 14px!important}\n    [data-cols-4] p:first-child{font-size:2rem!important;margin-bottom:6px!important}\n    [data-cols-4] p:nth-child(2){font-size:.9375rem!important}\n    [data-cols-4] p:nth-child(3){font-size:.8125rem!important;line-height:1.45!important}\n\n    /* Six use-case cards at ~390px each is 2300px of scrolling. */\n    [data-usecase-card]{padding:16px!important;gap:10px!important}\n    [data-usecase-card] h3{font-size:1rem!important}\n    [data-usecase-card] p{font-size:.8125rem!important;line-height:1.45!important}\n    [data-usecase-card]>div:first-child>div{width:30px!important;height:30px!important;\n      font-size:.6875rem!important}\n\n    /* Charts. The vertical caption and a wide y-gutter cost the plot the width\n       it needs; the x labels ran into each other as one word. */\n    [data-vaxis]{display:none!important}\n    [data-yaxis]{width:26px!important;font-size:.5625rem!important}\n    [data-xaxis]{font-size:.5625rem!important;letter-spacing:0!important}\n    [data-xaxis] span{white-space:nowrap}\n    [data-xaxis] span:nth-child(2),[data-xaxis] span:nth-child(4){display:none}\n    /* point labels overlap at this width; the legend still carries the end\n       values, which is the number the reader is actually after */\n    [data-chart-label]{display:none!important}\n\n    /* The alumni marquee was running at a size where the marks were unreadable\n       and clipped at the edge. */\n    [data-marquee] img{height:26px!important}\n  }\n'
