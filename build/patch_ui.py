@@ -521,6 +521,24 @@ def apply(out):
             "const r = el.getBoundingClientRect();\n"
             "        if (r.top < vh * 0.9 && r.bottom > 0) this.reveal(el);")
 
+        # The two charts draw themselves as you scroll through them, left to
+        # right, with each value label landing as the line reaches its point.
+        #
+        # Done as a clip rect scaled along x, not a stroke-dashoffset draw.
+        # Dashoffset needs stroke-dasharray, which the accuracy lines already
+        # use to be dashed - drawing that way turned them solid while the legend
+        # still showed them dashed. A clip wipe leaves every stroke exactly as
+        # designed and reveals along the timeline, which is the axis the reader
+        # is being asked to follow anyway.
+        #
+        # Gated behind @supports (animation-timeline: view()). Firefox and older
+        # Safari do not have scroll-driven animations, and without the gate the
+        # ungated dashoffset:1 would leave both charts permanently blank there -
+        # a decorative animation failing closed on the section that carries the
+        # argument.
+        if "[data-wipe]" not in s:
+            s = s.replace("\n</style>", CHART_DRAW_CSS + "</style>", 1)
+
         # "stick" was doing the work of "remember" without saying it.
         s = s.replace("Watch it stick.", "Watch it remember.")
 
@@ -1337,6 +1355,9 @@ const CHART_LABELS = (series, yOf, fmt, dy) => {
     out.push({
       left: (c.x / 800 * 100).toFixed(2) + '%',
       top: (c.y / 260 * 100).toFixed(2) + '%',
+      // appears when the drawing line reaches its x, over the same 12-52% band
+      range: 'cover ' + (12 + ((c.x - 10) / 780) * 40).toFixed(1) + '% cover '
+             + (16 + ((c.x - 10) / 780) * 40).toFixed(1) + '%',
       text: c.text, colour: c.colour
     });
   });
@@ -1404,7 +1425,8 @@ def legend(binding, alias, suffix, faded):
 
 OVERLAY = ('<div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none">'
            '<sc-for list="{{ %s }}" as="l" hint-placeholder-count="10">'
-           '<span style="position:absolute;left:{{ l.left }};top:{{ l.top }};'
+           '<span data-chart-label style="animation-range:{{ l.range }};'
+           'position:absolute;left:{{ l.left }};top:{{ l.top }};'
            'transform:translate(-50%%,-50%%);padding:1px 5px;border-radius:4px;'
            'background:rgba(246,246,244,.92);font-family:\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
            'font-size:.625rem;line-height:1.5;font-weight:500;color:{{ l.colour }};'
@@ -1456,11 +1478,14 @@ def _split_chart(s):
         '<line x1="0" y1="94" x2="800" y2="94" stroke="#EFEFEC"></line>'
         '<line x1="0" y1="172" x2="800" y2="172" stroke="#EFEFEC"></line>'
         '<line x1="0" y1="250" x2="800" y2="250" stroke="#E4E4E0"></line>'
+        '<defs><clipPath id="wipe-acc" clipPathUnits="userSpaceOnUse">'
+        '<rect data-wipe x="0" y="0" width="800" height="260"></rect>'
+        '</clipPath></defs><g clip-path="url(#wipe-acc)">'
         '<sc-for list="{{ accuracy }}" as="a" hint-placeholder-count="3">'
         '<polyline points="{{ a.points }}" fill="none" stroke="{{ a.colour }}" '
         'stroke-width="3.5" stroke-dasharray="{{ a.dash }}" stroke-linejoin="round" '
         'stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>'
-        '</sc-for></svg>' + (OVERLAY % "accLabels") + "</div>" + XAXIS
+        '</sc-for></g></svg>' + (OVERLAY % "accLabels") + "</div>" + XAXIS
         + "</div></div>"
         + caption("How much of what a user told you is still recalled correctly "
                   "as the conversation grows. Context-stuffing decays because the "
@@ -1475,7 +1500,7 @@ def _split_chart(s):
         '<p style="margin:0 0 14px;font-family:\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
         'font-size:.6875rem;letter-spacing:.14em;text-transform:uppercase;'
         'color:#6B7078">Cost, multiple of week one</p>'
-        + legend("cost", "s", "\\u00d7", False) +
+        + legend("cost", "s", "\u00d7", False) +
         '<div style="display:flex;gap:12px">'
         '<span style="%s">Cost</span>' % VLABEL +
         '<div style="%s;color:#9AA0A8">' % AXIS +
@@ -1487,11 +1512,14 @@ def _split_chart(s):
         '<line x1="0" y1="93" x2="800" y2="93" stroke="#EFEFEC"></line>'
         '<line x1="0" y1="176" x2="800" y2="176" stroke="#EFEFEC"></line>'
         '<line x1="0" y1="250" x2="800" y2="250" stroke="#E4E4E0"></line>'
+        '<defs><clipPath id="wipe-cost" clipPathUnits="userSpaceOnUse">'
+        '<rect data-wipe x="0" y="0" width="800" height="260"></rect>'
+        '</clipPath></defs><g clip-path="url(#wipe-cost)">'
         '<sc-for list="{{ cost }}" as="s" hint-placeholder-count="3">'
         '<polyline points="{{ s.points }}" fill="none" stroke="{{ s.colour }}" '
         'stroke-width="3.5" stroke-dasharray="{{ s.dash }}" stroke-linejoin="round" '
         'stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>'
-        '</sc-for></svg>' + (OVERLAY % "costLabels") + "</div>" +
+        '</sc-for></g></svg>' + (OVERLAY % "costLabels") + "</div>" +
         # the x-axis is drawn once, under the lower panel, and read by both
         '<div style="display:flex;justify-content:space-between;margin-top:8px;'
         'font-family:\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6875rem;'
@@ -1650,3 +1678,17 @@ def _founder_cards(s):
 
 
 LINKEDIN_PATH = '<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>'
+
+
+CHART_DRAW_CSS = """
+  @keyframes chart-wipe{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes chart-label-in{from{opacity:0}to{opacity:1}}
+  @supports (animation-timeline: view()){
+    [data-wipe]{transform-origin:0 0;transform:scaleX(0);animation:chart-wipe linear both;animation-timeline:view();animation-range:cover 12% cover 52%}
+    [data-chart-label]{opacity:0;animation:chart-label-in linear both;animation-timeline:view()}
+  }
+  @media (prefers-reduced-motion:reduce){
+    [data-wipe]{transform:none!important;animation:none!important}
+    [data-chart-label]{opacity:1!important;animation:none!important}
+  }
+"""
