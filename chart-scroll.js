@@ -21,8 +21,19 @@
 (function () {
   "use strict";
 
-  var START = 0.92;  // fraction of viewport height at which drawing begins
-  var END = 0.22;    // where it finishes, as a fraction of the way out
+  /*
+    Each chart is driven by its own box, not by one progress value shared
+    across the section. Sharing meant the cost chart's completion was tied to
+    how far the whole section had travelled, so it finished after it had
+    already scrolled past the top of the screen - you never saw the end of the
+    line you were being asked to read.
+
+    Per chart: the draw starts as the card enters from the bottom and finishes
+    once the card is fully on screen with a little room to spare. So each chart
+    is complete exactly when you can see all of it, and the accuracy chart is
+    done by the time the cost chart arrives.
+  */
+  var TAIL = 70;   // px of extra scroll past "fully visible" before completion
 
   function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
@@ -30,34 +41,37 @@
     var pin = document.querySelector("[data-chart-pin]");
     if (!pin || pin.dataset.chartOn) return !!pin;
 
-    var rects = [].slice.call(pin.querySelectorAll("[data-wipe]"));
+    var cards = [].slice.call(pin.querySelectorAll("[data-chart-card]"));
+    var rects = cards.map(function (c) { return c.querySelector("[data-wipe]"); });
     var labels = [].slice.call(pin.querySelectorAll("[data-chart-label]"));
-    if (rects.length !== 2) return false;
+    if (cards.length !== 2 || rects.some(function (r) { return !r; })) return false;
     pin.dataset.chartOn = "1";
 
     labels.forEach(function (l) {
       var pct = parseFloat(l.style.left);
       l.dataset.at = isNaN(pct) ? 0 : pct / 100;
       l.style.transition = "opacity 150ms linear";
-      var card = l.closest("[data-chart-card]");
-      l.dataset.series = card && card.dataset.chart === "cost" ? "cost" : "acc";
+      l._card = l.closest("[data-chart-card]");
     });
 
-    function paint() {
-      var box = pin.getBoundingClientRect();
+    function drawn(card) {
+      var box = card.getBoundingClientRect();
       var vh = window.innerHeight;
-      var from = vh * START;
-      var to = vh * END - box.height;
-      var p = from - to <= 0 ? 1 : clamp((from - box.top) / (from - to));
+      var span = box.height + TAIL;
+      if (span <= 0) return 1;
+      return clamp((vh - box.top) / span);
+    }
 
-      // accuracy over the first half, cost over the second
-      var acc = clamp(p / 0.5);
-      var cost = clamp((p - 0.5) / 0.5);
-      rects[0].setAttribute("width", (800 * acc).toFixed(1));
-      rects[1].setAttribute("width", (800 * cost).toFixed(1));
+    function paint() {
+      cards.forEach(function (card, i) {
+        var p = drawn(card);
+        if (rects[i]) rects[i].setAttribute("width", (800 * p).toFixed(1));
+        card._p = p;
+      });
       labels.forEach(function (l) {
-        var prog = l.dataset.series === "cost" ? cost : acc;
-        l.style.opacity = prog >= (+l.dataset.at) - 0.004 ? "1" : "0";
+        var card = l._card;
+        var p = card ? card._p || 0 : 0;
+        l.style.opacity = p >= (+l.dataset.at) - 0.004 ? "1" : "0";
       });
     }
 
