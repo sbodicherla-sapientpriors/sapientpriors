@@ -1156,6 +1156,7 @@ USECASE_CSS = """
   @media (max-width:720px){
     [data-usecase-grid]{grid-template-columns:minmax(0,1fr)!important}
     [data-founder-cards]{grid-template-columns:minmax(0,1fr)!important}
+    [data-founder-cards]>div:first-child{border-right:0!important;border-bottom:1px solid #EFEFEC}
   }
 """
 
@@ -1520,51 +1521,66 @@ def _founder_cards(s):
         return s
     end = s.find("</p>", i) + len("</p>")
 
-    def card(name, initials, role, prior, email, linkedin, photo=None):
-        # The square is the photo slot. It holds its 1:1 ratio whether it
-        # contains an <img> or the monogram, so dropping a real portrait in
-        # later changes what is inside the box and nothing about the layout.
-        fill = ('<img src="%s" alt="%s" style="display:block;width:100%%;height:100%%;'
-                'object-fit:cover">' % (photo, name)) if photo else (
-                '<span style="font-family:Newsreader,Georgia,serif;font-size:2.5rem;'
-                'color:#84512E">%s</span>' % initials)
-        mail = ('<a href="mailto:%s?subject=Beta%%20access" style="font-family:'
-                '\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;letter-spacing:.04em;'
-                'color:#84512E;text-decoration:none">Email \u2197</a>' % email) if email else ""
-        li = ('<a href="%s" target="_blank" rel="noopener" style="font-family:'
-              '\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;letter-spacing:.04em;'
-              'color:#6B7078;text-decoration:none">LinkedIn \u2197</a>' % linkedin)
+    # One group photograph spanning both tiles, with the two info panels
+    # under it. Until that photograph exists the slot is filled with the two
+    # portraits side by side, which reads as one continuous band rather than as
+    # a placeholder - and swapping in the real one is a single <img>.
+    GROUP_PHOTO = None
+
+    def photo_band():
+        if GROUP_PHOTO:
+            return ('<img src="%s" alt="Raveeshu Pahuja and Karankumar Sabhnani" '
+                    'style="display:block;width:100%%;height:100%%;object-fit:cover">'
+                    % GROUP_PHOTO)
         return (
-            '<div style="border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF;'
-            'overflow:hidden;display:flex;flex-direction:column">'
-            '<div style="aspect-ratio:1/1;width:100%%;background:rgba(132,81,46,.1);'
-            'display:flex;align-items:center;justify-content:center;'
-            'border-bottom:1px solid #EFEFEC">%s</div>'
-            '<div style="padding:16px;display:flex;flex-direction:column;gap:2px;flex:1">'
+            '<img src="art/people/raveeshu.webp" alt="Raveeshu Pahuja" '
+            'style="display:block;width:50%%;height:100%%;object-fit:cover;'
+            'object-position:50% 42%">'
+            '<img src="art/people/karan.webp" alt="Karankumar Sabhnani" '
+            'style="display:block;width:50%%;height:100%%;object-fit:cover;'
+            'object-position:50% 42%">'
+        )
+
+    def panel(name, role, prior, email, linkedin, divider):
+        mail = ('<a href="mailto:%s?subject=Beta%%20access" style="font-family:'
+                '\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
+                'font-size:.75rem;letter-spacing:.04em;color:#84512E;'
+                'text-decoration:none">Email \u2197</a>' % email) if email else ""
+        li = ('<a href="%s" target="_blank" rel="noopener" style="font-family:'
+              '\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
+              'font-size:.75rem;letter-spacing:.04em;color:#6B7078;'
+              'text-decoration:none">LinkedIn \u2197</a>' % linkedin)
+        return (
+            '<div style="padding:16px;display:flex;flex-direction:column;gap:2px%s">'
             '<p style="margin:0;font-size:1rem;font-weight:600;line-height:1.35">%s</p>'
             '<p style="margin:0;font-size:.875rem;color:#6B7078">%s</p>'
             '<p style="margin:6px 0 12px;font-family:\'Cascadia Code\',ui-monospace,'
             'SFMono-Regular,Menlo,monospace;font-size:.6875rem;letter-spacing:.06em;'
             'color:#9AA0A8">%s</p>'
             '<div style="margin-top:auto;display:flex;flex-wrap:wrap;gap:14px">%s%s</div>'
-            '</div></div>' % (fill, name, role, prior, mail, li)
+            '</div>' % (divider, name, role, prior, mail, li)
         )
 
     block = (
-        '<p style="margin:28px 0 14px;font-family:\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
-        'font-weight:500;font-size:.8125rem;letter-spacing:.14em;'
-        'text-transform:uppercase;color:#6B7078">Prefer email, or LinkedIn</p>'
+        '<p style="margin:28px 0 14px;font-family:\'Cascadia Code\',ui-monospace,'
+        'SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;'
+        'letter-spacing:.14em;text-transform:uppercase;color:#6B7078">'
+        'Prefer email, or LinkedIn \u2014 contact the founders directly</p>'
+        '<div style="border:1px solid #E4E4E0;border-radius:10px;overflow:hidden;'
+        'background:#FFFFFF">'
+        '<div style="display:flex;width:100%;aspect-ratio:2.35/1;'
+        'background:rgba(132,81,46,.06);border-bottom:1px solid #EFEFEC">'
+        + photo_band() + "</div>"
         '<div data-founder-cards style="display:grid;'
-        'grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">'
-        + card("Raveeshu Pahuja", "RP", "Co-founder",
-               "Microsoft \u00b7 Twitter \u00b7 Dropbox",
-               "raveeshu@sapientpriors.io",
-               "https://www.linkedin.com/in/raveeshu-pahuja-82b77924/",
-               "art/people/raveeshu.webp")
-        + card("Karankumar Sabhnani", "KS", "Co-founder",
-               "84.51\u00b0 \u00b7 Twitter \u00b7 Univ. of Delaware",
-               None, "https://www.linkedin.com/in/ksabhnani",
-               "art/people/karan.webp")
-        + "</div>"
+        'grid-template-columns:repeat(2,minmax(0,1fr))">'
+        + panel("Raveeshu Pahuja", "Co-founder",
+                "Microsoft \u00b7 Twitter \u00b7 Dropbox",
+                "raveeshu@sapientpriors.io",
+                "https://www.linkedin.com/in/raveeshu-pahuja-82b77924/",
+                ";border-right:1px solid #EFEFEC")
+        + panel("Karankumar Sabhnani", "Co-founder",
+                "84.51\u00b0 \u00b7 Twitter \u00b7 Univ. of Delaware",
+                None, "https://www.linkedin.com/in/ksabhnani", "")
+        + "</div></div>"
     )
     return s[:i] + block + s[end:]
