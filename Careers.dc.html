@@ -12,7 +12,7 @@
   @font-face{font-family:'Newsreader';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/newsreader-400.woff2') format('woff2')}
   @font-face{font-family:'Newsreader';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/newsreader-600.woff2') format('woff2')}
   @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('fonts/inter-var-latin.woff2') format('woff2')}
-  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/jetbrains-mono-var-latin.woff2') format('woff2')}
+  @font-face{font-family:'Cascadia Code';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/cascadia-code-var-latin.woff2') format('woff2')}
   html,body{margin:0;padding:0;background:#F6F6F4;-webkit-font-smoothing:antialiased}
   *{box-sizing:border-box}
   a{color:#84512E;text-decoration:none}
@@ -44,7 +44,7 @@
     <div style="position:relative;overflow:hidden;border-bottom:1px solid #E4E4E0;padding-block:clamp(4.5rem,6vw,7rem)">
       <div data-section-art aria-hidden="true" style="pointer-events:none;position:absolute;right:-4%;top:-4%;width:min(85vw,1150px);aspect-ratio:2/1;background:url('art/goldfish-school.webp') center/contain no-repeat;filter:brightness(1.12) contrast(1.34) saturate(.9);mix-blend-mode:multiply;opacity:.28"></div>
       <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
-        <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;max-width:42rem;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Careers<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
+        <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;max-width:42rem;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Careers<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
         <h1 style="margin:0;max-width:44rem;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(2.25rem,1rem + 3.6vw,4.5rem);line-height:1.04;letter-spacing:-.025em;text-wrap:balance">Come build the part that remembers.</h1>
         <p style="margin:24px 0 0;max-width:40rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45;text-wrap:pretty">Two roles, both in Bangalore, both hybrid. Small team, so whatever you ship goes to production with your name on it. Mentorship from ML veterans with twelve years behind them.</p>
         <div style="margin-top:32px;display:flex;flex-wrap:wrap;gap:12px">
@@ -59,10 +59,10 @@
         <div data-role-grid style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#E4E4E0">
           <sc-for list="{{ roles }}" as="r" hint-placeholder-count="2">
             <div data-reveal onClick="{{ r.select }}" style="display:flex;flex-direction:column;gap:14px;background:{{ r.tint }};padding:clamp(1.75rem,2.4vw,2.25rem);cursor:pointer">
-              <p style="margin:0;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#84512E">{{ r.type }}<span style="height:1px;width:24px;background:#CFCFC9"></span>{{ r.location }}</p>
+              <p style="margin:0;display:flex;align-items:center;gap:12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#84512E">{{ r.type }}<span style="height:1px;width:24px;background:#CFCFC9"></span>{{ r.location }}</p>
               <h2 style="margin:0;font-family:Newsreader,Georgia,serif;font-weight:600;font-size:clamp(1.375rem,1rem + 1.2vw,2rem);line-height:1.18;letter-spacing:-.012em">{{ r.title }}</h2>
               <p style="margin:0;flex:1;font-size:1rem;line-height:1.6;color:#6B7078;text-wrap:pretty">{{ r.description }}</p>
-              <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">{{ r.cue }}</p>
+              <p style="margin:0;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">{{ r.cue }}</p>
             </div>
           </sc-for>
         </div>
@@ -72,13 +72,13 @@
     <div style="position:relative;padding-block:clamp(3.5rem,5vw,5rem)">
       <div style="padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
         <div style="margin-bottom:36px">
-          <p style="margin:0 0 12px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">The role in full</p>
+          <p style="margin:0 0 12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">The role in full</p>
           <h2 style="margin:0;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,3rem);line-height:1.1;letter-spacing:-.018em">{{ activeTitle }}</h2>
         </div>
         <div data-detail-grid style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(1.5rem,2vw,2rem)">
           <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="4">
             <div data-reveal style="border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF;padding:clamp(1.5rem,2vw,2rem)">
-              <p style="margin:0 0 18px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">{{ b.heading }}<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
+              <p style="margin:0 0 18px;display:flex;align-items:center;gap:12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">{{ b.heading }}<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
               <div style="display:flex;flex-direction:column;gap:12px">
                 <sc-for list="{{ b.items }}" as="i" hint-placeholder-count="6">
                   <div style="display:flex;align-items:flex-start;gap:10px;font-size:.9375rem;line-height:1.6;color:#3A3E45"><span style="flex-shrink:0;color:#84512E">·</span><span>{{ i.text }}</span></div>

@@ -27,10 +27,10 @@ BENCH_JS = """const BENCH = [
 
 """
 
-TH = ("padding:12px 16px;text-align:right;font-family:'JetBrains Mono',monospace;"
+TH = ("padding:12px 16px;text-align:right;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;"
       "font-weight:500;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#6B7078")
 TH1 = TH.replace("text-align:right", "text-align:left")
-TD = ("padding:13px 16px;text-align:right;font-family:'JetBrains Mono',monospace;"
+TD = ("padding:13px 16px;text-align:right;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;"
       "font-size:.9rem;color:#14161A")
 TD1 = ("padding:13px 16px;text-align:left;font-size:.9375rem;font-weight:500;color:#14161A")
 
@@ -55,7 +55,7 @@ TABLE = (
     '                    <sc-for list="{{ bench }}" as="r" hint-placeholder-count="3">\n'
     '                      <tr style="border-bottom:1px solid #EFEFEC">\n'
     '                        <th scope="row" style="' + TD1 + '">{{ r.suite }}'
-    '<span style="display:block;margin-top:2px;font-family:\'JetBrains Mono\',monospace;'
+    '<span style="display:block;margin-top:2px;font-family:\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
     'font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#9AA0A8">{{ r.note }}</span></th>\n'
     '                        <td style="' + TD + '">{{ r.overall }}</td>\n'
     '                        <td style="' + TD + '">{{ r.single }}</td>\n'
@@ -116,9 +116,13 @@ def apply(out):
         s = s.replace("{ name: 'Samsung R&D Institute', logo: 'logos/samsung.svg', aspect: 1, scale: 1.5 }",
                       "{ name: 'Samsung Research', logo: 'logos/samsung-research.webp', "
                       "aspect: 2.32, scale: 1.2 }")
+        # TIFR replaces TCS Research. The source was a JPEG carrying a baked-in
+        # transparency checkerboard, which the colour rule reads as ink - the
+        # grey squares are only ~20% from white. Cleared on saturation first
+        # (the checker is neutral, the mark is a saturated blue), then masked.
         s = s.replace("{ name: 'TCS Research', logo: 'logos/tcs.svg', aspect: 1, scale: 1.24 }",
-                      "{ name: 'TCS Research', logo: 'logos/tcs-research.webp', "
-                      "aspect: 1.06, scale: 1.05 }")
+                      "{ name: 'TIFR', logo: 'logos/tifr.webp', "
+                      "aspect: 2.14, scale: 1.0 }")
         s = s.replace("{ name: 'Indian Institute of Science' }",
                       "{ name: 'Indian Institute of Science', logo: 'logos/iisc.webp', "
                       "aspect: 1.24, scale: 1.45 }")

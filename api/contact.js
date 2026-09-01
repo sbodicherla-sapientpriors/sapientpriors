@@ -26,7 +26,16 @@
  * silently discards leads is the bug this whole endpoint exists to replace.
  */
 
-const REQUIRED = ["name", "email", "phone", "company", "country", "useCase"];
+/*
+  The form asks four questions now: name, work email, company, and phone as an
+  optional. Country, use case, model and free text were cut - every field is a
+  place to abandon, and those are questions for the call.
+
+  Optional values are still forwarded when present, so nothing that does arrive
+  is dropped on the floor.
+*/
+const REQUIRED = ["name", "email", "company"];
+const OPTIONAL = ["phone", "country", "useCase", "model", "message"];
 const MAX = 4000;
 
 const clean = v => (typeof v === "string" ? v.trim().slice(0, MAX) : "");
@@ -37,8 +46,7 @@ function validate(body) {
     out[k] = clean(body[k]);
     if (!out[k]) missing.push(k);
   }
-  out.message = clean(body.message);
-  out.model = clean(body.model);
+  for (const k of OPTIONAL) out[k] = clean(body[k]);
   if (out.email && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(out.email)) missing.push("email");
   return { out, missing: [...new Set(missing)] };
 }
@@ -100,7 +108,7 @@ export default async function handler(req, res) {
     { name: "model_in_use", value: out.model },
     {
       name: useCaseProp,
-      value: out.message ? `${out.useCase}\n\n---\n${out.message}` : out.useCase
+      value: [out.useCase, out.message].filter(Boolean).join("\n\n---\n")
     }
   ].filter(f => f.value);
 

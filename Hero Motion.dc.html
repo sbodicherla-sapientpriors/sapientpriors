@@ -10,7 +10,7 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   html,body{margin:0;padding:0;background:#F6F6F4;-webkit-font-smoothing:antialiased}
   *{box-sizing:border-box}
@@ -44,7 +44,7 @@
     <div style="position:fixed;inset:0;z-index:200;background:#F6F6F4;overflow:hidden;animation:curtainLift .7s 2.02s cubic-bezier(.72,0,.24,1) forwards">
       <div style="position:absolute;left:50%;top:50%;width:min(1180px,104vw);aspect-ratio:1;transform:translate(-50%,-50%);background:url('art/loop-pg.webp') center/contain no-repeat;opacity:.6;animation:artSettle 2.9s cubic-bezier(.16,.7,.2,1) both"></div>
       <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:#8A8E95;margin-bottom:20px;animation:riseSmall .55s .1s both">SapientPriors</div>
+        <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:#8A8E95;margin-bottom:20px;animation:riseSmall .55s .1s both">SapientPriors</div>
         <div style="overflow:hidden;padding-bottom:.08em">
           <div style="font-family:Newsreader,Georgia,serif;font-size:clamp(48px,8.6vw,152px);line-height:.95;letter-spacing:-.035em;animation:lineUp .9s .3s cubic-bezier(.16,.84,.24,1) both">Nothing</div>
         </div>
@@ -55,14 +55,14 @@
           <div style="width:28%;height:2px;background:#84512E;animation:ruleTravel 1.4s .6s cubic-bezier(.62,0,.3,1) both"></div>
         </div>
       </div>
-      <div style="position:absolute;top:26px;left:5vw;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#8A8E95;animation:riseSmall .5s 1.5s both">Research lab · stateful memory</div>
-      <div style="position:absolute;bottom:26px;right:5vw;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#8A8E95;animation:riseSmall .5s 1.6s both">Est. 2025</div>
+      <div style="position:absolute;top:26px;left:5vw;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#8A8E95;animation:riseSmall .5s 1.5s both">Research lab · stateful memory</div>
+      <div style="position:absolute;bottom:26px;right:5vw;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#8A8E95;animation:riseSmall .5s 1.6s both">Est. 2025</div>
     </div>
   </sc-if>
 
   <sc-if value="{{ wipe }}" hint-placeholder-val="{{ false }}">
     <div style="position:fixed;inset:0;z-index:150;background:#14161A;animation:wipePanel 1.06s cubic-bezier(.72,0,.24,1) both;display:grid;place-items:center">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(246,246,244,.6)">{{ wipeLabel }}</div>
+      <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(246,246,244,.6)">{{ wipeLabel }}</div>
     </div>
   </sc-if>
 
@@ -76,7 +76,7 @@
       <div onClick="{{ goTry }}" style="cursor:pointer">Research</div>
       <div style="cursor:pointer">Docs</div>
       <div style="display:flex;align-items:center;gap:6px;cursor:pointer">Company <span style="font-size:10px;color:#8A8E95">▾</span></div>
-      <div onClick="{{ replay }}" title="Replay intro (⌥R)" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9A9EA4;cursor:pointer">Replay</div>
+      <div onClick="{{ replay }}" title="Replay intro (⌥R)" style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9A9EA4;cursor:pointer">Replay</div>
       <div style="padding:10px 18px;border-radius:7px;background:#84512E;color:#F6F6F4;font-size:13.5px;font-weight:500;cursor:pointer">Get access</div>
     </div>
   </div>
@@ -89,7 +89,7 @@
 
       <div style="position:relative;display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);gap:clamp(30px,4vw,72px);align-items:start;max-width:1560px;margin:0 auto">
         <div style="display:flex;flex-direction:column;align-items:flex-start;gap:26px">
-          <div data-hero style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8A8E95;animation:riseSmall .5s both;animation-play-state:paused">SapientPriors</div>
+          <div data-hero style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8A8E95;animation:riseSmall .5s both;animation-play-state:paused">SapientPriors</div>
 
           <h1 style="margin:0;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(42px,6.4vw,112px);line-height:1.06;letter-spacing:-.032em;text-wrap:pretty;max-width:15ch">
             <span data-hero style="display:inline-block;animation:riseIn .74s .04s cubic-bezier(.2,.7,.2,1) both;animation-play-state:paused">Your AI</span>
@@ -111,7 +111,7 @@
 
           <div data-hero style="width:100%;max-width:720px;height:1px;background:rgba(20,22,26,.12);margin-top:22px;animation:riseSmall .5s 1.6s both;animation-play-state:paused"></div>
 
-          <div data-hero style="display:flex;flex-wrap:wrap;align-items:center;gap:30px;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.04em;color:#6B6F76;animation:riseSmall .5s 1.68s both;animation-play-state:paused">
+          <div data-hero style="display:flex;flex-wrap:wrap;align-items:center;gap:30px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;letter-spacing:.04em;color:#6B6F76;animation:riseSmall .5s 1.68s both;animation-play-state:paused">
             <div><span style="color:#14161A">91.6</span> on LoCoMo · REST, no SDK required</div>
             <div style="display:flex;align-items:center;gap:14px;letter-spacing:.18em;text-transform:uppercase;color:#9A9EA4">
               <span>Works with</span>
@@ -122,10 +122,10 @@
 
         <div data-hero style="position:relative;margin-top:clamp(0px,5vw,96px);background:#FFFFFF;border:1px solid rgba(20,22,26,.11);border-radius:11px;box-shadow:0 1px 2px rgba(20,22,26,.04);overflow:hidden;animation:riseIn .84s .9s cubic-bezier(.2,.7,.2,1) both;animation-play-state:paused">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:13.5px;color:#14161A">POST /v1/memory/recall</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#8A8E95">200 · <span style="color:#2F6B4F">48ms</span></div>
+            <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;color:#14161A">POST /v1/memory/recall</div>
+            <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:#8A8E95">200 · <span style="color:#2F6B4F">48ms</span></div>
           </div>
-          <div style="position:relative;padding:8px 20px 22px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:2.05;color:#14161A">
+          <div style="position:relative;padding:8px 20px 22px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:2.05;color:#14161A">
             <div data-damp style="position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(46,90,125,.5),transparent);animation:scanSweep 3.8s cubic-bezier(.5,0,.5,1) infinite"></div>
             <div data-hero style="animation:riseSmall .4s 1.04s both;animation-play-state:paused"><span style="color:#9A9EA4">{</span></div>
             <div data-hero style="animation:riseSmall .4s 1.12s both;animation-play-state:paused">&nbsp;&nbsp;<span style="color:#6B6F76">"user"</span><span style="color:#9A9EA4">:</span> <span style="color:#14161A">"u_8213"</span><span style="color:#9A9EA4">,</span></div>
@@ -142,16 +142,16 @@
       </div>
 
       <div style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;max-width:1560px;margin:clamp(28px,4vw,64px) auto 0">
-        <div data-hero data-damp style="display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#9A9EA4;writing-mode:vertical-rl;animation:scrollNudge 2.6s ease-in-out infinite">Scroll</div>
+        <div data-hero data-damp style="display:flex;align-items:center;gap:8px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#9A9EA4;writing-mode:vertical-rl;animation:scrollNudge 2.6s ease-in-out infinite">Scroll</div>
         <sc-if value="{{ showBackers }}" hint-placeholder-val="{{ true }}">
           <div data-hero style="position:relative;width:min(680px,56%);height:30px;overflow:hidden;white-space:nowrap;animation:riseSmall .5s 1.84s both;animation-play-state:paused">
             <div data-damp style="position:absolute;inset:0;opacity:1;display:flex;align-items:center;justify-content:flex-start;gap:22px;animation:flipA 5.6s linear infinite">
-              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#9A9EA4">Backed by</span>
+              <span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#9A9EA4">Backed by</span>
               <span style="font-family:Newsreader,Georgia,serif;font-size:20px;color:#14161A">South Park Commons</span>
               <span style="font-family:Newsreader,Georgia,serif;font-size:20px;color:#14161A">Nexus Venture Partners</span>
             </div>
             <div data-damp style="position:absolute;inset:0;opacity:0;display:flex;align-items:center;justify-content:flex-start;gap:22px;animation:flipB 5.6s linear infinite">
-              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#9A9EA4">Working with</span>
+              <span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#9A9EA4">Working with</span>
               <span style="font-family:Newsreader,Georgia,serif;font-size:20px;color:#14161A">Ental.ai</span>
             </div>
           </div>
@@ -163,27 +163,27 @@
     <div data-para style="position:relative;background:#14161A;color:#F6F6F4;padding:clamp(64px,8vw,120px) 4vw;overflow:hidden">
       <div data-damp style="position:absolute;inset:0;background-image:radial-gradient(rgba(246,246,244,.16) 1px, transparent 1px);background-size:26px 26px;opacity:.55;transform:translate3d(0,calc(var(--p,0) * -46px),0)"></div>
       <div style="position:relative;max-width:1560px;margin:0 auto;display:flex;flex-direction:column;gap:clamp(34px,4vw,58px)">
-        <div data-reveal style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,246,244,.55);animation:riseSmall .55s both;animation-play-state:paused">The numbers</div>
+        <div data-reveal style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(246,246,244,.55);animation:riseSmall .55s both;animation-play-state:paused">The numbers</div>
         <h2 data-reveal style="margin:0;max-width:22ch;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(30px,3.8vw,62px);line-height:1.08;letter-spacing:-.024em;animation:riseIn .78s .06s cubic-bezier(.2,.7,.2,1) both;animation-play-state:paused">What changes when the model actually remembers.</h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:rgba(246,246,244,.15)">
           <div data-reveal style="background:#14161A;padding:28px 24px;display:flex;flex-direction:column;gap:12px;animation:riseIn .7s .1s both;animation-play-state:paused">
             <div data-count data-to="91.6" data-dp="1" style="font-family:Newsreader,Georgia,serif;font-size:clamp(38px,4.6vw,70px);line-height:1;letter-spacing:-.03em">0.0</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(246,246,244,.5)">LoCoMo accuracy</div>
+            <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(246,246,244,.5)">LoCoMo accuracy</div>
           </div>
           <div data-reveal style="background:#14161A;padding:28px 24px;display:flex;flex-direction:column;gap:12px;animation:riseIn .7s .18s both;animation-play-state:paused">
             <div data-count data-to="85" data-dp="0" data-suffix="%" style="font-family:Newsreader,Georgia,serif;font-size:clamp(38px,4.6vw,70px);line-height:1;letter-spacing:-.03em">0%</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(246,246,244,.5)">LongMem · provisional</div>
+            <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(246,246,244,.5)">LongMem · provisional</div>
           </div>
           <div data-reveal style="background:#14161A;padding:28px 24px;display:flex;flex-direction:column;gap:12px;animation:riseIn .7s .26s both;animation-play-state:paused">
             <div data-count data-to="85" data-dp="0" data-suffix="%" style="font-family:Newsreader,Georgia,serif;font-size:clamp(38px,4.6vw,70px);line-height:1;letter-spacing:-.03em">0%</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(246,246,244,.5)">BEAM · provisional</div>
+            <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(246,246,244,.5)">BEAM · provisional</div>
           </div>
           <div data-reveal style="background:#14161A;padding:28px 24px;display:flex;flex-direction:column;gap:12px;animation:riseIn .7s .34s both;animation-play-state:paused">
             <div style="display:flex;align-items:baseline;gap:2px;color:#C79A6E">
               <div data-count data-to="7" data-dp="0" style="font-family:Newsreader,Georgia,serif;font-size:clamp(38px,4.6vw,70px);line-height:1;letter-spacing:-.03em">0</div>
               <div style="font-family:Newsreader,Georgia,serif;font-size:clamp(24px,2.6vw,40px)">×</div>
             </div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(246,246,244,.5)">Cost index at week 12</div>
+            <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(246,246,244,.5)">Cost index at week 12</div>
           </div>
         </div>
       </div>
@@ -200,27 +200,27 @@
 
   <sc-if value="{{ atTry }}" hint-placeholder-val="{{ false }}">
     <div style="position:relative;padding:clamp(44px,5vw,80px) 4vw;max-width:1560px;margin:0 auto;display:flex;flex-direction:column;gap:28px">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8A8E95">Live comparison</div>
+      <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#8A8E95">Live comparison</div>
       <h1 style="margin:0;max-width:24ch;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(32px,4.4vw,68px);line-height:1.06;letter-spacing:-.028em">One question. Three systems. One of them read the memo.</h1>
       <p style="margin:0;max-width:62ch;font-size:18px;line-height:1.55;color:#3D4147">The schedule states a $500,000 sub-limit. Endorsement CE-22 in a later memo raised it to $750,000 and the schedule was never reissued.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px">
         <div style="border:1px solid rgba(132,81,46,.38);border-radius:11px;background:#FFFFFF;padding:20px;display:flex;flex-direction:column;gap:14px;min-height:220px">
-          <div style="display:flex;align-items:center;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#84512E">SapientPriors<span>{{ clockA }}</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#84512E">SapientPriors<span>{{ clockA }}</span></div>
           <div style="align-self:flex-end;max-width:82%;padding:11px 14px;border-radius:9px;background:#F1EFEA;font-size:14px;line-height:1.5">What is the current sub-limit?</div>
           <div style="align-self:flex-start;max-width:88%;padding:11px 14px;border-radius:9px;border:1px solid rgba(20,22,26,.11);font-size:14px;line-height:1.5;color:#3D4147">{{ answerA }}</div>
         </div>
         <div style="border:1px solid rgba(20,22,26,.13);border-radius:11px;background:#FFFFFF;padding:20px;display:flex;flex-direction:column;gap:14px;min-height:220px">
-          <div style="display:flex;align-items:center;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#6B6F76">Haiku 4.5<span>{{ clockB }}</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#6B6F76">Haiku 4.5<span>{{ clockB }}</span></div>
           <div style="align-self:flex-end;max-width:82%;padding:11px 14px;border-radius:9px;background:#F1EFEA;font-size:14px;line-height:1.5">What is the current sub-limit?</div>
           <div style="align-self:flex-start;max-width:88%;padding:11px 14px;border-radius:9px;border:1px solid rgba(20,22,26,.11);font-size:14px;line-height:1.5;color:#3D4147">{{ answerB }}</div>
         </div>
         <div style="border:1px solid rgba(20,22,26,.13);border-radius:11px;background:#FFFFFF;padding:20px;display:flex;flex-direction:column;gap:14px;min-height:220px">
-          <div style="display:flex;align-items:center;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#6B6F76">Opus 4.5<span>{{ clockC }}</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#6B6F76">Opus 4.5<span>{{ clockC }}</span></div>
           <div style="align-self:flex-end;max-width:82%;padding:11px 14px;border-radius:9px;background:#F1EFEA;font-size:14px;line-height:1.5">What is the current sub-limit?</div>
           <div style="align-self:flex-start;max-width:88%;padding:11px 14px;border-radius:9px;border:1px solid rgba(20,22,26,.11);font-size:14px;line-height:1.5;color:#3D4147">{{ answerC }}</div>
         </div>
       </div>
-      <div onClick="{{ goHome }}" style="align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#84512E;cursor:pointer">← Back to home</div>
+      <div onClick="{{ goHome }}" style="align-self:flex-start;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#84512E;cursor:pointer">← Back to home</div>
     </div>
   </sc-if>
 

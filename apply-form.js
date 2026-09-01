@@ -23,7 +23,7 @@
   var INK = "#14161A", INK2 = "#3A3E45", INK3 = "#6B7078", INK4 = "#9AA0A8";
   var LINE = "#E4E4E0", LINE_SOFT = "#EFEFEC", BONE = "#F6F6F4", WHITE = "#FFFFFF";
   var BROWN = "#84512E", RED = "#A03030", FIELD = "#CFCFC9";
-  var MONO = "'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace";
+  var MONO = "'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace";
   var SERIF = "Newsreader,Georgia,serif";
 
   var ROLES = [

@@ -31,6 +31,27 @@ PASSTHROUGH = ["strata.webp", "cards.webp"]
 REWRITES = {f"art/{n}.png": f"art/{n}.webp" for n in IMAGES}
 REWRITES.update({"art/strata.png": "art/strata.webp", "art/cards.png": "art/cards.webp"})
 
+# Mono goes to Cascadia Code everywhere it is used - code samples, the API docs
+# blocks, section kickers, axis ticks and figures. Done as a rewrite rather
+# than a patch because the family name appears in every page and in both
+# standalone scripts, and a per-file patch would leave whichever file was added
+# next still asking for a font the site no longer ships.
+#
+# The variable file carries the same 400-700 axis the old one did, so no
+# weight declaration changes. It costs 48.6KB against JetBrains' 31KB.
+REWRITES.update({
+    "@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 700;"
+    "font-display:swap;src:url('fonts/jetbrains-mono-var-latin.woff2') format('woff2')}":
+    "@font-face{font-family:'Cascadia Code';font-style:normal;font-weight:400 700;"
+    "font-display:swap;src:url('fonts/cascadia-code-var-latin.woff2') format('woff2')}",
+    "'JetBrains Mono',monospace": "'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace",
+    "'JetBrains Mono', monospace": "'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace",
+    # Hero Motion.dc.html still asks Google for JetBrains. Cascadia is not on
+    # Google Fonts and the page's CSS now names Cascadia anyway, so the request
+    # only costs a round trip to fetch a face nothing references.
+    "&family=JetBrains+Mono:wght@400;500": "",
+})
+
 HASH_FIX = """<script>
 /* The page hydrates after parse, so the browser resolves location.hash before
    the section ids exist, finds nothing, and never retries — every anchor link
@@ -102,8 +123,11 @@ def main(src):
     # 3. Video. The export emits H.265/HEVC, which Safari plays and Chrome and
     #    Firefox do not, so the loop is dead for most visitors. It also carries
     #    a pointless audio track on a muted element.
+    # The curtain no longer plays the film, so re-encoding it each build only
+    # produced a 428KB file nothing references. Left here rather than deleted
+    # because the export still ships it and a future curtain may want it back.
     v_in = os.path.join(src, "art", "goldfish-swim.mp4")
-    if os.path.exists(v_in):
+    if False and os.path.exists(v_in):
         v_out = os.path.join(art_out, "goldfish-swim.mp4")
         run(["ffmpeg", "-y", "-loglevel", "error", "-i", v_in, "-an",
              "-vf", "scale=1280:-2", "-c:v", "libx264", "-profile:v", "main",
@@ -158,6 +182,7 @@ def main(src):
     patch_contact.apply(out)
     patch_contact.apply_success_state(out)
     patch_contact.unify_tryit_form(out)
+    patch_contact.shorten(out)
     import patch_content
     print('content')
     patch_content.apply(out)

@@ -12,7 +12,7 @@
   @font-face{font-family:'Newsreader';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/newsreader-400.woff2') format('woff2')}
   @font-face{font-family:'Newsreader';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/newsreader-600.woff2') format('woff2')}
   @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('fonts/inter-var-latin.woff2') format('woff2')}
-  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/jetbrains-mono-var-latin.woff2') format('woff2')}
+  @font-face{font-family:'Cascadia Code';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/cascadia-code-var-latin.woff2') format('woff2')}
   html,body{margin:0;padding:0;background:#F6F6F4;-webkit-font-smoothing:antialiased}
   *{box-sizing:border-box}
   a{color:#84512E;text-decoration:none}
@@ -48,7 +48,7 @@
     <div style="position:relative;overflow:hidden;border-bottom:1px solid #E4E4E0;padding-block:clamp(4.5rem,6vw,7rem)">
       <div data-section-art aria-hidden="true" style="pointer-events:none;position:absolute;right:-2%;top:-6%;width:min(30vw,400px);aspect-ratio:1;background:url('art/goldfish-loop.webp') center/contain no-repeat;filter:brightness(1.12) contrast(1.34) saturate(.9);mix-blend-mode:multiply;opacity:.5;animation:fish-drift 14s ease-in-out infinite"></div>
       <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
-        <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;max-width:42rem;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">The team<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
+        <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;max-width:42rem;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">The team<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
         <h1 style="margin:0;max-width:44rem;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(2.25rem,1rem + 3.6vw,4.5rem);line-height:1.04;letter-spacing:-.025em;text-wrap:balance">A memory problem worth a decade.</h1>
         <p style="margin:24px 0 0;max-width:40rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45;text-wrap:pretty">Two founders out of Microsoft, Twitter, Dropbox and 84.51°, and a research group drawn from IISc, ISRO, TCS Research and Samsung Research. We show our working, and we hire people who want their work used.</p>
       </div>
@@ -56,60 +56,60 @@
 
     <div style="position:relative;background:#FFFFFF;border-bottom:1px solid #E4E4E0;padding-block:clamp(4rem,5vw,6rem)">
       <div style="padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
-        <h2 style="margin:0 20px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Founders</h2><div data-people style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
+        <h2 style="margin:0 20px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Founders</h2><div data-people style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
           <sc-for list="{{ founders }}" as="p" hint-placeholder-count="8">
             <div data-reveal style="display:flex;flex-direction:column;gap:16px;background:#FFFFFF;outline:1px solid #E4E4E0;padding:clamp(1.5rem,2vw,2rem)">
               <div style="display:flex;align-items:center;gap:14px">
-                <span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:999px;background:rgba(132,81,46,.1);font-family:'JetBrains Mono',monospace;font-size:.875rem;font-weight:500;color:#84512E">{{ p.initials }}</span>
+                <span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:999px;background:rgba(132,81,46,.1);font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.875rem;font-weight:500;color:#84512E">{{ p.initials }}</span>
                 <div>
                   <p style="margin:0;font-size:1.0625rem;font-weight:600;line-height:1.3">{{ p.name }}</p>
                   <sc-if value="{{ p.hasRole }}" hint-placeholder-val="{{ true }}">
-                    <p style="margin:2px 0 0;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E">{{ p.role }}</p>
+                    <p style="margin:2px 0 0;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E">{{ p.role }}</p>
                   </sc-if>
                 </div>
               </div>
               <sc-if value="{{ p.hasPrior }}" hint-placeholder-val="{{ true }}">
                 <p style="margin:0;flex:1;font-size:.9375rem;line-height:1.6;color:#6B7078">{{ p.prior }}</p>
               </sc-if>
-              <a href="{{ p.linkedin }}" target="_blank" rel="noopener noreferrer" style="font-family:'JetBrains Mono',monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">LinkedIn ↗</a>
+              <a href="{{ p.linkedin }}" target="_blank" rel="noopener noreferrer" style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">LinkedIn ↗</a>
             </div>
           </sc-for>
         </div>
-            <h2 style="margin:margin-top:56px;0 20px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Research engineering</h2><div data-people style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
+            <h2 style="margin:margin-top:56px;0 20px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Research engineering</h2><div data-people style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
           <sc-for list="{{ engineers }}" as="p" hint-placeholder-count="8">
             <div data-reveal style="display:flex;flex-direction:column;gap:16px;background:#FFFFFF;outline:1px solid #E4E4E0;padding:clamp(1.5rem,2vw,2rem)">
               <div style="display:flex;align-items:center;gap:14px">
-                <span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:999px;background:rgba(132,81,46,.1);font-family:'JetBrains Mono',monospace;font-size:.875rem;font-weight:500;color:#84512E">{{ p.initials }}</span>
+                <span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:999px;background:rgba(132,81,46,.1);font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.875rem;font-weight:500;color:#84512E">{{ p.initials }}</span>
                 <div>
                   <p style="margin:0;font-size:1.0625rem;font-weight:600;line-height:1.3">{{ p.name }}</p>
                   <sc-if value="{{ p.hasRole }}" hint-placeholder-val="{{ true }}">
-                    <p style="margin:2px 0 0;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E">{{ p.role }}</p>
+                    <p style="margin:2px 0 0;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E">{{ p.role }}</p>
                   </sc-if>
                 </div>
               </div>
               <sc-if value="{{ p.hasPrior }}" hint-placeholder-val="{{ true }}">
                 <p style="margin:0;flex:1;font-size:.9375rem;line-height:1.6;color:#6B7078">{{ p.prior }}</p>
               </sc-if>
-              <a href="{{ p.linkedin }}" target="_blank" rel="noopener noreferrer" style="font-family:'JetBrains Mono',monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">LinkedIn ↗</a>
+              <a href="{{ p.linkedin }}" target="_blank" rel="noopener noreferrer" style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">LinkedIn ↗</a>
             </div>
           </sc-for>
         </div>
-            <h2 style="margin:margin-top:56px;0 20px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Founders office</h2><div data-people style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
+            <h2 style="margin:margin-top:56px;0 20px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Founders office</h2><div data-people style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
           <sc-for list="{{ office }}" as="p" hint-placeholder-count="8">
             <div data-reveal style="display:flex;flex-direction:column;gap:16px;background:#FFFFFF;outline:1px solid #E4E4E0;padding:clamp(1.5rem,2vw,2rem)">
               <div style="display:flex;align-items:center;gap:14px">
-                <span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:999px;background:rgba(132,81,46,.1);font-family:'JetBrains Mono',monospace;font-size:.875rem;font-weight:500;color:#84512E">{{ p.initials }}</span>
+                <span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:999px;background:rgba(132,81,46,.1);font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.875rem;font-weight:500;color:#84512E">{{ p.initials }}</span>
                 <div>
                   <p style="margin:0;font-size:1.0625rem;font-weight:600;line-height:1.3">{{ p.name }}</p>
                   <sc-if value="{{ p.hasRole }}" hint-placeholder-val="{{ true }}">
-                    <p style="margin:2px 0 0;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E">{{ p.role }}</p>
+                    <p style="margin:2px 0 0;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E">{{ p.role }}</p>
                   </sc-if>
                 </div>
               </div>
               <sc-if value="{{ p.hasPrior }}" hint-placeholder-val="{{ true }}">
                 <p style="margin:0;flex:1;font-size:.9375rem;line-height:1.6;color:#6B7078">{{ p.prior }}</p>
               </sc-if>
-              <a href="{{ p.linkedin }}" target="_blank" rel="noopener noreferrer" style="font-family:'JetBrains Mono',monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">LinkedIn ↗</a>
+              <a href="{{ p.linkedin }}" target="_blank" rel="noopener noreferrer" style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">LinkedIn ↗</a>
             </div>
           </sc-for>
         </div>
@@ -122,7 +122,7 @@
       </div>
       <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:32px">
         <div>
-          <p style="margin:0 0 14px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#A3A3A0">Open roles</p>
+          <p style="margin:0 0 14px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#A3A3A0">Open roles</p>
           <h2 style="margin:0;max-width:34rem;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,3rem);line-height:1.1;letter-spacing:-.018em">Two seats in Bangalore, high autonomy from day one.</h2>
         </div>
         <a href="Careers.dc.html" style="display:inline-flex;align-items:center;gap:8px;border-radius:10px;border:1px solid #32353B;background:#1E2126;padding:14px 24px;font-size:.9375rem;font-weight:500;color:#F6F6F4;text-decoration:none">See both roles <span style="opacity:.6">→</span></a>

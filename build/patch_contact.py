@@ -295,16 +295,77 @@ SUCCESS_BODY = (
     'color:#14161A">Request received.</h3>\n'
     '              <p style="margin:0 auto 26px;max-width:34rem;font-size:1.0625rem;'
     'line-height:1.65;color:#3A3E45">{{ sentBody }}</p>\n'
-    '              <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center">\n'
-    '                <a href="TryIt.dc.html" style="display:inline-flex;align-items:center;'
-    'gap:8px;border-radius:8px;background:#84512E;padding:11px 20px;font-size:.9375rem;'
-    'font-weight:500;color:#FFFFFF;text-decoration:none">Try the demo</a>\n'
-    '                <a href="Research.dc.html" style="display:inline-flex;align-items:center;'
-    'gap:8px;border-radius:8px;border:1px solid #CFCFC9;padding:11px 20px;font-size:.9375rem;'
-    'font-weight:500;color:#3A3E45;text-decoration:none">Read the research</a>\n'
-    '              </div>\n'
     '            </div>'
 )
+
+
+def shorten(out):
+    """
+    Cut the contact form to four fields.
+
+    Every field is a place to abandon. Name, work email and company are what a
+    first reply needs; the rest - country, which assistant forgets, which model,
+    free text - are questions for the call, not the form. Phone stays but stops
+    being required.
+
+    The removed fields are removed, not hidden: a hidden input still posts, and
+    a CRM column quietly filling with empty strings is worse than a column that
+    is honestly absent.
+
+    Note this depends on phone, country and message being optional on the
+    HubSpot form. They are required there by default, and the submission API
+    returns 400 REQUIRED_FIELD for each one missing - so the form has to be
+    updated on that side or every lead fails at the last step.
+    """
+    import os
+    import re as _re
+    for name in ("SapientPriors.dc.html", "index.html", "TryIt.dc.html"):
+        p = os.path.join(out, name)
+        if not os.path.exists(p):
+            continue
+        s = open(p, encoding="utf-8", errors="surrogateescape").read()
+        before = s
+
+        # Balanced scan from the wrapper. Counting "one </div> past the label"
+        # works for <div><label><input></div> and overshoots by one for a
+        # <select>, whose wrapper closes at the first </div> - so removing the
+        # country field also swallowed the company field that followed it.
+        def close_div(t, start):
+            depth, k = 0, start
+            while k < len(t):
+                if t.startswith("<div", k):
+                    depth += 1
+                elif t.startswith("</div>", k):
+                    depth -= 1
+                    if depth == 0:
+                        return k + len("</div>")
+                k += 1
+            return -1
+
+        for fid in ("sp-country", "sp-usecase", "sp-model", "sp-message"):
+            i = s.find('id="%s"' % fid)
+            if i == -1:
+                continue
+            w = s.rfind('<div style="margin-bottom:', 0, i)
+            end = close_div(s, w)
+            if end == -1:
+                print("  %s: unbalanced wrapper - CHECK" % fid)
+                continue
+            s = s[:w] + s[end:]
+
+        s = s.replace("Book the working session", "Book a Demo")
+        s = s.replace("Phone number *", "Phone number (optional)")
+
+        # the client check follows the fields that still exist
+        # Regex, not a literal: the two forms list the same fields in a
+        # different order (company before country on one, after on the other),
+        # so a literal matched one file and silently skipped the other.
+        s = _re.sub(r"const need = \[[^\]]*\];",
+                    "const need = ['name', 'email', 'company'];", s)
+
+        if s != before:
+            open(p, "w", encoding="utf-8", errors="surrogateescape").write(s)
+            print("  %-24s form cut to four fields" % name)
 
 
 def apply_success_state(out):
