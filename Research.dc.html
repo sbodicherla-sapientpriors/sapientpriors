@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/newsreader-400.woff2') format('woff2')}
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/newsreader-600.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('fonts/inter-var-latin.woff2') format('woff2')}
+  @font-face{font-family:'Cascadia Code';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/cascadia-code-var-latin.woff2') format('woff2')}
+  html,body{margin:0;padding:0;background:#F6F6F4;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:#84512E;text-decoration:none}
+  a:hover{color:#14161A}
+  @keyframes fish-drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-16px,0)}}
+  @media (max-width:1023.98px){
+    [data-nav-links]{display:none!important}
+    [data-nav-burger]{display:flex!important}
+    [data-footer-grid]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    [data-uc]{grid-template-columns:minmax(0,1fr)!important}
+    [data-uc-art]{order:-1}
+  }
+</style>
+</helmet>
+
+<div style="font-family:Inter,system-ui,sans-serif;color:#14161A;background:#F6F6F4;position:relative">
+
+  <dc-import name="SiteNav" active="Docs" hint-size="100%,72px"></dc-import>
+
+  <div style="padding-top:72px">
+    <div style="position:relative;min-height:calc(100vh - 72px);display:flex;align-items:center;padding-block:clamp(4rem,6vw,7rem);padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+      <div data-uc style="width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:clamp(2.5rem,5vw,5rem)">
+        <div>
+          <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Research<span style="height:1px;flex:1;background:#E4E4E0"></span></p>
+          <h1 style="margin:0;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(2.25rem,1rem + 3.4vw,4rem);line-height:1.04;letter-spacing:-.025em;text-wrap:balance">This page is still being built.</h1>
+          <p style="margin:24px 0 0;max-width:34rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45;text-wrap:pretty">How a system decides what to keep, what to surface and what to let go. We are writing this up properly rather than shipping a placeholder full of adjectives — and we would rather publish nothing than publish a number we cannot stand behind.</p>
+          <div style="margin-top:32px;display:flex;flex-wrap:wrap;gap:12px">
+            <a href="SapientPriors.dc.html#access" style="padding:12px 28px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.9375rem;font-weight:500;text-decoration:none">Tell us what you need from it</a>
+            <a href="SapientPriors.dc.html" style="padding:12px 28px;border-radius:10px;background:#FFFFFF;border:1px solid #CFCFC9;font-size:.9375rem;font-weight:500;color:#14161A;text-decoration:none">Back to the main page</a>
+          </div>
+        </div>
+        <div data-uc-art aria-hidden="true" style="justify-self:center;width:min(100%,460px);aspect-ratio:1;background:url('art/under-construction.webp') center/contain no-repeat;mix-blend-mode:multiply;opacity:.94;animation:fish-drift 15s ease-in-out infinite"></div>
+      </div>
+    </div>
+    <dc-import name="SiteFooter" hint-size="100%,420px"></dc-import>
+  </div>
+</div>
+</x-dc>
+<script>
+/* The page hydrates after parse, so the browser resolves location.hash before
+   the section ids exist, finds nothing, and never retries — every anchor link
+   lands at the top. Re-apply the hash once the target appears. */
+(function () {
+  var id = location.hash ? location.hash.slice(1) : "";
+  if (!id) return;
+  var tries = 0;
+  (function go() {
+    var el = document.getElementById(id);
+    if (el) { el.scrollIntoView(); return; }
+    if (tries++ < 90) requestAnimationFrame(go);
+  })();
+})();
+</script>
+</body>
+</html>
