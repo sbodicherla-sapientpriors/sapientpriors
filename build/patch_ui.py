@@ -470,6 +470,57 @@ def apply(out):
             end = s.find("</p>", i) + len("</p>")
             s = s[:j] + s[end:]
 
+        # Entrance animations replay when you come back to them.
+        #
+        # reveal() and count() each guard on a data attribute and never clear
+        # it, so every element animated once per page load and then sat
+        # finished. Scroll down, back up, down again and the page is inert.
+        #
+        # Three things had to change together:
+        #
+        #  1. The observer only acted on isIntersecting. It now also fires on
+        #     the way out, resetting the element to its pre-animation state.
+        #  2. reveal()/count() drop their guards on reset, so the next entry
+        #     runs the animation rather than returning early.
+        #  3. The rAF fallback in measure() revealed anything with
+        #     top < vh*0.9 - which is true for everything scrolled past above
+        #     the viewport, so it re-revealed elements the instant they were
+        #     reset. It now requires the element to be genuinely on screen.
+        #
+        # Counters reset their text to zero as well, otherwise the number would
+        # flash its final value before counting up to it again. That happens
+        # while the tile is at opacity 0, so it is never seen.
+        OLD_IO = ("entries.forEach(e => { if (e.isIntersecting) "
+                  "this.reveal(e.target); });")
+        if OLD_IO not in s:
+            print("  reveal observer not found - animations will NOT replay - CHECK")
+        s = s.replace(OLD_IO,
+                      "entries.forEach(e => { if (e.isIntersecting) "
+                      "this.reveal(e.target); else this.unreveal(e.target); });", 1)
+
+        s = s.replace(
+            "  reveal(el) {\n    if (el.dataset.revealed) return;",
+            "  unreveal(el) {\n"
+            "    if (!el.dataset.revealed) return;\n"
+            "    delete el.dataset.revealed;\n"
+            "    el.style.transitionDelay = '';\n"
+            "    if (el.hasAttribute('data-reveal')) {\n"
+            "      el.style.opacity = '0';\n"
+            "      el.style.transform = 'translateY(10px)';\n"
+            "    }\n"
+            "    if (el.hasAttribute('data-count')) {\n"
+            "      delete el.dataset.counted;\n"
+            "      const dp = parseInt(el.getAttribute('data-dp') || '0', 10);\n"
+            "      el.textContent = (0).toFixed(dp);\n"
+            "    }\n"
+            "  }\n\n"
+            "  reveal(el) {\n    if (el.dataset.revealed) return;")
+
+        s = s.replace(
+            "if (el.getBoundingClientRect().top < vh * 0.9) this.reveal(el);",
+            "const r = el.getBoundingClientRect();\n"
+            "        if (r.top < vh * 0.9 && r.bottom > 0) this.reveal(el);")
+
         # "stick" was doing the work of "remember" without saying it.
         s = s.replace("Watch it stick.", "Watch it remember.")
 
@@ -1528,28 +1579,39 @@ def _founder_cards(s):
     GROUP_PHOTO = None
 
     def photo_band():
+        # An explicit empty-image mark, not a cropped stand-in. A placeholder
+        # that looks like content is one nobody remembers to replace.
         if GROUP_PHOTO:
             return ('<img src="%s" alt="Raveeshu Pahuja and Karankumar Sabhnani" '
                     'style="display:block;width:100%%;height:100%%;object-fit:cover">'
                     % GROUP_PHOTO)
         return (
-            '<img src="art/people/raveeshu.webp" alt="Raveeshu Pahuja" '
-            'style="display:block;width:50%%;height:100%%;object-fit:cover;'
-            'object-position:50% 42%">'
-            '<img src="art/people/karan.webp" alt="Karankumar Sabhnani" '
-            'style="display:block;width:50%%;height:100%%;object-fit:cover;'
-            'object-position:50% 42%">'
+            '<div style="width:100%;height:100%;display:flex;align-items:center;'
+            'justify-content:center">'
+            '<svg viewBox="0 0 24 24" fill="none" stroke="#C2A288" stroke-width="1.4" '
+            'style="width:44px;height:44px" aria-hidden="true">'
+            '<rect x="3" y="4.5" width="18" height="15" rx="2"></rect>'
+            '<circle cx="8.5" cy="10" r="1.6"></circle>'
+            '<path d="M4 17l5-5 3.5 3.5L16 12l4 4.5"></path></svg></div>'
         )
 
     def panel(name, role, prior, email, linkedin, divider):
-        mail = ('<a href="mailto:%s?subject=Beta%%20access" style="font-family:'
-                '\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
-                'font-size:.75rem;letter-spacing:.04em;color:#84512E;'
-                'text-decoration:none">Email \u2197</a>' % email) if email else ""
-        li = ('<a href="%s" target="_blank" rel="noopener" style="font-family:'
-              '\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
-              'font-size:.75rem;letter-spacing:.04em;color:#6B7078;'
-              'text-decoration:none">LinkedIn \u2197</a>' % linkedin)
+        CHIP = ("display:inline-flex;align-items:center;justify-content:center;"
+                "gap:7px;flex:1;padding:9px 12px;border-radius:8px;"
+                "font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;"
+                "font-size:.75rem;letter-spacing:.03em;text-decoration:none")
+        MAIL_ICON = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+                     'stroke-width="1.8" style="width:14px;height:14px;flex:none">'
+                     '<rect x="2.5" y="4.5" width="19" height="15" rx="2.5"></rect>'
+                     '<path d="M3 7l9 6 9-6"></path></svg>')
+        LI_ICON = ('<svg viewBox="0 0 24 24" fill="currentColor" '
+                   'style="width:14px;height:14px;flex:none">%s</svg>' % LINKEDIN_PATH)
+        mail = ('<a href="mailto:%s?subject=Beta%%20access" style="%s;'
+                'background:rgba(132,81,46,.1);color:#84512E">%sEmail</a>'
+                % (email, CHIP, MAIL_ICON)) if email else ""
+        li = ('<a href="%s" target="_blank" rel="noopener" style="%s;'
+              'background:rgba(10,102,194,.1);color:#0A66C2">%sLinkedIn</a>'
+              % (linkedin, CHIP, LI_ICON))
         return (
             '<div style="padding:16px;display:flex;flex-direction:column;gap:2px%s">'
             '<p style="margin:0;font-size:1rem;font-weight:600;line-height:1.35">%s</p>'
@@ -1557,7 +1619,7 @@ def _founder_cards(s):
             '<p style="margin:6px 0 12px;font-family:\'Cascadia Code\',ui-monospace,'
             'SFMono-Regular,Menlo,monospace;font-size:.6875rem;letter-spacing:.06em;'
             'color:#9AA0A8">%s</p>'
-            '<div style="margin-top:auto;display:flex;flex-wrap:wrap;gap:14px">%s%s</div>'
+            '<div style="margin-top:auto;display:flex;gap:8px">%s%s</div>'
             '</div>' % (divider, name, role, prior, mail, li)
         )
 
@@ -1580,7 +1642,11 @@ def _founder_cards(s):
                 ";border-right:1px solid #EFEFEC")
         + panel("Karankumar Sabhnani", "Co-founder",
                 "84.51\u00b0 \u00b7 Twitter \u00b7 Univ. of Delaware",
-                None, "https://www.linkedin.com/in/ksabhnani", "")
+                "karan@sapientpriors.io",
+                "https://www.linkedin.com/in/ksabhnani", "")
         + "</div></div>"
     )
     return s[:i] + block + s[end:]
+
+
+LINKEDIN_PATH = '<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>'
