@@ -132,15 +132,25 @@ def apply(out):
         # screen and landed it between the two headline lines. Move the element
         # out to be a direct child of the fixed curtain, which is the box we
         # actually want to measure from.
-        import re as _re2
-        m = _re2.search(r'<div style="position:absolute;top:clamp\(2rem,7vh,4\.5rem\)[^>]*>'
-                       r'Sapient<span[^>]*>Priors</span></div>', s)
-        if m:
-            mark = m.group(0)
-            s = s[:m.start()] + s[m.end():]
+        # Located by its own style, not by what is inside it. The previous
+        # version matched "Sapient<span>Priors</span>", so adding the "Inc."
+        # suffix stopped it matching - the hoist silently did nothing and the
+        # wordmark went back to measuring 7vh from the middle of the screen,
+        # landing on top of the headline. The element carries no other marker,
+        # so its absolute-top style is the stable handle.
+        START = '<div style="position:absolute;top:clamp(2rem,7vh,4.5rem)'
+        i = s.find(START)
+        if i == -1:
+            print("  curtain wordmark not found to hoist - CHECK")
+        else:
+            end = s.find("</div>", s.find(">", i)) + len("</div>")
+            mark = s[i:end]
+            s = s[:i] + s[end:]
             col = s.find('<div style="position:relative;display:flex;flex-direction:column;'
                          'align-items:center;gap:2px">')
-            if col != -1:
+            if col == -1:
+                print("  curtain column not found - wordmark NOT hoisted - CHECK")
+            else:
                 s = s[:col] + mark + "\n      " + s[col:]
 
 
@@ -448,6 +458,17 @@ def apply(out):
                       "padding-bottom:clamp(4rem,5vw,5.5rem)",
                       "padding-top:clamp(5rem,6vw,7rem);"
                       "padding-bottom:clamp(2rem,2.5vw,3rem)")
+
+        # Drop the "The lab" kicker above "We have built this before."
+        # Anchored on the text and walked back to its own <p>, so a style
+        # change cannot silently unhook it.
+        i = s.find(">The lab<")
+        if i == -1:
+            print("  'The lab' kicker not found - CHECK")
+        else:
+            j = s.rfind("<p ", 0, i)
+            end = s.find("</p>", i) + len("</p>")
+            s = s[:j] + s[end:]
 
         # "stick" was doing the work of "remember" without saying it.
         s = s.replace("Watch it stick.", "Watch it remember.")
