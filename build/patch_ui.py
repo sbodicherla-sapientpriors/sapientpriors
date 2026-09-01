@@ -1528,8 +1528,8 @@ def _split_chart(s):
         + "</div>"
     )
 
-    s = s[:row] + '<div data-chart-pin><div data-chart-sticky>' \
-        + acc_panel + cost_panel + "</div></div>" + s[end:]
+    s = s[:row] + '<div data-chart-pin>' \
+        + acc_panel + cost_panel + "</div>" + s[end:]
 
     # one de-overlap pass per panel now, not one across both planes
     i = s.find("<div data-chart-legend")
