@@ -1,93 +1,90 @@
 /**
- * Pin the benchmark charts and draw them as you scroll.
+ * Draw the benchmark charts as they scroll.
  *
- * The section holds still while the two charts reveal along the timeline -
- * accuracy first, then cost - and releases once both are complete.
+ * Two modes, and it always animates:
  *
- * Driven from scroll position rather than CSS scroll-driven animation. The
- * previous attempt animated a <rect> inside a <clipPath>, which lives in
- * <defs> and is never laid out, so `animation-timeline: view()` had no box to
- * measure and the timeline never advanced. Nothing moved, and nothing errored.
+ *   pinned      when the two cards fit on screen, the section holds still
+ *               while they draw, then releases.
+ *   scroll-past when they do not fit - which is most laptops, since two
+ *               stacked cards run to roughly 700-800px - the charts draw as
+ *               the section travels through the viewport instead.
  *
- * Fails open: the markup ships fully drawn, this only ever subtracts. If the
- * script does not run, or the browser has no matchMedia, or the reader prefers
- * reduced motion, the charts are simply there - which is the state that matters.
+ * The first version pinned or did nothing, and "does not fit" is the common
+ * case, so on most screens it did nothing. A sticky element taller than the
+ * viewport does not stick, so pinning genuinely cannot be forced here; the
+ * animation just must not depend on it.
+ *
+ * Fails open: the markup ships fully drawn and this only ever subtracts. No
+ * script, or reduced motion, and the charts are simply complete.
  */
 (function () {
   "use strict";
 
-  var SPAN = 260;   // vh of scroll the whole sequence occupies
-  var HOLD = 0.08;  // fraction held at each end before and after drawing
+  var TOP = 88;      // sticky offset, clears the fixed nav
+  var SPAN = 240;    // vh of scroll the pinned sequence occupies
+  var HOLD = 0.08;   // fraction held finished at each end
 
   function clamp(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
   function setup() {
     var pin = document.querySelector("[data-chart-pin]");
-    if (!pin || pin.dataset.chartPinned) return !!pin;
+    if (!pin || pin.dataset.chartOn) return !!pin;
 
     var sticky = pin.querySelector("[data-chart-sticky]");
     var rects = [].slice.call(pin.querySelectorAll("[data-wipe]"));
     var labels = [].slice.call(pin.querySelectorAll("[data-chart-label]"));
     if (!sticky || rects.length !== 2) return false;
 
-    var reduced = window.matchMedia
-      && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) { pin.dataset.chartPinned = "1"; return true; }
-
-    pin.dataset.chartPinned = "1";
-
-    /*
-      Pinning only works if the pinned content fits on screen. Two stacked
-      chart cards run to roughly 800px; on a short window that is taller than
-      the viewport, and a sticky element taller than its container does not
-      stick - it scrolls, and the section reads as broken rather than held.
-      Below the fit threshold the charts are simply left drawn.
-    */
-    var TOP = 88;
-    function fits() { return sticky.offsetHeight <= window.innerHeight - TOP - 16; }
-
-    function applyPin() {
-      if (fits()) {
-        pin.style.height = SPAN + "vh";
-        sticky.style.position = "sticky";
-        sticky.style.top = TOP + "px";
-      } else {
-        pin.style.height = "";
-        sticky.style.position = "";
-        sticky.style.top = "";
-        rects.forEach(function (r) { r.setAttribute("width", "800"); });
-        labels.forEach(function (l) { l.style.opacity = "1"; });
-      }
+    if (window.matchMedia
+        && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      pin.dataset.chartOn = "reduced";
+      return true;
     }
+    pin.dataset.chartOn = "1";
 
-    // Each label's own x, so it appears exactly when the wipe passes it.
     labels.forEach(function (l) {
       var pct = parseFloat(l.style.left);
       l.dataset.at = isNaN(pct) ? 0 : pct / 100;
-      l.style.transition = "opacity 180ms linear";
+      l.style.transition = "opacity 160ms linear";
+      var card = l.closest("[data-chart-card]");
+      l.dataset.series = card && card.dataset.chart === "cost" ? "cost" : "acc";
     });
 
-    function paint() {
-      if (!fits()) return;
+    var pinned = false;
+
+    function layout() {
+      pinned = sticky.offsetHeight <= window.innerHeight - TOP - 16;
+      pin.style.height = pinned ? SPAN + "vh" : "";
+      sticky.style.position = pinned ? "sticky" : "";
+      sticky.style.top = pinned ? TOP + "px" : "";
+      pin.dataset.chartMode = pinned ? "pinned" : "scroll-past";
+    }
+
+    function progress() {
       var box = pin.getBoundingClientRect();
-      var travel = box.height - window.innerHeight;
-      if (travel <= 0) return;
-      var p = clamp((-box.top) / travel);
+      var vh = window.innerHeight;
+      if (pinned) {
+        var travel = box.height - vh;
+        if (travel <= 0) return 1;
+        return clamp(-box.top / travel);
+      }
+      // Not pinned: run from the moment the section is well into view to
+      // shortly before it leaves, so the draw finishes while it is readable.
+      var from = vh * 0.85;
+      var to = vh * 0.30 - box.height;
+      if (from - to <= 0) return 1;
+      return clamp((from - box.top) / (from - to));
+    }
 
-      // remap so the charts sit finished for a moment at each end
-      var t = clamp((p - HOLD) / (1 - HOLD * 2));
-
-      // accuracy draws over the first half, cost over the second
+    function paint() {
+      var t = clamp((progress() - HOLD) / (1 - HOLD * 2));
       var acc = clamp(t / 0.5);
       var cost = clamp((t - 0.5) / 0.5);
-
       rects[0].setAttribute("width", (800 * acc).toFixed(1));
       rects[1].setAttribute("width", (800 * cost).toFixed(1));
-
-      labels.forEach(function (l, i) {
-        var chart = l.closest("[data-chart-card]");
-        var prog = chart && chart.dataset.chart === "cost" ? cost : acc;
-        l.style.opacity = prog >= l.dataset.at - 0.005 ? "1" : "0";
+      labels.forEach(function (l) {
+        var p = l.dataset.series === "cost" ? cost : acc;
+        l.style.opacity = p >= (+l.dataset.at) - 0.004 ? "1" : "0";
       });
     }
 
@@ -98,15 +95,16 @@
       requestAnimationFrame(function () { queued = false; paint(); });
     }
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", function () { applyPin(); onScroll(); },
+    window.addEventListener("resize", function () { layout(); paint(); },
                             { passive: true });
-    applyPin();
+
+    layout();
     paint();
+    // The runtime finishes rendering after this runs, which changes heights.
+    setTimeout(function () { layout(); paint(); }, 400);
     return true;
   }
 
-  // The runtime renders after this deferred script, and re-renders on state
-  // changes, so watch rather than wait once.
   setup();
   var obs = new MutationObserver(function () { setup(); });
   obs.observe(document.documentElement, { childList: true, subtree: true });
