@@ -1,0 +1,13 @@
+# SapientPriors — internal review build.
+#
+# The site is shared by link with the team while it is still being written.
+# Nothing here is ready to be found by search. This asks every well-behaved
+# crawler to stay out entirely, and the X-Robots-Tag header in vercel.json
+# says the same thing at the HTTP level so it also covers files a crawler
+# reaches without parsing our HTML.
+#
+# This is not access control. Anyone holding the link can open the site.
+# Remove this file and the noindex header on the day we launch.
+
+User-agent: *
+Disallow: /

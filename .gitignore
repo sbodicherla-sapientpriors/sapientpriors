@@ -1,12 +1,2 @@
 .DS_Store
-*.log
-node_modules/
-.vscode/
-dist
-server/public
-vite.config.ts.*
-*.tar.gz
-temp/
-screenshots-playwright/
-.env
-.env.local
+__pycache__/

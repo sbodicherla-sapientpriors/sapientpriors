@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;font-family:Inter,system-ui,sans-serif;color:#14161A;border-top:1px solid #E4E4E0;background:#F6F6F4;padding-block:clamp(4rem,5vw,5rem)">
+  <div style="padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+    <div data-footer-grid style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:40px">
+      <div>
+        <a href="SapientPriors.dc.html" style="margin-bottom:16px;display:flex;align-items:center;gap:12px;text-decoration:none;color:#14161A">
+          <img src="logos/sapientpriors-sp-logo.svg" alt="" style="width:36px;height:36px;display:block">
+          <span style="font-family:Newsreader,Georgia,serif;font-size:1.125rem;font-weight:600;letter-spacing:-.015em">SapientPriors</span>
+        </a>
+        
+        <div style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;color:#9AA0A8">
+          <span style="display:block">23203 SE 27th St</span>
+          <span style="display:block">Sammamish, WA 98075</span>
+        </div>
+      </div>
+      <sc-for list="{{ columns }}" as="c" hint-placeholder-count="4">
+        <div>
+          <h2 style="margin:0 0 16px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">{{ c.heading }}</h2>
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+            <sc-for list="{{ c.links }}" as="l" hint-placeholder-count="5">
+              <a href="{{ l.href }}" style="font-size:.875rem;color:#6B7078;text-decoration:none" style-hover="color:#14161A">{{ l.label }}</a>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:56px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #E4E4E0;padding-top:24px">
+      <p style="margin:0;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;color:#9AA0A8">© 2026 SapientPriors. All rights reserved.</p>
+      <a href="mailto:raveeshu@sapientpriors.io" style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;color:#6B7078;text-decoration:none">raveeshu@sapientpriors.io</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:420}}">
+const HOME = 'SapientPriors.dc.html';
+const MAIL = 'mailto:raveeshu@sapientpriors.io';
+
+const COLUMNS = [
+  { heading: 'Product', links: [
+    { label: 'How it works', href: HOME + '#how-it-works' },
+    { label: 'Benchmarks', href: HOME + '#benchmarks' },
+    { label: 'Use cases', href: HOME + '#use-cases' },
+    { label: 'Documentation', href: 'API%20Docs.dc.html' }
+  ] },
+  { heading: 'Company', links: [
+    { label: 'About', href: HOME + '#lab' },
+    { label: 'Team', href: 'Team.dc.html' },
+    { label: 'Careers', href: 'Careers.dc.html' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/raveeshu-pahuja-82b77924/' },
+    { label: 'Contact', href: HOME + '#access' }
+  ] },
+  { heading: 'Resources', links: [
+    { label: 'API docs', href: 'API%20Docs.dc.html' },
+    { label: 'Support', href: MAIL + '?subject=Support%20request' },
+    { label: 'Partnerships', href: MAIL + '?subject=Partnership%20inquiry' },
+    { label: 'Press', href: MAIL + '?subject=Press%20enquiry' }
+  ] },
+  { heading: 'Legal', links: [
+    { label: 'Privacy policy', href: MAIL + '?subject=Privacy%20policy' },
+    { label: 'Terms of service', href: MAIL + '?subject=Terms%20of%20service' },
+    { label: 'Cookie policy', href: MAIL + '?subject=Cookie%20policy' },
+    { label: 'Security', href: MAIL + '?subject=Security' }
+  ] }
+];
+
+class Component extends DCLogic {
+  renderVals() {
+    return { columns: COLUMNS };
+  }
+}
+</script>
+<script>
+/* The page hydrates after parse, so the browser resolves location.hash before
+   the section ids exist, finds nothing, and never retries — every anchor link
+   lands at the top. Re-apply the hash once the target appears. */
+(function () {
+  var id = location.hash ? location.hash.slice(1) : "";
+  if (!id) return;
+  var tries = 0;
+  (function go() {
+    var el = document.getElementById(id);
+    if (el) { el.scrollIntoView(); return; }
+    if (tries++ < 90) requestAnimationFrame(go);
+  })();
+})();
+</script>
+</body>
+</html>
