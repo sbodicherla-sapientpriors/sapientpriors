@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:fixed;inset-inline:0;top:0;z-index:52;font-family:Inter,system-ui,sans-serif;border-bottom:1px solid #E4E4E0;background:rgba(246,246,244,.85);backdrop-filter:blur(12px)">
+  <div style="padding-inline:clamp(1.25rem,3.2vw,4.5rem);height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+    <a href="SapientPriors.dc.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:#14161A">
+      <img src="logos/sapientpriors-sp-logo.svg" alt="" style="width:36px;height:36px;display:block">
+      <span style="font-family:Newsreader,Georgia,serif;font-size:1.125rem;font-weight:600;letter-spacing:-.015em">SapientPriors</span>
+    </a>
+    <div data-nav-links style="display:flex;align-items:center;gap:4px">
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+        <div onMouseEnter="{{ g.open }}" onMouseLeave="{{ g.close }}" style="position:relative">
+          <a href="{{ g.href }}" onClick="{{ g.click }}" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:.875rem;font-weight:500;color:{{ g.colour }};cursor:pointer;text-decoration:none">{{ g.label }}<sc-if value="{{ g.hasMenu }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;opacity:.6">▾</span></sc-if></a>
+          <sc-if value="{{ g.isOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;left:0;top:100%;z-index:60;padding-top:6px"><div style="width:20rem;padding:8px;border-radius:12px;border:1px solid #E4E4E0;background:#FFFFFF;box-shadow:0 12px 32px -12px rgba(20,22,26,.18)">
+              <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="5">
+                <a href="{{ i.href }}" style="display:block;padding:10px 12px;border-radius:8px;text-decoration:none;color:#14161A" style-hover="background:#F6F6F4">
+                  <span style="display:block;font-size:.875rem;font-weight:600">{{ i.label }}</span>
+                  <span style="display:block;margin-top:2px;font-size:.8125rem;line-height:1.45;color:#6B7078">{{ i.description }}</span>
+                </a>
+              </sc-for>
+            </div>
+          </div></sc-if>
+        </div>
+      </sc-for>
+      <a href="SapientPriors.dc.html#access" style="margin-left:16px;padding:10px 18px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.875rem;font-weight:500;text-decoration:none">Get access</a>
+    </div>
+    <a data-nav-burger href="SapientPriors.dc.html#access" style="display:none;align-items:center;justify-content:center;padding:10px 16px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.8125rem;font-weight:500;text-decoration:none">Get access</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:72},&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;Product&quot;,&quot;Research&quot;,&quot;Docs&quot;,&quot;Company&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const HOME = 'SapientPriors.dc.html';
+
+const GROUPS = [
+  { label: 'Product', items: [
+    { label: 'Company Brain', href: 'Company Brain.dc.html', description: 'One shared memory across every team tool' },
+    { label: 'Context Management', href: 'Context Management.dc.html', description: 'What to keep, what to surface, what to drop' },
+    { label: 'Continual Learning Platform', href: 'Continual Learning.dc.html', description: 'The system that keeps improving after launch' }
+  ] },
+  { label: 'Pricing', href: 'Pricing.dc.html' },
+  { label: 'Docs', items: [
+    { label: 'API docs', href: 'API%20Docs.dc.html', description: 'Endpoints, limits and examples' },
+    { label: 'Research', href: 'Research.dc.html', description: 'What we are working on, and what we have not solved' }
+  ] },
+  { label: 'Company', items: [
+    { label: 'About', href: HOME + '#lab', description: 'The lab and how we work' },
+    { label: 'Team', href: 'Team.dc.html', description: 'Who is building it' },
+    { label: 'Careers', href: 'Careers.dc.html', description: 'Two open roles in Bangalore' },
+    { label: 'Contact', href: HOME + '#access', description: 'Book a working session' }
+  ] }
+];
+
+class Component extends DCLogic {
+  state = { menu: null };
+
+  renderVals() {
+    const active = this.props.active || '';
+    return {
+      groups: GROUPS.map(g => ({
+        label: g.label,
+        href: g.href || '#',
+        hasMenu: !!g.items,
+        colour: g.label === active ? '#84512E' : '#3A3E45',
+        isOpen: this.state.menu === g.label,
+        open: () => { if (g.items) this.setState({ menu: g.label }); },
+        close: () => this.setState(s => (s.menu === g.label ? { menu: null } : null)),
+        click: e => { if (g.items) { e.preventDefault(); this.setState(s => ({ menu: s.menu === g.label ? null : g.label })); } },
+        items: (g.items || []).map(i => ({ label: i.label, description: i.description, href: i.href }))
+      }))
+    };
+  }
+}
+</script>
+<script>
+/* The page hydrates after parse, so the browser resolves location.hash before
+   the section ids exist, finds nothing, and never retries — every anchor link
+   lands at the top. Re-apply the hash once the target appears. */
+(function () {
+  var id = location.hash ? location.hash.slice(1) : "";
+  if (!id) return;
+  var tries = 0;
+  (function go() {
+    var el = document.getElementById(id);
+    if (el) { el.scrollIntoView(); return; }
+    if (tries++ < 90) requestAnimationFrame(go);
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/newsreader-400.woff2') format('woff2')}
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/newsreader-600.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('fonts/inter-var-latin.woff2') format('woff2')}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/jetbrains-mono-var-latin.woff2') format('woff2')}
+  html,body{margin:0;padding:0;background:#F6F6F4;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:#84512E;text-decoration:none}
+  a:hover{color:#14161A}
+  @keyframes fade-up{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+  @keyframes reveal-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes rule-draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes fish-drift{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-14px,0)}}
+  @supports (animation-timeline:view()){
+    [data-reveal]{animation:reveal-in linear both;animation-timeline:view();animation-range:entry 6% entry 54%}
+    [data-rule]{animation:rule-draw linear both;animation-timeline:view();animation-range:entry 8% entry 62%}
+  }
+  @media (max-width:1023.98px){
+    [data-nav-burger]{display:flex!important}
+    [data-footer-grid]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    [data-people]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    [data-nav-links]{display:none!important}
+    [data-section-art]{display:none!important}
+  }
+  @media (max-width:639.98px){
+    [data-people]{grid-template-columns:minmax(0,1fr)!important}
+    [data-footer-grid]{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  }
+</style>
+</helmet>
+
+<div style="font-family:Inter,system-ui,sans-serif;color:#14161A;background:#F6F6F4;position:relative">
+
+  <dc-import name="SiteNav" active="Company" hint-size="100%,72px"></dc-import>
+
+  <div style="padding-top:72px">
+
+    <div style="position:relative;overflow:hidden;border-bottom:1px solid #E4E4E0;padding-block:clamp(4.5rem,6vw,7rem)">
+      <div data-section-art aria-hidden="true" style="pointer-events:none;position:absolute;right:-2%;top:-6%;width:min(30vw,400px);aspect-ratio:1;background:url('art/goldfish-loop.webp') center/contain no-repeat;filter:brightness(1.12) contrast(1.34) saturate(.9);mix-blend-mode:multiply;opacity:.5;animation:fish-drift 14s ease-in-out infinite"></div>
+      <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+        <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;max-width:42rem;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">The team<span data-rule style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center"></span></p>
+        <h1 style="margin:0;max-width:44rem;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(2.25rem,1rem + 3.6vw,4.5rem);line-height:1.04;letter-spacing:-.025em;text-wrap:balance">A memory problem worth a decade.</h1>
+        <p style="margin:24px 0 0;max-width:40rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45;text-wrap:pretty">Two founders out of Microsoft, Twitter, Dropbox and 84.51°, and a research group drawn from IISc, ISRO, TCS Research and Samsung Research. We show our working, and we hire people who want their work used.</p>
+      </div>
+    </div>
+
+    <div style="position:relative;background:#FFFFFF;border-bottom:1px solid #E4E4E0;padding-block:clamp(4rem,5vw,6rem)">
+      <div style="padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
+        <h2 style="margin:0 20px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Founders</h2><div data-people style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
+          <sc-for list="{{ founders }}" as="p" hint-placeholder-count="8">
+            <div data-reveal style="display:flex;flex-direction:column;gap:16px;background:#FFFFFF;outline:1px solid #E4E4E0;padding:clamp(1.5rem,2vw,2rem)">
+              <div style="display:flex;align-items:center;gap:14px">
+                <span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:999px;background:rgba(132,81,46,.1);font-family:'JetBrains Mono',monospace;font-size:.875rem;font-weight:500;color:#84512E">{{ p.initials }}</span>
+                <div>
+                  <p style="margin:0;font-size:1.0625rem;font-weight:600;line-height:1.3">{{ p.name }}</p>
+                  <sc-if value="{{ p.hasRole }}" hint-placeholder-val="{{ true }}">
+                    <p style="margin:2px 0 0;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E">{{ p.role }}</p>
+                  </sc-if>
+                </div>
+              </div>
+              <sc-if value="{{ p.hasPrior }}" hint-placeholder-val="{{ true }}">
+                <p style="margin:0;flex:1;font-size:.9375rem;line-height:1.6;color:#6B7078">{{ p.prior }}</p>
+              </sc-if>
+              <a href="{{ p.linkedin }}" target="_blank" rel="noopener noreferrer" style="font-family:'JetBrains Mono',monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">LinkedIn ↗</a>
+            </div>
+          </sc-for>
+        </div>
+            <h2 style="margin:margin-top:56px;0 20px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Research engineering</h2><div data-people style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
+          <sc-for list="{{ engineers }}" as="p" hint-placeholder-count="8">
+            <div data-reveal style="display:flex;flex-direction:column;gap:16px;background:#FFFFFF;outline:1px solid #E4E4E0;padding:clamp(1.5rem,2vw,2rem)">
+              <div style="display:flex;align-items:center;gap:14px">
+                <span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:999px;background:rgba(132,81,46,.1);font-family:'JetBrains Mono',monospace;font-size:.875rem;font-weight:500;color:#84512E">{{ p.initials }}</span>
+                <div>
+                  <p style="margin:0;font-size:1.0625rem;font-weight:600;line-height:1.3">{{ p.name }}</p>
+                  <sc-if value="{{ p.hasRole }}" hint-placeholder-val="{{ true }}">
+                    <p style="margin:2px 0 0;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E">{{ p.role }}</p>
+                  </sc-if>
+                </div>
+              </div>
+              <sc-if value="{{ p.hasPrior }}" hint-placeholder-val="{{ true }}">
+                <p style="margin:0;flex:1;font-size:.9375rem;line-height:1.6;color:#6B7078">{{ p.prior }}</p>
+              </sc-if>
+              <a href="{{ p.linkedin }}" target="_blank" rel="noopener noreferrer" style="font-family:'JetBrains Mono',monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">LinkedIn ↗</a>
+            </div>
+          </sc-for>
+        </div>
+            <h2 style="margin:margin-top:56px;0 20px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Founders office</h2><div data-people style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
+          <sc-for list="{{ office }}" as="p" hint-placeholder-count="8">
+            <div data-reveal style="display:flex;flex-direction:column;gap:16px;background:#FFFFFF;outline:1px solid #E4E4E0;padding:clamp(1.5rem,2vw,2rem)">
+              <div style="display:flex;align-items:center;gap:14px">
+                <span style="display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:999px;background:rgba(132,81,46,.1);font-family:'JetBrains Mono',monospace;font-size:.875rem;font-weight:500;color:#84512E">{{ p.initials }}</span>
+                <div>
+                  <p style="margin:0;font-size:1.0625rem;font-weight:600;line-height:1.3">{{ p.name }}</p>
+                  <sc-if value="{{ p.hasRole }}" hint-placeholder-val="{{ true }}">
+                    <p style="margin:2px 0 0;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E">{{ p.role }}</p>
+                  </sc-if>
+                </div>
+              </div>
+              <sc-if value="{{ p.hasPrior }}" hint-placeholder-val="{{ true }}">
+                <p style="margin:0;flex:1;font-size:.9375rem;line-height:1.6;color:#6B7078">{{ p.prior }}</p>
+              </sc-if>
+              <a href="{{ p.linkedin }}" target="_blank" rel="noopener noreferrer" style="font-family:'JetBrains Mono',monospace;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:#3A3E45">LinkedIn ↗</a>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:relative;overflow:hidden;border-bottom:1px solid #32353B;background:#14161A;color:#F6F6F4;padding-block:clamp(4rem,5vw,6rem)">
+      <div aria-hidden="true" style="pointer-events:none;position:absolute;inset:0;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,transparent,black 12%,black 88%,transparent);mask-image:linear-gradient(to bottom,transparent,black 12%,black 88%,transparent)">
+        <div style="position:absolute;inset:0;opacity:.6;background-image:radial-gradient(circle,rgba(246,246,244,.14) 1px,transparent 1px);background-size:22px 22px"></div>
+      </div>
+      <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:32px">
+        <div>
+          <p style="margin:0 0 14px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#A3A3A0">Open roles</p>
+          <h2 style="margin:0;max-width:34rem;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,3rem);line-height:1.1;letter-spacing:-.018em">Two seats in Bangalore, high autonomy from day one.</h2>
+        </div>
+        <a href="Careers.dc.html" style="display:inline-flex;align-items:center;gap:8px;border-radius:10px;border:1px solid #32353B;background:#1E2126;padding:14px 24px;font-size:.9375rem;font-weight:500;color:#F6F6F4;text-decoration:none">See both roles <span style="opacity:.6">→</span></a>
+      </div>
+    </div>
+
+    <dc-import name="SiteFooter" hint-size="100%,420px"></dc-import>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TEAM = [
+  { group: 'Founders', name: 'Raveeshu Pahuja', role: 'Founder', prior: 'Microsoft · Twitter · Dropbox', linkedin: 'https://www.linkedin.com/in/raveeshu-pahuja-82b77924/' },
+  { group: 'Founders', name: 'Karankumar Sabhnani', role: 'Founder', prior: '84.51° · Twitter · Univ. of Delaware', linkedin: 'https://www.linkedin.com/in/ksabhnani' },
+  { group: 'Research engineering', name: 'Eshwar SR', role: 'Research Engineer', prior: 'Indian Institute of Science · KENOME · Intuit', linkedin: 'https://www.linkedin.com/in/eshwarsr' },
+  { group: 'Research engineering', name: 'Siva Krishna', role: 'Research Engineer', prior: 'Spotmies · Aegion Dynamic Solutions', linkedin: 'https://www.linkedin.com/in/siva-krishna-07a91a280/' },
+  { group: 'Research engineering', name: 'Srinivas Raghav V C', role: 'Research Engineer', prior: 'TCS Research', linkedin: 'https://www.linkedin.com/in/srinivas-raghav-v-c-5aa655260/' },
+  { group: 'Research engineering', name: 'Yashwanth Erukulla', role: 'Research Engineer', prior: 'Samsung Research', linkedin: 'https://www.linkedin.com/in/yashwanth-erukulla/' },
+  { group: 'Research engineering', name: 'Neelesh Gupta', role: 'Research Engineer', prior: 'ISRO · OpenNLP Labs', linkedin: 'https://www.linkedin.com/in/neelesh-gupta-92b2bb2b5/' },
+  { group: 'Founders office', name: 'SriHarsha Bodicherla', role: 'Founders Office', prior: 'ISRO / NRSC', linkedin: 'https://in.linkedin.com/in/sriharsha-bodicherla' }
+];
+
+const card = list => list.map(p => ({
+  name: p.name,
+  role: p.role,
+  hasRole: !!p.role,
+  prior: p.prior,
+  hasPrior: !!p.prior,
+  linkedin: p.linkedin,
+  initials: p.name.split(' ').filter(w => w.length > 1).slice(0, 2).map(w => w.charAt(0)).join('')
+}));
+
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      founders: card(TEAM.filter(p => p.group === 'Founders')),
+      engineers: card(TEAM.filter(p => p.group === 'Research engineering')),
+      office: card(TEAM.filter(p => p.group === 'Founders office')),
+      team: card(TEAM),
+      _unused: TEAM.map(p => ({
+        name: p.name,
+        role: p.role,
+        hasRole: !!p.role,
+        prior: p.prior,
+        hasPrior: !!p.prior,
+        linkedin: p.linkedin,
+        initials: p.name.split(' ').filter(w => w.length > 1).slice(0, 2).map(w => w.charAt(0)).join('')
+      }))
+    };
+  }
+}
+</script>
+<script>
+/* The page hydrates after parse, so the browser resolves location.hash before
+   the section ids exist, finds nothing, and never retries — every anchor link
+   lands at the top. Re-apply the hash once the target appears. */
+(function () {
+  var id = location.hash ? location.hash.slice(1) : "";
+  if (!id) return;
+  var tries = 0;
+  (function go() {
+    var el = document.getElementById(id);
+    if (el) { el.scrollIntoView(); return; }
+    if (tries++ < 90) requestAnimationFrame(go);
+  })();
+})();
+</script>
+</body>
+</html>

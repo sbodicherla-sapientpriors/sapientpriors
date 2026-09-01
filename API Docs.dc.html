@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/newsreader-400.woff2') format('woff2')}
+  @font-face{font-family:'Newsreader';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/newsreader-600.woff2') format('woff2')}
+  @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('fonts/inter-var-latin.woff2') format('woff2')}
+  @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/jetbrains-mono-var-latin.woff2') format('woff2')}
+  html,body{margin:0;padding:0;background:#F6F6F4;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:#84512E;text-decoration:none}
+  a:hover{color:#14161A}
+  @keyframes fade-up{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+  @media (max-width:1023.98px){
+    [data-docs-shell]{grid-template-columns:minmax(0,1fr)!important}
+    [data-docs-aside]{display:none!important}
+    [data-cols-3]{grid-template-columns:minmax(0,1fr)!important}
+  }
+  @media (max-width:767.98px){
+    [data-nav-links]{display:none!important}
+    [data-nav-burger]{display:flex!important}
+    [data-ref-row]{grid-template-columns:minmax(0,1fr)!important}
+  }
+  @media (prefers-reduced-motion:reduce){ .fade-up{animation:none!important;opacity:1!important;transform:none!important} }
+</style>
+</helmet>
+
+<div style="font-family:Inter,system-ui,sans-serif;color:#14161A;background:#F6F6F4;position:relative">
+
+  <dc-import name="SiteNav" active="Docs" hint-size="100%,72px"></dc-import>
+
+  <div style="padding-top:72px">
+
+    <div style="position:relative;overflow:hidden;border-bottom:1px solid #E4E4E0">
+      <div aria-hidden="true" style="pointer-events:none;position:absolute;inset:0;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,black,transparent);mask-image:linear-gradient(to bottom,black,transparent)">
+        <div style="position:absolute;inset:0;opacity:.6;background-image:radial-gradient(circle,rgba(20,22,26,.12) 1px,transparent 1px);background-size:22px 22px"></div>
+      </div>
+      <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem);padding-top:clamp(4rem,5vw,6rem);padding-bottom:clamp(3rem,4vw,4rem)">
+        <p class="fade-up" style="margin:0 0 20px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078;animation:fade-up .8s cubic-bezier(.16,1,.3,1) both">Documentation</p>
+        <h1 class="fade-up" style="margin:0 0 24px;max-width:20ch;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(2.5rem,.9rem + 4.6vw,5.25rem);line-height:1.02;letter-spacing:-.025em;animation:fade-up .8s cubic-bezier(.16,1,.3,1) .05s both">Two calls in your request path.</h1>
+        <p class="fade-up" style="margin:0 0 40px;max-width:46rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45;animation:fade-up .8s cubic-bezier(.16,1,.3,1) .15s both">Post the interaction you already have. Ask for the context before your prompt. Everything between those two calls happens on our side — no schema to design, no vector store to operate, no SDK to install.</p>
+        <div data-cols-3 style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#E4E4E0;max-width:56rem">
+          <div style="background:#FFFFFF;padding:24px">
+            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:2.5rem;line-height:1;letter-spacing:-.03em">2</p>
+            <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Calls per request</p>
+          </div>
+          <div style="background:#FFFFFF;padding:24px">
+            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:2.5rem;line-height:1;letter-spacing:-.03em">5 min</p>
+            <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">To the first call</p>
+          </div>
+          <div style="background:#FFFFFF;padding:24px">
+            <p style="margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:2.5rem;line-height:1;letter-spacing:-.03em">REST</p>
+            <p style="margin:0;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">JSON over HTTPS</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-docs-shell style="display:grid;grid-template-columns:minmax(0,1fr) 15rem;gap:clamp(2rem,4vw,4.5rem);padding-inline:clamp(1.25rem,3.2vw,4.5rem);padding-block:clamp(3.5rem,5vw,5.5rem);align-items:start">
+
+      <div style="min-width:0;display:flex;flex-direction:column;gap:clamp(3.5rem,5vw,5rem)">
+
+        <div id="concepts">
+          <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Concepts<span style="height:1px;flex:1;background:#E4E4E0"></span></p>
+          <h2 style="margin:0 0 20px;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,2.75rem);line-height:1.1;letter-spacing:-.018em">Account, app, user.</h2>
+          <p style="margin:0 0 28px;max-width:46rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45">Three levels, and every path you call contains all three. An account holds your key. An app scopes what is learned, so a support bot and a writing assistant never share a memory. A user is the person whose preferences accumulate.</p>
+          <div style="overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
+            <sc-for list="{{ hierarchy }}" as="h" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:minmax(6rem,.5fr) minmax(0,1.5fr);border-bottom:1px solid #EFEFEC">
+                <div style="display:flex;align-items:center;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:.875rem;color:#84512E">{{ h.level }}</div>
+                <div style="border-left:1px solid #E4E4E0;padding:16px 20px;font-size:.9375rem;line-height:1.6;color:#3A3E45">{{ h.detail }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div id="pattern">
+          <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">The pattern<span style="height:1px;flex:1;background:#E4E4E0"></span></p>
+          <h2 style="margin:0 0 20px;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,2.75rem);line-height:1.1;letter-spacing:-.018em">Read before, write after.</h2>
+          <p style="margin:0 0 28px;max-width:46rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45">Ask for context before you call your model, and post the interaction once you have it. You send raw material — the message, the edit, the correction — and never a preference you inferred yourself. Working out which part was durable is our job, and the part we are measured on.</p>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#E4E4E0" data-ref-row>
+            <div style="background:#FFFFFF;padding:24px">
+              <p style="margin:0 0 10px;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#84512E">Before your prompt</p>
+              <p style="margin:0 0 6px;font-family:'JetBrains Mono',monospace;font-size:.875rem;color:#14161A">GET …/context</p>
+              <p style="margin:0;font-size:.9375rem;line-height:1.6;color:#6B7078">Returns the preferences that apply, with confidences, and one line of guidance you can paste into a system prompt.</p>
+            </div>
+            <div style="background:#FFFFFF;padding:24px">
+              <p style="margin:0 0 10px;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#84512E">After the exchange</p>
+              <p style="margin:0 0 6px;font-family:'JetBrains Mono',monospace;font-size:.875rem;color:#14161A">POST …/interactions</p>
+              <p style="margin:0;font-size:.9375rem;line-height:1.6;color:#6B7078">Takes the message, the reply, and whatever surrounding detail you have. Returns the insights it drew from them.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="quickstart">
+          <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Quickstart<span style="height:1px;flex:1;background:#E4E4E0"></span></p>
+          <h2 style="margin:0 0 36px;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,2.75rem);line-height:1.1;letter-spacing:-.018em">From nothing to a personalised reply.</h2>
+
+          <div style="display:flex;flex-direction:column;gap:40px">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+              <div>
+                <p style="margin:0 0 12px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078"><span style="color:#84512E">{{ s.num }}</span><span style="height:1px;width:24px;background:#CFCFC9"></span>{{ s.label }}</p>
+                <h3 style="margin:0 0 12px;font-family:Newsreader,Georgia,serif;font-weight:600;font-size:clamp(1.25rem,.95rem + 1.1vw,1.75rem);line-height:1.22;letter-spacing:-.012em">{{ s.title }}</h3>
+                <p style="margin:0 0 20px;max-width:46rem;font-size:1.0625rem;line-height:1.6;color:#3A3E45">{{ s.body }}</p>
+                <div style="overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #EFEFEC;padding:10px 16px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:.8125rem;color:#6B7078">{{ s.lang }}</span>
+                    <span onClick="{{ s.copy }}" style="font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:#84512E;cursor:pointer">{{ s.copyLabel }}</span>
+                  </div>
+                  <pre style="margin:0;overflow-x:auto;padding:18px;font-size:.8125rem;line-height:1.75;color:#3A3E45"><code style="font-family:'JetBrains Mono',monospace">{{ s.code }}</code></pre>
+                  <p style="margin:0;border-top:1px solid #EFEFEC;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:.875rem;color:#2E8B5A">{{ s.result }}</p>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div id="reference">
+          <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Reference<span style="height:1px;flex:1;background:#E4E4E0"></span></p>
+          <h2 style="margin:0 0 20px;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,2.75rem);line-height:1.1;letter-spacing:-.018em">The whole surface.</h2>
+          <p style="margin:0 0 28px;max-width:46rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45">Four endpoints. Two of them you call once when you set up; two of them sit in your request path. Every request carries <span style="font-family:'JetBrains Mono',monospace;font-size:.9em">Authorization: Bearer</span> and returns JSON.</p>
+          <div style="overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF">
+            <div style="display:grid;grid-template-columns:4.5rem minmax(0,2fr) minmax(0,1.4fr);border-bottom:1px solid #E4E4E0;background:#F6F6F4">
+              <div style="padding:12px 16px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Verb</div>
+              <div style="border-left:1px solid #E4E4E0;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Path</div>
+              <div style="border-left:1px solid #E4E4E0;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">What it does</div>
+            </div>
+            <sc-for list="{{ endpoints }}" as="e" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:4.5rem minmax(0,2fr) minmax(0,1.4fr);border-bottom:1px solid #EFEFEC">
+                <div style="padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:.8125rem;font-weight:500;color:#84512E">{{ e.verb }}</div>
+                <div style="border-left:1px solid #E4E4E0;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:.8125rem;line-height:1.6;color:#14161A;overflow-wrap:anywhere">{{ e.path }}</div>
+                <div style="border-left:1px solid #E4E4E0;padding:14px 16px;font-size:.9375rem;line-height:1.55;color:#6B7078">{{ e.does }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div id="notes">
+          <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">Objectives<span style="height:1px;flex:1;background:#E4E4E0"></span></p>
+          <h2 style="margin:0 0 20px;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.75rem,1rem + 2.2vw,2.75rem);line-height:1.1;letter-spacing:-.018em">Writing one worth learning against.</h2>
+          <p style="margin:0 0 28px;max-width:46rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45">The objective on your app is the most consequential line of configuration you write: it decides which patterns are worth keeping. The shape that works is <span style="font-family:'JetBrains Mono',monospace;font-size:.9em;color:#84512E">[outcome verb] + [what] + by [how]</span> — measurable, user-centric, and about an outcome rather than a process.</p>
+
+          <div data-ref-row style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#E4E4E0">
+            <div style="background:#FFFFFF;padding:24px;display:flex;flex-direction:column;gap:18px">
+              <p style="margin:0;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#2E8B5A">Works</p>
+              <sc-for list="{{ goodObjectives }}" as="o" hint-placeholder-count="3">
+                <div>
+                  <p style="margin:0 0 6px;font-family:'JetBrains Mono',monospace;font-size:.8125rem;line-height:1.6;color:#14161A">{{ o.text }}</p>
+                  <p style="margin:0;font-size:.9375rem;line-height:1.55;color:#6B7078">{{ o.why }}</p>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:#FFFFFF;padding:24px;display:flex;flex-direction:column;gap:18px">
+              <p style="margin:0;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#BF3E33">Doesn't</p>
+              <sc-for list="{{ badObjectives }}" as="o" hint-placeholder-count="3">
+                <div>
+                  <p style="margin:0 0 6px;font-family:'JetBrains Mono',monospace;font-size:.8125rem;line-height:1.6;color:#9AA0A8">{{ o.text }}</p>
+                  <p style="margin:0;font-size:.9375rem;line-height:1.55;color:#6B7078">{{ o.why }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-radius:10px;background:#14161A;color:#F6F6F4;padding:clamp(2rem,3.5vw,3rem);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px">
+          <div>
+            <h2 style="margin:0 0 10px;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.5rem,1rem + 1.6vw,2.25rem);line-height:1.12;letter-spacing:-.02em">Keys are issued by hand while we are in beta.</h2>
+            <p style="margin:0;max-width:38rem;font-size:1.0625rem;line-height:1.6;color:#D2D2CD">Tell us which assistant keeps forgetting and we will wire this into it with you on a call.</p>
+          </div>
+          <a href="SapientPriors.dc.html#access" style="padding:13px 26px;border-radius:10px;background:#F6F6F4;color:#14161A;font-size:.9375rem;font-weight:500">Get access</a>
+        </div>
+      </div>
+
+      <div data-docs-aside style="position:sticky;top:104px;display:flex;flex-direction:column;gap:14px">
+        <p style="margin:0;font-family:'JetBrains Mono',monospace;font-weight:500;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:#9AA0A8">On this page</p>
+        <div style="display:flex;flex-direction:column;gap:2px;border-left:1px solid #E4E4E0">
+          <a href="#concepts" style="padding:6px 14px;font-size:.875rem;color:#6B7078">Concepts</a>
+          <a href="#pattern" style="padding:6px 14px;font-size:.875rem;color:#6B7078">The pattern</a>
+          <a href="#quickstart" style="padding:6px 14px;font-size:.875rem;color:#6B7078">Quickstart</a>
+          <a href="#reference" style="padding:6px 14px;font-size:.875rem;color:#6B7078">Reference</a>
+          <a href="#notes" style="padding:6px 14px;font-size:.875rem;color:#6B7078">Objectives</a>
+        </div>
+      </div>
+    </div>
+
+    <dc-import name="SiteFooter" hint-size="100%,420px"></dc-import>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+const BASE = 'https://api.sapientpriors.com/v1';
+
+const HIERARCHY = [
+  { level: 'Account', detail: 'Your organisation. Holds the API key and the billing relationship. Created once.' },
+  { level: 'App', detail: 'One product surface. Memories never cross apps, so a support bot and a writing assistant learn separately about the same person.' },
+  { level: 'User', detail: 'The person whose preferences accumulate. You choose the id; we never need a name or an email.' }
+];
+
+const STEPS = [
+  {
+    num: '01', label: 'Setup', lang: 'javascript', result: '201 Created · returns account_id, app_id and api_key',
+    title: 'Create an account and an app.',
+    body: 'Two calls you make once. The app carries a base prompt and an objective — the objective is what shapes which patterns get learned, so it is worth writing carefully. Keep the key server-side.',
+    code: "const { account_id, api_key } = await fetch('" + BASE + "/accounts', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n    email: 'admin@company.com',\n    organization: 'Your Company'\n  })\n}).then(r => r.json());\n\nconst { app_id } = await fetch(\n  `" + BASE + "/accounts/${account_id}/apps`,\n  {\n    method: 'POST',\n    headers: {\n      Authorization: `Bearer ${api_key}`,\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify({\n      name: 'Email Assistant',\n      base_prompt: 'You are a helpful AI assistant for business communication.',\n      objective: 'Make writing emails as seamless as possible by minimizing the edits required by the user.'\n    })\n  }\n).then(r => r.json());"
+  },
+  {
+    num: '02', label: 'Recall', lang: 'javascript', result: '200 OK · 48ms',
+    title: 'Ask for context before your prompt.',
+    body: 'Describe what the user is about to do and you get back the preferences that apply, each with a confidence, plus one line of guidance written for a system prompt.',
+    code: "const context = await fetch(\n  `" + BASE + "/accounts/${accountId}/apps/${appId}` +\n  `/users/${userId}/context?task=email_drafting&topic=Q4_results&recipient=Sarah`,\n  { headers: { Authorization: `Bearer ${apiKey}` } }\n).then(r => r.json());\n\ncontext.learned_preferences;\n// [ { preference: 'concise_communication', confidence: 0.95 },\n//   { preference: 'tldr_at_top',           confidence: 0.87 } ]\n\ncontext.suggested_approach;\n// 'Draft a concise email with TLDR at the beginning. Keep under 100 words.'\n\nconst reply = await yourModel.generate(\n  `Draft an email about Q4 results to Sarah.\\nStyle: ${context.suggested_approach}`\n);"
+  },
+  {
+    num: '03', label: 'Learn', lang: 'javascript', result: '202 Accepted · queued',
+    title: 'Post the interaction once you have it.',
+    body: 'Send the raw exchange, including corrections and edits, with whatever surrounding detail you hold. Do not send preferences you inferred yourself — that inference is the thing being measured.',
+    code: "const learned = await fetch(\n  `" + BASE + "/accounts/${accountId}/apps/${appId}` +\n  `/users/${userId}/interactions`,\n  {\n    method: 'POST',\n    headers: {\n      Authorization: `Bearer ${apiKey}`,\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify({\n      ai_response: 'Draft an email to the team about the product launch',\n      user_message: 'Make it shorter and add a TLDR at the top',\n      task: 'email_drafting',\n      topic: 'product_launch',\n      recipient: 'team'\n    })\n  }\n).then(r => r.json());\n\nlearned.insights_generated;\n// [ 'User prefers concise communication style',\n//   'User prefers TLDR format at beginning' ]"
+  }
+];
+
+const ENDPOINTS = [
+  { verb: 'POST', path: '/v1/accounts', does: 'Create an account. Returns the API key.' },
+  { verb: 'POST', path: '/v1/accounts/{account_id}/apps', does: 'Create an app to scope memory to one product surface.' },
+  { verb: 'GET', path: '/v1/accounts/{account_id}/apps/{app_id}/users/{user_id}/context', does: 'The recall call. Preferences, confidences and prompt guidance.' },
+  { verb: 'POST', path: '/v1/accounts/{account_id}/apps/{app_id}/users/{user_id}/interactions', does: 'The learn call. Raw exchange in, insights out.' }
+];
+
+const GOOD_OBJECTIVES = [
+  { text: 'Make writing emails as seamless as possible by minimizing the edits required by the user', why: 'Measurable (edit count), user-centric, outcome-focused' },
+  { text: "Reduce code review cycles by learning the team's style guide and best practices", why: 'Measurable (review cycles), specific, clear benefit' },
+  { text: 'Generate marketing copy that requires zero edits by matching brand voice and tone', why: 'Ambitious target, specific, clear outcome' }
+];
+
+const BAD_OBJECTIVES = [
+  { text: 'Learn user preferences', why: 'Too vague — which preferences, for what purpose?' },
+  { text: 'Provide personalized suggestions', why: 'Process-focused rather than outcome-focused' },
+  { text: 'Be helpful', why: 'Not measurable — how would you know you got there?' }
+];
+
+class Component extends DCLogic {
+  state = { copied: null };
+
+  copy(i, code) {
+    if (navigator.clipboard) navigator.clipboard.writeText(code);
+    this.setState({ copied: i });
+    clearTimeout(this.t);
+    this.t = setTimeout(() => this.setState({ copied: null }), 1600);
+  }
+
+  componentWillUnmount() { clearTimeout(this.t); }
+
+  renderVals() {
+    return {
+      hierarchy: HIERARCHY,
+      endpoints: ENDPOINTS,
+      goodObjectives: GOOD_OBJECTIVES,
+      badObjectives: BAD_OBJECTIVES,
+      steps: STEPS.map((s, i) => ({
+        num: s.num, label: s.label, title: s.title, body: s.body,
+        code: s.code, lang: s.lang, result: s.result,
+        copyLabel: this.state.copied === i ? 'Copied' : 'Copy',
+        copy: () => this.copy(i, s.code)
+      }))
+    };
+  }
+}
+
+</script>
+<script>
+/* The page hydrates after parse, so the browser resolves location.hash before
+   the section ids exist, finds nothing, and never retries — every anchor link
+   lands at the top. Re-apply the hash once the target appears. */
+(function () {
+  var id = location.hash ? location.hash.slice(1) : "";
+  if (!id) return;
+  var tries = 0;
+  (function go() {
+    var el = document.getElementById(id);
+    if (el) { el.scrollIntoView(); return; }
+    if (tries++ < 90) requestAnimationFrame(go);
+  })();
+})();
+</script>
+</body>
+</html>
