@@ -12,14 +12,16 @@ Two panels now, on one 14s loop:
   1. the lookup    the query going in, and the context that comes back
   2. the answer    the same user's reply, written with that context applied
 
-Both panels are quoted in seconds, not milliseconds. A figure like "48ms"
-invites arithmetic about a single hop; the claim being made here is that the
-whole thing is quick, so the numbers are given at the resolution of that
-claim - 0.2s for the lookup, 0.9s for the round trip with the model in it.
+Neither panel carries a number. Both read "under a second", in words, by
+instruction: no figure here is a measurement, and inventing a plausible-looking
+one - 48ms, then 0.2s - put a precision on the card that nothing behind it
+supports. Words claim exactly what is known and no more.
 
-Step 03 further down the page still quotes this same call at 48ms. That is a
-retrieval-latency claim backing the "faster than Mem0" tile rather than a
-response-time one, so it is left alone here deliberately, not by oversight.
+Do not substitute a figure here without being asked for one.
+
+Step 03 further down the page does quote this call at 48ms. That is a separate
+retrieval-latency claim backing the "faster than Mem0" tile, and it is left as
+it is deliberately, not by oversight.
 
 They are written so the second visibly obeys the first: the context says short
 replies with no preamble, a casual tone with John, and always cite the source,
@@ -122,11 +124,11 @@ def apply(out):
 
         block = (
             '<div style="display:grid">'
-            + _panel("api-a", 1, "GET", "/v1/&hellip;/users/{id}/context", "0.2s",
+            + _panel("api-a", 1, "GET", "/v1/&hellip;/users/{id}/context", "under a second",
                      _lookup_json(),
                      "One call, before your prompt. No fine-tuning, no vector "
                      "store to run.")
-            + _panel("api-b", 0, "POST", "/v1/&hellip;/chat/completions", "0.9s",
+            + _panel("api-b", 0, "POST", "/v1/&hellip;/chat/completions", "under a second",
                      _answer_json(),
                      "The call your app already makes, answered with what it "
                      "knows. Under a second, end to end.")
