@@ -40,6 +40,7 @@ def apply(out):
     _pricing_page(out)
     _careers_roles(out)
     _careers_art(out)
+    _careers_hero_and_scroll(out)
     _careers_apply_form(out)
     _api_docs_chrome(out)
     _contact_email(out)
@@ -1202,14 +1203,36 @@ NEW_ROLES = """  {
   },
   {
     id: 'software-engineer',
-    title: 'Software Engineer',
+    title: 'Software Engineer, Distributed Systems',
     type: 'Full-time',
     location: 'Bangalore, India',
-    description: 'Build the API, the infrastructure and the tooling around the memory layer. The full description is not published yet \\u2014 tell us what you have built and we will take it from there.',
-    responsibilities: [],
-    requirements: [],
-    preferred: [],
-    benefits: []
+    description: 'Own the serving path for the memory layer \\u2014 request routing, resource health and reliability, from launch onward. Memory is only useful if it comes back before the model needs it, so latency and correctness under load are the product, not a non-functional requirement.',
+    responsibilities: [
+      'Own the control plane: model the lifecycle of a serving cluster as explicit states and transitions, and reconcile toward them rather than scripting one-off changes',
+      'Build the request path \\u2014 routing, admission, backpressure and caching \\u2014 against a tail-latency budget rather than an average',
+      'Make failure boring: idempotency, retries with sane budgets, safe draining of degraded nodes, and rollback that has been tested rather than assumed',
+      'Instrument first. Own the metrics, traces and load tests that tell us a change worked before a customer does',
+      'Engineer infrastructure like software \\u2014 typed, tested, reviewed, versioned, in CI'
+    ],
+    requirements: [
+      '3+ years building and operating backend or infrastructure systems that other people depended on',
+      'Strong in Go, Rust, Python or an equivalent systems language \\u2014 you write and test real software',
+      'You have run something in production and been on the hook when it broke, and can talk through what you changed afterwards',
+      'Comfortable reasoning about concurrency, queueing and where time actually goes in a request',
+      'Working knowledge of a cloud platform and of containers and orchestration'
+    ],
+    preferred: [
+      'Control planes, Kubernetes operators, or custom reconciliation loops',
+      'Durable workflow orchestration \\u2014 Temporal, Cadence or similar \\u2014 for work that must survive a restart',
+      'Event-driven systems on Kafka, NATS or equivalent, rather than polling',
+      'Serving ML workloads, GPU scheduling, or low-latency retrieval at scale',
+      'Having built an internal platform or API that another engineering team used'
+    ],
+    benefits: [
+      'Founding team equity \\u2014 a meaningful stake',
+      'Ownership of the serving path end to end, not a slice of it',
+      'Learning budget \\u2014 conferences, courses, hardware to experiment on'
+    ]
   }
 ];"""
 
@@ -1252,6 +1275,55 @@ def _careers_roles(out):
 
     open(p, "w", encoding="utf-8", errors="surrogateescape").write(s)
     print("  Careers.dc.html  intern renamed; Founders Office and Software Engineer added")
+
+
+def _careers_hero_and_scroll(out):
+    """
+    Two things on the careers page.
+
+    The goldfish comes out of the hero. It went from the home page for the same
+    reason - three instances of one mark stopped reading as a motif.
+
+    And selecting a role now scrolls to the description it opened. The detail
+    panel is below the fold on every screen the role grid fits on, so clicking
+    a card changed something the reader could not see and the page appeared not
+    to respond at all.
+    """
+    import os
+    p = os.path.join(out, "Careers.dc.html")
+    if not os.path.exists(p):
+        return
+    s = open(p, encoding="utf-8", errors="surrogateescape").read()
+    before = s
+
+    i = s.find("data-section-art aria-hidden")
+    if i == -1:
+        print("  Careers.dc.html  hero art not found - CHECK")
+    else:
+        j = s.rfind("<div ", 0, i)
+        s = s[:j] + s[_close_div(s, j):]
+
+    # the detail panel gets an id, and select scrolls to it after the state
+    # change has actually rendered it
+    s = s.replace('<div data-detail-grid', '<div id="role-detail" data-detail-grid', 1)
+    old = "select: () => this.setState({ active: j.id })"
+    if old not in s:
+        print("  Careers.dc.html  role select handler not found - CHECK")
+    s = s.replace(old,
+        "select: () => {\n"
+        "          this.setState({ active: j.id });\n"
+        "          // after the panel for this role has rendered, not before\n"
+        "          requestAnimationFrame(() => requestAnimationFrame(() => {\n"
+        "            const el = document.getElementById('role-detail');\n"
+        "            if (!el) return;\n"
+        "            const y = el.getBoundingClientRect().top + window.scrollY - 96;\n"
+        "            window.scrollTo({ top: y, behavior: 'smooth' });\n"
+        "          }));\n"
+        "        }")
+
+    if s != before:
+        open(p, "w", encoding="utf-8", errors="surrogateescape").write(s)
+        print("  Careers.dc.html  hero art removed; selecting a role scrolls to it")
 
 
 def _careers_apply_form(out):

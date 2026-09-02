@@ -44,6 +44,10 @@
     ["role", "Role you are applying for *", "role", true],
     ["school", "College or university *", "text", true],
     ["resumeLink", "Link to your resume *", "url", true],
+    ["q1", "What ML topic or paper are you most excited about right now? Why? *", "textarea", true],
+    ["q2", "Describe an ML project you have worked on. What did you learn? *", "textarea", true],
+    ["q3", "Give an example of your deepest ML work. *", "textarea", true],
+    ["q4", "Any interesting ideas you have about current model architectures? *", "textarea", true],
     ["message", "Anything else you want us to know", "textarea", false]
   ];
 
@@ -164,7 +168,8 @@
     grid.setAttribute("data-apply-grid", "");
 
     FIELDS.forEach(function (f) {
-      var key = f[0], wide = key === "message" || key === "resumeLink";
+      var key = f[0], wide = key === "message" || key === "resumeLink"
+        || key.charAt(0) === "q";
       var cell = el("div", "display:flex;flex-direction:column;gap:8px" +
         (wide ? ";grid-column:1/-1" : ""));
       cell.appendChild(el("label", "font-size:.875rem;font-weight:500;color:" + INK, f[1]))

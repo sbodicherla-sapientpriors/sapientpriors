@@ -20,7 +20,8 @@
  * form-submission API, meant to be called from a browser.
  */
 
-const REQUIRED = ["name", "email", "phone", "country", "role", "school", "resumeLink"];
+const REQUIRED = ["name", "email", "phone", "country", "role", "school",
+                  "resumeLink", "q1", "q2", "q3", "q4"];
 const MAX = 4000;
 
 /*
@@ -102,6 +103,10 @@ export default async function handler(req, res) {
     { name: "role_applied_for", value: ROLES[out.role] },
     { name: "school", value: out.school },
     { name: "resume_link", value: out.resumeLink },
+    { name: "app_q1", value: out.q1 },
+    { name: "app_q2", value: out.q2 },
+    { name: "app_q3", value: out.q3 },
+    { name: "app_q4", value: out.q4 },
     { name: "message", value: out.message }
   ].filter(f => f.value);
 
