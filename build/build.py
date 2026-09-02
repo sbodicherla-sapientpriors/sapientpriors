@@ -193,6 +193,14 @@ def main(src):
     import patch_ui
     print('ui')
     patch_ui.apply(out)
+    import patch_api_demo
+    print('api demo')
+    patch_api_demo.apply(out)
+
+    import patch_head
+    print('head')
+    patch_head.apply(out)
+
     import patch_motion
     print('motion')
     patch_motion.apply(out)

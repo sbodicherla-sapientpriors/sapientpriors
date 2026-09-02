@@ -240,7 +240,7 @@ def apply(out):
             close = s.find("</h1>", open_end)
             s = (s[:open_end]
                  + "Agents that learn from every conversation, "
-                 + '<span style="color:#6C4126">answer in real time.</span>'
+                 + '<span style="color:#6C4126">answer in realtime.</span>'
                  + s[close:])
 
         # The sub-line has to carry three words the eye should catch on its own:

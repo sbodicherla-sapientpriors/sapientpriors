@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>SapientPriors</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon.ico" sizes="32x32"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
@@ -140,6 +142,10 @@
        and clipped at the edge. */
     [data-marquee] img{height:26px!important}
   }
+  /* The two API panels, 50% out of phase on one 14s loop. Pure CSS so a
+     runtime re-render cannot leave the rotation un-armed. */
+  @keyframes api-a{0%,44%{opacity:1}50%,94%{opacity:0}100%{opacity:1}}
+  @keyframes api-b{0%,44%{opacity:0}50%,94%{opacity:1}100%{opacity:0}}
 </style>
 </helmet>
 
@@ -190,7 +196,7 @@
         <div data-hero-grid="" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));align-items:center;gap:clamp(3.5rem,4vw,4rem)">
           <div style="grid-column:span 7">
             
-            <h1 class="fade-up" style="margin:0 0 24px;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(2.75rem,.9rem + 5.6vw,6.75rem);line-height:1.02;letter-spacing:-.025em;text-wrap:balance;animation:fade-up .8s cubic-bezier(.16,1,.3,1) .05s both">Agents that learn from every conversation, <span style="color:#6C4126">answer in real time.</span></h1>
+            <h1 class="fade-up" style="margin:0 0 24px;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(2.75rem,.9rem + 5.6vw,6.75rem);line-height:1.02;letter-spacing:-.025em;text-wrap:balance;animation:fade-up .8s cubic-bezier(.16,1,.3,1) .05s both">Agents that learn from every conversation, <span style="color:#6C4126">answer in realtime.</span></h1>
             <p class="fade-up" style="margin:0 0 32px;max-width:36rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45;text-wrap:pretty;animation:fade-up .8s cubic-bezier(.16,1,.3,1) .15s both">One <span style="font-weight:600;color:#14161A">multi-model</span> memory layer behind whichever model you run, <span style="font-weight:600;color:#14161A">trainable</span> on your own data. Preferences learned from real conversations, returned in <span style="font-weight:600;color:#14161A">real time</span>, and <span style="font-weight:600;color:#14161A">benchmarked</span> on the state-of-the-art memory suites.</p>
             <div class="fade-up" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:32px;animation:fade-up .8s cubic-bezier(.16,1,.3,1) .25s both">
               
@@ -208,20 +214,20 @@
 
           <div style="grid-column:span 5">
             <div data-reveal="" style="border-radius:10px;border:1px solid #E4E4E0;background:#FFFFFF;box-shadow:0 1px 3px 0 rgba(20,22,26,.06);opacity:0;transform:translateY(10px);transition:opacity 400ms cubic-bezier(.16,1,.3,1) 120ms,transform 400ms cubic-bezier(.16,1,.3,1) 120ms">
-              <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EFEFEC;padding:12px 16px">
-                <span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;color:#6B7078">GET /v1/…/users/{id}/context</span>
-                <span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;color:#2E8B5A">200 · 48ms</span>
-              </div>
-              <pre style="margin:0;overflow-x:auto;padding:16px;font-size:.8125rem;line-height:1.625"><code style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace"><span style="color:#9AA0A8">{</span>
+              <div style="display:grid"><div style="grid-area:1/1;opacity:1;animation:api-a 14s linear infinite"><div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EFEFEC;padding:12px 16px"><span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;color:#6B7078">GET /v1/&hellip;/users/{id}/context</span><span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;color:#2E8B5A">200 &middot; 48ms</span></div><pre style="margin:0;overflow-x:auto;padding:16px;font-size:.8125rem;line-height:1.625"><code style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace"><span style="color:#9AA0A8">{</span>
   <span style="color:#6B7078">"user"</span><span style="color:#9AA0A8">: </span><span style="color:#3A3E45">"u_8213"</span><span style="color:#9AA0A8">,</span>
+  <span style="color:#6B7078">"query"</span><span style="color:#9AA0A8">: </span><span style="color:#3A3E45">"Can you draft an email to john"</span><span style="color:#9AA0A8">,</span>
   <span style="color:#6B7078">"context"</span><span style="color:#9AA0A8">: [</span>
     <span style="color:#3A3E45">"prefers short replies, no preamble"</span><span style="color:#9AA0A8">,</span>
-    <span style="color:#3A3E45">"works in insurance claims"</span><span style="color:#9AA0A8">,</span>
+    <span style="color:#3A3E45">"john works in insurance claims"</span><span style="color:#9AA0A8">,</span>
+    <span style="color:#3A3E45">"has a casual tone with john"</span><span style="color:#9AA0A8">,</span>
     <span style="color:#3A3E45">"always asks for the source"</span>
-  <span style="color:#9AA0A8">],</span>
-  <span style="color:#6B7078">"learned_from"</span><span style="color:#9AA0A8">: </span><span style="color:#84512E">31 conversations</span>
-<span style="color:#9AA0A8">}</span></code></pre>
-              <p style="margin:0;border-top:1px solid #EFEFEC;padding:12px 16px;font-size:1rem;line-height:1.6;color:#6B7078">One call, before your prompt. No fine-tuning, no vector store to run.</p>
+  <span style="color:#9AA0A8">]</span><span style="color:#9AA0A8">
+}</span></code></pre><p style="margin:0;border-top:1px solid #EFEFEC;padding:12px 16px;font-size:1rem;line-height:1.6;color:#6B7078">One call, before your prompt. No fine-tuning, no vector store to run.</p></div><div style="grid-area:1/1;opacity:0;animation:api-b 14s linear infinite"><div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EFEFEC;padding:12px 16px"><span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;color:#6B7078">POST /v1/&hellip;/chat/completions</span><span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9375rem;color:#2E8B5A">200 &middot; 0.9s</span></div><pre style="margin:0;overflow-x:auto;padding:16px;font-size:.8125rem;line-height:1.625"><code style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace"><span style="color:#9AA0A8">{</span>
+  <span style="color:#6B7078">"user"</span><span style="color:#9AA0A8">: </span><span style="color:#3A3E45">"u_8213"</span><span style="color:#9AA0A8">,</span>
+  <span style="color:#6B7078">"reply"</span><span style="color:#9AA0A8">: </span><span style="color:#3A3E45">"Hey John — file attached. Source: the Aug 14 export."</span><span style="color:#9AA0A8">,</span>
+  <span style="color:#6B7078">"context_applied"</span><span style="color:#9AA0A8">: </span><span style="color:#84512E">4</span><span style="color:#9AA0A8">
+}</span></code></pre><p style="margin:0;border-top:1px solid #EFEFEC;padding:12px 16px;font-size:1rem;line-height:1.6;color:#6B7078">The call your app already makes, answered with what it knows. Under a second, end to end.</p></div></div>
             </div>
           </div>
         </div>
