@@ -1889,16 +1889,16 @@ def _founder_cards(s):
     end = s.find("</p>", i) + len("</p>")
 
     # One group photograph spanning both tiles, with the two info panels
-    # under it. Until that photograph exists the slot is filled with the two
-    # portraits side by side, which reads as one continuous band rather than as
-    # a placeholder - and swapping in the real one is a single <img>.
-    GROUP_PHOTO = None
+    # under it. Cropped to 2.35:1 to match the band, so object-fit has nothing
+    # left to trim and both faces sit where the crop put them.
+    GROUP_PHOTO = "art/people/founders.webp"
 
     def photo_band():
         # An explicit empty-image mark, not a cropped stand-in. A placeholder
         # that looks like content is one nobody remembers to replace.
         if GROUP_PHOTO:
             return ('<img src="%s" alt="Raveeshu Pahuja and Karankumar Sabhnani" '
+                    'loading="lazy" decoding="async" '
                     'style="display:block;width:100%%;height:100%%;object-fit:cover">'
                     % GROUP_PHOTO)
         return (
@@ -1947,7 +1947,7 @@ def _founder_cards(s):
         '<div style="border:1px solid #E4E4E0;border-radius:10px;overflow:hidden;'
         'background:#FFFFFF">'
         '<div style="display:flex;width:100%;aspect-ratio:2.35/1;'
-        'background:rgba(132,81,46,.06);border-bottom:1px solid #EFEFEC">'
+        'background:#EFEFEC;border-bottom:1px solid #EFEFEC">'
         + photo_band() + "</div>"
         '<div data-founder-cards style="display:grid;'
         'grid-template-columns:repeat(2,minmax(0,1fr))">'
