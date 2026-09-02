@@ -499,7 +499,7 @@ const STEPS = [
     code: 'POST /v1/accounts/{account_id}/apps/{app_id}\n     /users/u_8213/interactions\n\n{\n  "type": "message",\n  "content": "Short. Like I said yesterday.",\n  "context": { "task": "email_drafting" }\n}' },
   { num: '02', label: 'Learn', title: 'We work out what actually mattered.', body: 'Corrections, retries and edits carry more signal than anything a user tells you directly. We keep the durable preference, drop the noise, and keep testing it against what happens next.', result: '3 durable · 11 discarded',
     code: '# extracted, not asked for\n\nprefers short replies    0.94 ·  7 interactions\nno preamble              0.88 ·  4 interactions\nworks in insurance       0.91 · 12 interactions' },
-  { num: '03', label: 'Recall', title: 'One call before your prompt.', body: "Ask for the context that applies to this user and paste it into your system prompt. Any model, any framework — it's a REST call that returns strings.", result: '200 OK · 48ms',
+  { num: '03', label: 'Recall', title: 'One call before your prompt.', body: "Ask for the context that applies to this user and paste it into your system prompt. Any model, any framework — it's a REST call that returns strings.", result: '200 OK · under a second',
     code: 'GET /v1/accounts/{account_id}/apps/{app_id}\n    /users/u_8213/context?task=email_drafting\n\n{\n  "context": [\n    "prefers short replies, no preamble",\n    "works in insurance claims"\n  ]\n}' }
 ];
 

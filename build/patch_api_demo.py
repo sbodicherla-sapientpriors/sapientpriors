@@ -19,9 +19,8 @@ supports. Words claim exactly what is known and no more.
 
 Do not substitute a figure here without being asked for one.
 
-Step 03 further down the page does quote this call at 48ms. That is a separate
-retrieval-latency claim backing the "faster than Mem0" tile, and it is left as
-it is deliberately, not by oversight.
+Step 03 further down the page quoted the same call at 48ms. It says "under a
+second" too now, for the same reason: it was never a measurement either.
 
 They are written so the second visibly obeys the first: the context says short
 replies with no preamble, a casual tone with John, and always cite the source,
@@ -113,6 +112,12 @@ def _answer_json():
     return "\n".join(out) + _sp(PUNC, "\n}")
 
 
+# Step 03 in "How it works" quotes this same call. It carried 48ms - the figure
+# this card started with, and no more measured there than it was here.
+STEP_FROM = "result: '200 OK \u00b7 48ms'"
+STEP_TO = "result: '200 OK \u00b7 under a second'"
+
+
 def apply(out):
     n = 0
     for path in sorted(glob.glob(os.path.join(out, "*.html"))):
@@ -135,6 +140,7 @@ def apply(out):
             + '</div>'
         )
         s = s[:i] + block + s[j:]
+        s = s.replace(STEP_FROM, STEP_TO)
         if "@keyframes api-a" not in s:
             s = s.replace("\n</style>", KEYFRAMES + "</style>", 1)
         io.open(path, "w", encoding="utf-8", errors="surrogateescape").write(s)
