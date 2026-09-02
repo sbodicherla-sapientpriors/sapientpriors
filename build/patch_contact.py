@@ -613,3 +613,36 @@ def unify_tryit_form(out):
 
     open(p, "w", encoding="utf-8", errors="surrogateescape").write(s)
     print("  TryIt.dc.html  form copied verbatim from the home page")
+
+
+# The founders block under the contact form ships an empty 2.35:1 placeholder
+# with a picture-icon SVG in it. The export has no slot for a real photo, so the
+# swap has to happen here or the placeholder comes back on every re-export.
+PLACEHOLDER_HEAD = (
+    '<div style="display:flex;width:100%;aspect-ratio:2.35/1;'
+    'background:rgba(132,81,46,.06);border-bottom:1px solid #EFEFEC">'
+)
+FOUNDER_IMG = (
+    '<img src="art/people/founders.webp" '
+    'alt="The SapientPriors co-founders in front of the Golden Gate Bridge" '
+    'width="860" height="366" loading="lazy" decoding="async" '
+    'style="width:100%;height:100%;object-fit:cover;object-position:50% 38%;display:block">'
+)
+
+
+def founder_photo(out):
+    """Replace the founders picture-icon placeholder with the real photo."""
+    for name in ("index.html", "SapientPriors.dc.html"):
+        p = os.path.join(out, name)
+        if not os.path.exists(p):
+            continue
+        s = open(p, encoding="utf-8", errors="surrogateescape").read()
+        i = s.find(PLACEHOLDER_HEAD)
+        if i == -1:
+            continue
+        # The placeholder is one centring div wrapping one <svg>; replace the
+        # whole inner run up to the matching close of the aspect-ratio div.
+        j = s.index("</svg></div></div>", i) + len("</svg></div></div>")
+        s = s[:i] + PLACEHOLDER_HEAD + FOUNDER_IMG + "</div>" + s[j:]
+        open(p, "w", encoding="utf-8", errors="surrogateescape").write(s)
+        print(f"  {name}  founders placeholder -> art/people/founders.webp")

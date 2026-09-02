@@ -61,11 +61,7 @@
     phone: "+91 91008 62186",
     school: "Your college or university",
     resumeLink: "https://drive.google.com/file/d/.../view",
-    message: "Anything else you want us to know.",
-    q1: "A paper, a problem, or a direction \u2014 and why it holds your attention.",
-    q2: "What you built, what broke, and what you would do differently.",
-    q3: "The piece of work you would want us to read first.",
-    q4: "What you think is wrong, missing, or worth trying."
+    message: "Anything else you want us to know."
   };
 
 
@@ -105,6 +101,36 @@
     ]
   };
   function questionsFor(role) { return QUESTIONS[role] || RESEARCH; }
+  /* Placeholder per question, parallel to QUESTIONS. A hint that belongs to a
+     different question is worse than no hint - it answers a question the label
+     never asked. */
+  var RESEARCH_HINTS = [
+    "A paper, a problem, or a direction \u2014 and why it holds your attention.",
+    "What you built, what broke, and what you would do differently.",
+    "The piece of work you would want us to read first.",
+    "What you think is wrong, missing, or worth trying."
+  ];
+  var HINTS = {
+    "Machine Learning Engineer": [
+      "The constraint, the change you made, and the number it moved.",
+      "The paper, and what it made you see differently.",
+      "Where you think the headroom is, and what you would try first."
+    ],
+    "Machine Learning Engineer Intern": RESEARCH_HINTS,
+    "Software Engineer, Distributed Systems": [
+      "The system, what failed, and what you changed afterwards.",
+      "How you found it \u2014 not just where it turned out to be.",
+      "What depended on it, and what you got wrong the first time."
+    ],
+    "Founder\u2019s Office \u2014 Engineering Intern": [
+      "What you made, the artifact, and how long it took you.",
+      "What draws you to working this close to the decisions.",
+      "How you spotted it, what you did, and how it landed."
+    ]
+  };
+  function hintsFor(role) { return HINTS[role] || RESEARCH_HINTS; }
+
+
 
   var state = { values: {}, invalid: [], status: "idle" };
 
@@ -139,7 +165,10 @@
       n.type = type;
     }
     n.id = "ap-" + key;
-    if (PLACEHOLDER[key]) n.placeholder = PLACEHOLDER[key];
+    var hint = key.charAt(0) === "q"
+      ? hintsFor(state.values.role)[+key.slice(1) - 1]
+      : PLACEHOLDER[key];
+    if (hint) n.placeholder = hint;
     n.value = state.values[key] || "";
     n.addEventListener("change", function (e) {
       set(key, e.target.value);

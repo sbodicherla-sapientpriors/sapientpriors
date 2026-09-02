@@ -186,6 +186,7 @@ def main(src):
     patch_contact.apply_success_state(out)
     patch_contact.unify_tryit_form(out)
     patch_contact.shorten(out)
+    patch_contact.founder_photo(out)
     import patch_content
     print('content')
     patch_content.apply(out)
