@@ -12,11 +12,14 @@ Two panels now, on one 14s loop:
   1. the lookup    the query going in, and the context that comes back
   2. the answer    the same user's reply, written with that context applied
 
-The lookup keeps its 48ms because step 03 further down the page quotes the
-same call at the same number, and because retrieval latency is what the
-"faster than Mem0" tile is claiming. The second panel is where the
-sub-second promise lives: 0.9s is the whole round trip, model included,
-which is the number a reader actually cares about.
+Both panels are quoted in seconds, not milliseconds. A figure like "48ms"
+invites arithmetic about a single hop; the claim being made here is that the
+whole thing is quick, so the numbers are given at the resolution of that
+claim - 0.2s for the lookup, 0.9s for the round trip with the model in it.
+
+Step 03 further down the page still quotes this same call at 48ms. That is a
+retrieval-latency claim backing the "faster than Mem0" tile rather than a
+response-time one, so it is left alone here deliberately, not by oversight.
 
 They are written so the second visibly obeys the first: the context says short
 replies with no preamble, a casual tone with John, and always cite the source,
@@ -119,7 +122,7 @@ def apply(out):
 
         block = (
             '<div style="display:grid">'
-            + _panel("api-a", 1, "GET", "/v1/&hellip;/users/{id}/context", "48ms",
+            + _panel("api-a", 1, "GET", "/v1/&hellip;/users/{id}/context", "0.2s",
                      _lookup_json(),
                      "One call, before your prompt. No fine-tuning, no vector "
                      "store to run.")
