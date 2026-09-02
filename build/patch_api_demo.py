@@ -1,38 +1,30 @@
 # -*- coding: utf-8 -*-
 """
-The API card in the hero: two responses, rotating.
+The API card in the hero: two worked exchanges, rotating.
 
-One panel was doing two jobs badly. It showed a context lookup but no query, so
-there was nothing for the context to be the answer to, and it ended on
-"learned_from: 31 conversations" - a number about us rather than about the user
-being served.
+Each card is one exchange split into two stacked sections - what the user asked,
+then what the model returned with that user's context applied. Split rather than
+merged because the argument only lands if you can see the second obeying the
+first: the context asks for short replies and a cited source, and the reply is
+short and cites its source.
 
-Two panels now, on one 14s loop:
+Two examples on one 14s loop, a different task each: the same call, two users,
+two sets of learned preferences.
 
-  1. the lookup    the query going in, and the context that comes back
-  2. the answer    the same user's reply, written with that context applied
+Content lives in EXAMPLES and nowhere else. To swap either exchange, edit that
+list - nothing below it needs touching.
 
-Neither panel carries a number. Both read "under a second", in words, by
-instruction: no figure here is a measurement, and inventing a plausible-looking
-one - 48ms, then 0.2s - put a precision on the card that nothing behind it
-supports. Words claim exactly what is known and no more.
+No figure appears anywhere on this card. Both read "under a second", in words,
+by instruction: nothing behind it is a measurement, and every number tried here
+was invented to look plausible - 48ms, then 0.2s and 0.9s - each claiming a
+precision the site cannot support.
 
-Do not substitute a figure here without being asked for one.
+  Do not substitute a figure here without being asked for one.
 
-Step 03 further down the page quoted the same call at 48ms. It says "under a
-second" too now, for the same reason: it was never a measurement either.
-
-They are written so the second visibly obeys the first: the context says short
-replies with no preamble, a casual tone with John, and always cite the source,
-and the reply is short, opens "Hey John", and names where the number came from.
-That connection is the whole argument of the section, and one panel could not
-make it.
-
-Rotation is CSS, not script. Both panels sit in the same CSS grid cell, so the
-card takes the height of the taller one and neither is positioned absolutely;
-the crossfade is two keyframe tracks 50% out of phase. Nothing to re-arm when
-the runtime replaces these nodes, which is the failure this codebase keeps
-finding with mounted scripts.
+Rotation is CSS, not script. Both panels sit in the same grid cell, so the card
+takes the height of the taller and neither is positioned absolutely. The
+resting state resolves to the first panel: if the animation never runs, the two
+must not print on top of each other.
 """
 import glob
 import io
@@ -40,7 +32,38 @@ import os
 
 MONO = ("font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,"
         "monospace")
-PUNC, KEY, STR, NUM = "#9AA0A8", "#6B7078", "#3A3E45", "#84512E"
+PUNC, KEY, STR, NUM, INK = "#9AA0A8", "#6B7078", "#3A3E45", "#84512E", "#14161A"
+LINE, GREEN = "#EFEFEC", "#2E8B5A"
+
+LATENCY = "under a second"
+
+EXAMPLES = [
+    {
+        "path": "/v1/&hellip;/completions?task=email_drafting",
+        "user": "u_8213",
+        "query": "Can you draft an email to john",
+        "context": ["prefers short replies, no preamble",
+                    "john works in insurance claims",
+                    "has a casual tone with john",
+                    "always asks for the source"],
+        "output": "Hey John — file attached. Source: the Aug 14 export.",
+        "caption": "One call, before your prompt. No fine-tuning, no vector "
+                   "store to run.",
+    },
+    {
+        "path": "/v1/&hellip;/completions?task=code_review",
+        "user": "u_4417",
+        "query": "Add retries to the upload handler",
+        "context": ["explicit error types, never a bare except",
+                    "no new dependencies without asking",
+                    "ships a test with every fix",
+                    "prefers small diffs"],
+        "output": "Bounded retry with an explicit UploadTimeout, plus a test. "
+                  "No new deps.",
+        "caption": "Same call, another user. The context is theirs, not a "
+                   "prompt you maintain.",
+    },
+]
 
 START = ('<div style="display:flex;align-items:center;justify-content:'
          'space-between;border-bottom:1px solid #EFEFEC;padding:12px 16px">')
@@ -58,64 +81,75 @@ def _sp(colour, text):
     return '<span style="color:%s">%s</span>' % (colour, text)
 
 
-def _panel(anim, opacity, method, path, ms, lines, caption):
-    head = (
+def _label(text, right=""):
+    return (
         '<div style="display:flex;align-items:center;justify-content:'
-        'space-between;border-bottom:1px solid #EFEFEC;padding:12px 16px">'
-        '<span style="%s;font-size:.9375rem;color:#6B7078">%s %s</span>'
-        '<span style="%s;font-size:.9375rem;color:#2E8B5A">200 &middot; %s</span>'
-        '</div>' % (MONO, method, path, MONO, ms)
+        'space-between;padding:10px 16px 0">'
+        '<span style="%s;font-size:.6875rem;letter-spacing:.14em;'
+        'text-transform:uppercase;color:#9AA0A8">%s</span>%s</div>'
+        % (MONO, text, right)
     )
-    body = (
-        '<pre style="margin:0;overflow-x:auto;padding:16px;font-size:.8125rem;'
-        'line-height:1.625"><code style="%s">%s</code></pre>' % (MONO, lines)
-    )
-    foot = (
-        '<p style="margin:0;border-top:1px solid #EFEFEC;padding:12px 16px;'
-        'font-size:1rem;line-height:1.6;color:#6B7078">%s</p>' % caption
-    )
-    # The inline opacity is the resting state, and it matters: two panels share
-    # one grid cell, so if the animation never runs - reduced motion, an old
-    # engine, anything - the overlap has to resolve to one readable panel rather
-    # than both printed on top of each other. Fill-mode stays at none so these
-    # values apply whenever the keyframes are not driving.
-    return ('<div style="grid-area:1/1;opacity:%d;animation:%s 14s linear '
-            'infinite">%s%s%s</div>' % (opacity, anim, head, body, foot))
 
 
-def _lookup_json():
-    ctx = ["prefers short replies, no preamble",
-           "john works in insurance claims",
-           "has a casual tone with john",
-           "always asks for the source"]
+def _pre(body):
+    return ('<pre style="margin:0;overflow-x:auto;padding:8px 16px 14px;'
+            'font-size:.8125rem;line-height:1.625;white-space:pre-wrap;'
+            'overflow-wrap:anywhere"><code style="%s">%s'
+            '</code></pre>' % (MONO, body))
+
+
+def _user_block(ex):
     out = [_sp(PUNC, "{")]
     out.append('  ' + _sp(KEY, '"user"') + _sp(PUNC, ": ") +
-               _sp(STR, '"u_8213"') + _sp(PUNC, ","))
+               _sp(STR, '"%s"' % ex["user"]) + _sp(PUNC, ","))
     out.append('  ' + _sp(KEY, '"query"') + _sp(PUNC, ": ") +
-               _sp(STR, '"Can you draft an email to john"') + _sp(PUNC, ","))
+               _sp(STR, '"%s"' % ex["query"]) + _sp(PUNC, ","))
     out.append('  ' + _sp(KEY, '"context"') + _sp(PUNC, ": ["))
+    ctx = ex["context"]
     for n, c in enumerate(ctx):
         out.append('    ' + _sp(STR, '"%s"' % c) +
                    (_sp(PUNC, ",") if n < len(ctx) - 1 else ""))
     out.append('  ' + _sp(PUNC, "]"))
+    # The closing brace carries its own newline: the runtime drops the last
+    # whitespace text node in a <pre>, so a brace written as its own line lands
+    # welded to the value above it. Inside the span it is text, and text stays.
     return "\n".join(out) + _sp(PUNC, "\n}")
 
 
-def _answer_json():
-    out = [_sp(PUNC, "{")]
-    out.append('  ' + _sp(KEY, '"user"') + _sp(PUNC, ": ") +
-               _sp(STR, '"u_8213"') + _sp(PUNC, ","))
-    out.append('  ' + _sp(KEY, '"reply"') + _sp(PUNC, ": ") +
-               _sp(STR, '"Hey John — file attached. Source: the Aug 14 export."') + _sp(PUNC, ","))
-    out.append('  ' + _sp(KEY, '"context_applied"') + _sp(PUNC, ": ") +
-               _sp(NUM, "4"))
-    return "\n".join(out) + _sp(PUNC, "\n}")
+def _output_block(ex):
+    return _sp(INK, '"%s"' % ex["output"])
+
+
+def _panel(anim, opacity, ex):
+    status = ('<span style="%s;font-size:.6875rem;letter-spacing:.14em;'
+              'text-transform:uppercase;color:%s">200 &middot; %s</span>'
+              % (MONO, GREEN, LATENCY))
+    head = (
+        '<div style="border-bottom:1px solid %s;padding:12px 16px">'
+        '<span style="%s;font-size:.9375rem;color:#6B7078">POST %s</span>'
+        '</div>' % (LINE, MONO, ex["path"])
+    )
+    user = _label("User") + _pre(_user_block(ex))
+    rule = '<div style="border-top:1px solid %s"></div>' % LINE
+    model = _label("Model output", status) + _pre(_output_block(ex))
+    foot = (
+        '<p style="margin:0;border-top:1px solid %s;padding:12px 16px;'
+        'font-size:1rem;line-height:1.6;color:#6B7078">%s</p>'
+        % (LINE, ex["caption"])
+    )
+    # min-width:0 is load-bearing. A grid item defaults to min-width:auto, so
+    # the widest <pre> line pushes the panel wider than the card that holds it
+    # instead of scrolling inside its own box - measured at 61px of overhang,
+    # which put the status line outside the card's right edge.
+    return ('<div style="grid-area:1/1;min-width:0;opacity:%d;animation:%s 14s '
+            'linear infinite">%s%s%s%s%s</div>'
+            % (opacity, anim, head, user, rule, model, foot))
 
 
 # Step 03 in "How it works" quotes this same call. It carried 48ms - the figure
 # this card started with, and no more measured there than it was here.
-STEP_FROM = "result: '200 OK \u00b7 48ms'"
-STEP_TO = "result: '200 OK \u00b7 under a second'"
+STEP_FROM = "result: '200 OK · 48ms'"
+STEP_TO = "result: '200 OK · under a second'"
 
 
 def apply(out):
@@ -126,19 +160,10 @@ def apply(out):
         if i == -1 or END not in s:
             continue
         j = s.index(END) + len(END)
-
-        block = (
-            '<div style="display:grid">'
-            + _panel("api-a", 1, "GET", "/v1/&hellip;/users/{id}/context", "under a second",
-                     _lookup_json(),
-                     "One call, before your prompt. No fine-tuning, no vector "
-                     "store to run.")
-            + _panel("api-b", 0, "POST", "/v1/&hellip;/chat/completions", "under a second",
-                     _answer_json(),
-                     "The call your app already makes, answered with what it "
-                     "knows. Under a second, end to end.")
-            + '</div>'
-        )
+        block = ('<div style="display:grid;min-width:0">'
+                 + _panel("api-a", 1, EXAMPLES[0])
+                 + _panel("api-b", 0, EXAMPLES[1])
+                 + '</div>')
         s = s[:i] + block + s[j:]
         s = s.replace(STEP_FROM, STEP_TO)
         if "@keyframes api-a" not in s:
@@ -147,4 +172,4 @@ def apply(out):
         n += 1
     print("  api demo rebuilt on %d pages" % n)
     if n == 0:
-        print("  api demo card not found - still the old single panel - CHECK")
+        print("  api demo card not found - still the old panel - CHECK")
