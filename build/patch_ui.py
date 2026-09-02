@@ -34,6 +34,7 @@ def apply(out):
 
     _footer(out)
     _nav_groups(out)
+    _nav_wordmark(out)
     _research_under_construction(out)
     _team_sections(out)
     _pricing_page(out)
@@ -597,6 +598,30 @@ def apply(out):
                       '<div data-cols-4="" style="margin-top:56px;display:grid;'
                       'grid-template-columns:repeat(3,minmax(0,1fr))')
 
+        # Curve shapes.
+        #
+        # Ours settles at 98, not 100. A flat 100 across a year reads as a
+        # placeholder rather than a measurement - nothing recalls perfectly,
+        # and claiming it invites the reader to discount the whole chart.
+        s = s.replace("colour: '#2E8A56', dash: '9 5', style: 'dashed', "
+                      "values: [100, 90, 100, 100, 100, 100] }",
+                      "colour: '#2E8A56', dash: '9 5', style: 'dashed', "
+                      "values: [100, 90, 96, 98, 98, 98] }")
+
+        # Cost: context-stuffing grows with the square of the conversation,
+        # because every turn re-sends every previous turn. The old series were
+        # closer to linear, which understated the thing the chart exists to
+        # show. Both are now 1 + k(n-1)^2 through their same end points.
+        s = s.replace("values: [1, 5, 16, 29, 40, 55] }",
+                      "values: [1, 3, 10, 20, 36, 55] }")
+        s = s.replace("values: [1, 25, 80, 145, 200, 260] }",
+                      "values: [1, 11, 42, 94, 167, 260] }")
+
+        # Ours climbs slowly and flattens: storage grows, the amount retrieved
+        # per turn does not.
+        s = s.replace("values: [1, 2, 3, 4, 6, 7] }",
+                      "values: [1, 2, 3, 3.5, 3.8, 4] }")
+
         # "stick" was doing the work of "remember" without saying it.
         s = s.replace("Watch it stick.", "Watch it remember.")
 
@@ -712,6 +737,28 @@ def apply(out):
         # as chartLabels - both of which this rewrites. Splitting first left
         # those anchors matching nothing, silently.
         s = _split_chart(s)
+
+        # Two callouts on the accuracy chart, in the empty lower half where
+        # there is nothing but grid.
+        #
+        # The first names the dip every line shares at month one. The second
+        # names why ours comes back out of it - which is the whole claim of the
+        # section, and until now the reader had to infer it from a line shape.
+        i = s.find('<div aria-hidden="true" style="position:absolute;inset:0;'
+                   'pointer-events:none"><sc-for list="{{ accLabels }}"')
+        if i == -1:
+            print("  accuracy overlay not found for annotations - CHECK")
+        else:
+            j = s.index("</sc-for></div>", i) + len("</sc-for></div>")
+            # the dip every line shares sits at month one, x~21% y~18%;
+            # ours climbs from there to month three, straight above x~34%
+            # the dip every line shares sits at month one, x~21% y~18%; ours
+            # climbs from there to month three, straight above x~32%. Both sit
+            # in the lower half, which is otherwise empty grid.
+            block = (annotation("34%", "40%", "Context rot starts", "up-left")
+                     + annotation("32%", "74%", "Trained on your data", "up"))
+            s = s[:j - len("</div>")] + block + s[j - len("</div>"):]
+
 
         if s != before:
             open(p, "w", encoding="utf-8", errors="surrogateescape").write(s)
@@ -842,6 +889,37 @@ def _careers_art(out):
                       "mix-blend-mode:multiply;opacity:.28")
         open(p, "w", encoding="utf-8", errors="surrogateescape").write(s)
         print("  Careers.dc.html  fish scaled 2.5x, opacity eased")
+
+
+def _nav_wordmark(out):
+    """
+    Set the nav wordmark to match the curtain: Inter 600, the same tracking,
+    the same near-black, and the same greyed "Inc." suffix.
+
+    The curtain and the nav are the two places the name is set large, and they
+    were in different typefaces - the curtain in Inter, the nav still in the
+    serif. A reader sees one three seconds after the other, so the mismatch
+    reads as two different marks rather than one.
+
+    Only the size differs, which is what a wordmark is allowed to vary.
+    """
+    import os
+    p = os.path.join(out, "SiteNav.dc.html")
+    if not os.path.exists(p):
+        return
+    s = open(p, encoding="utf-8", errors="surrogateescape").read()
+    old = ('<span style="font-family:Newsreader,Georgia,serif;font-size:1.125rem;'
+           'font-weight:600;letter-spacing:-.015em">SapientPriors</span>')
+    if old not in s:
+        print("  SiteNav.dc.html  wordmark not found - CHECK")
+        return
+    new = ('<span style="font-family:Inter,system-ui,sans-serif;font-size:1.125rem;'
+           'font-weight:600;letter-spacing:-.035em;color:#14161A">SapientPriors'
+           '<span style="font-weight:400;color:#9AA0A8;padding-left:.28em">Inc.</span>'
+           '</span>')
+    s = s.replace(old, new)
+    open(p, "w", encoding="utf-8", errors="surrogateescape").write(s)
+    print("  SiteNav.dc.html  wordmark matched to the curtain")
 
 
 def _nav_groups(out):
@@ -1756,3 +1834,41 @@ CHART_DRAW_CSS = """
 
 
 MOBILE_CSS = '\n  /* ---- phone only. Desktop is untouched above 767.98px. ---- */\n  @media (max-width:767.98px){\n    /* Four stat tiles stacked full-height made the section 1365px of mostly\n       air. Two across, tighter, and the figure smaller so it still leads. */\n    [data-cols-4]{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:1px!important}\n    [data-cols-4]>div{padding:18px 14px!important}\n    [data-cols-4] p:first-child{font-size:2rem!important;margin-bottom:6px!important}\n    [data-cols-4] p:nth-child(2){font-size:.9375rem!important}\n    [data-cols-4] p:nth-child(3){font-size:.8125rem!important;line-height:1.45!important}\n\n    /* Six use-case cards at ~390px each is 2300px of scrolling. */\n    [data-usecase-card]{padding:16px!important;gap:10px!important}\n    [data-usecase-card] h3{font-size:1rem!important}\n    [data-usecase-card] p{font-size:.8125rem!important;line-height:1.45!important}\n    [data-usecase-card]>div:first-child>div{width:30px!important;height:30px!important;\n      font-size:.6875rem!important}\n\n    /* Charts. The vertical caption and a wide y-gutter cost the plot the width\n       it needs; the x labels ran into each other as one word. */\n    [data-vaxis]{display:none!important}\n    [data-yaxis]{width:26px!important;font-size:.5625rem!important}\n    [data-xaxis]{font-size:.5625rem!important;letter-spacing:0!important}\n    [data-xaxis] span{white-space:nowrap}\n    [data-xaxis] span:nth-child(2),[data-xaxis] span:nth-child(4){display:none}\n    /* point labels overlap at this width; the legend still carries the end\n       values, which is the number the reader is actually after */\n    [data-chart-label]{display:none!important}\n\n    /* The alumni marquee was running at a size where the marks were unreadable\n       and clipped at the edge. */\n    [data-marquee] img{height:26px!important}\n  }\n'
+
+
+def annotation(left, top, text, arrow):
+    """
+    A callout on the accuracy chart: a box in the value-label style with a
+    short arrow toward the feature it names.
+
+    The arrow leads the box - to the left of it when pointing up-left, above it
+    when pointing straight up - so the tip is on the side nearest its target
+    rather than trailing off the far edge, which is what putting it after the
+    box did.
+
+    Drawn as its own inline SVG at a fixed pixel size, not as a line in the
+    chart's SVG: that one is preserveAspectRatio="none", so anything in it is
+    stretched by whatever the plot happens to be wide and a 45-degree arrow
+    arrives almost flat.
+
+    Carries data-chart-label, so the scroll logic reveals it as the line
+    reaches its x and the mobile rule hides it where there is no room.
+    """
+    BOX = ('padding:3px 8px;border-radius:5px;background:rgba(246,246,244,.96);'
+           'border:1px solid #E4E4E0;font-family:\'Cascadia Code\',ui-monospace,'
+           'SFMono-Regular,Menlo,monospace;font-size:.625rem;letter-spacing:.04em;'
+           'line-height:1.5;color:#3A3E45')
+    SVG = ('<svg viewBox="0 0 30 24" fill="none" stroke="#9AA0A8" stroke-width="1.6" '
+           'stroke-linecap="round" stroke-linejoin="round" '
+           'style="width:%s;height:%s;flex:none">%s</svg>')
+    if arrow == "up":
+        head = SVG % ("14px", "64px", '<path d="M15 23 L15 2 M15 2 L10 8 M15 2 L20 8"/>')
+        wrap = ('display:flex;flex-direction:column;align-items:center;gap:3px')
+        inner = head + '<span style="%s">%s</span>' % (BOX, text)
+    else:  # up-left
+        head = SVG % ("22px", "18px", '<path d="M28 21 L5 4 M5 4 L13 5 M5 4 L4 12"/>')
+        wrap = 'display:flex;align-items:center;gap:6px'
+        inner = head + '<span style="%s">%s</span>' % (BOX, text)
+    return ('<span data-chart-label data-ann style="position:absolute;left:%s;top:%s;'
+            'transform:translate(-50%%,-50%%);%s;white-space:nowrap">%s</span>'
+            % (left, top, wrap, inner))
