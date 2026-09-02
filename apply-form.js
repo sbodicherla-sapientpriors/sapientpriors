@@ -30,26 +30,30 @@
     "Machine Learning Engineer",
     "Machine Learning Engineer Intern",
     "Founders Office",
-    "Software Engineer"
+    "Software Engineer, Distributed Systems"
   ];
 
   var COUNTRY_OPTIONS = "<option>Afghanistan</option><option>Albania</option><option>Algeria</option><option>Andorra</option><option>Angola</option><option>Antigua and Barbuda</option><option>Argentina</option><option>Armenia</option><option>Australia</option><option>Austria</option><option>Azerbaijan</option><option>Bahamas</option><option>Bahrain</option><option>Bangladesh</option><option>Barbados</option><option>Belarus</option><option>Belgium</option><option>Belize</option><option>Benin</option><option>Bhutan</option><option>Bolivia</option><option>Bosnia and Herzegovina</option><option>Botswana</option><option>Brazil</option><option>Brunei</option><option>Bulgaria</option><option>Burkina Faso</option><option>Burundi</option><option>Cabo Verde</option><option>Cambodia</option><option>Cameroon</option><option>Canada</option><option>Central African Republic</option><option>Chad</option><option>Chile</option><option>China</option><option>Colombia</option><option>Comoros</option><option>Congo</option><option>Congo (DRC)</option><option>Costa Rica</option><option>C\u00f4te d'Ivoire</option><option>Croatia</option><option>Cuba</option><option>Cyprus</option><option>Czechia</option><option>Denmark</option><option>Djibouti</option><option>Dominica</option><option>Dominican Republic</option><option>Ecuador</option><option>Egypt</option><option>El Salvador</option><option>Equatorial Guinea</option><option>Eritrea</option><option>Estonia</option><option>Eswatini</option><option>Ethiopia</option><option>Fiji</option><option>Finland</option><option>France</option><option>Gabon</option><option>Gambia</option><option>Georgia</option><option>Germany</option><option>Ghana</option><option>Greece</option><option>Grenada</option><option>Guatemala</option><option>Guinea</option><option>Guinea-Bissau</option><option>Guyana</option><option>Haiti</option><option>Honduras</option><option>Hong Kong</option><option>Hungary</option><option>Iceland</option><option>India</option><option>Indonesia</option><option>Iran</option><option>Iraq</option><option>Ireland</option><option>Israel</option><option>Italy</option><option>Jamaica</option><option>Japan</option><option>Jordan</option><option>Kazakhstan</option><option>Kenya</option><option>Kiribati</option><option>Kuwait</option><option>Kyrgyzstan</option><option>Laos</option><option>Latvia</option><option>Lebanon</option><option>Lesotho</option><option>Liberia</option><option>Libya</option><option>Liechtenstein</option><option>Lithuania</option><option>Luxembourg</option><option>Macao</option><option>Madagascar</option><option>Malawi</option><option>Malaysia</option><option>Maldives</option><option>Mali</option><option>Malta</option><option>Marshall Islands</option><option>Mauritania</option><option>Mauritius</option><option>Mexico</option><option>Micronesia</option><option>Moldova</option><option>Monaco</option><option>Mongolia</option><option>Montenegro</option><option>Morocco</option><option>Mozambique</option><option>Myanmar</option><option>Namibia</option><option>Nauru</option><option>Nepal</option><option>Netherlands</option><option>New Zealand</option><option>Nicaragua</option><option>Niger</option><option>Nigeria</option><option>North Korea</option><option>North Macedonia</option><option>Norway</option><option>Oman</option><option>Pakistan</option><option>Palau</option><option>Palestine</option><option>Panama</option><option>Papua New Guinea</option><option>Paraguay</option><option>Peru</option><option>Philippines</option><option>Poland</option><option>Portugal</option><option>Qatar</option><option>Romania</option><option>Russia</option><option>Rwanda</option><option>Saint Kitts and Nevis</option><option>Saint Lucia</option><option>Saint Vincent and the Grenadines</option><option>Samoa</option><option>San Marino</option><option>Sao Tome and Principe</option><option>Saudi Arabia</option><option>Senegal</option><option>Serbia</option><option>Seychelles</option><option>Sierra Leone</option><option>Singapore</option><option>Slovakia</option><option>Slovenia</option><option>Solomon Islands</option><option>Somalia</option><option>South Africa</option><option>South Korea</option><option>South Sudan</option><option>Spain</option><option>Sri Lanka</option><option>Sudan</option><option>Suriname</option><option>Sweden</option><option>Switzerland</option><option>Syria</option><option>Taiwan</option><option>Tajikistan</option><option>Tanzania</option><option>Thailand</option><option>Timor-Leste</option><option>Togo</option><option>Tonga</option><option>Trinidad and Tobago</option><option>Tunisia</option><option>T\u00fcrkiye</option><option>Turkmenistan</option><option>Tuvalu</option><option>Uganda</option><option>Ukraine</option><option>United Arab Emirates</option><option>United Kingdom</option><option>United States</option><option>Uruguay</option><option>Uzbekistan</option><option>Vanuatu</option><option>Vatican City</option><option>Venezuela</option><option>Vietnam</option><option>Yemen</option><option>Zambia</option><option>Zimbabwe</option>";
 
   /* name, label, type, required */
-  var FIELDS = [
+  var BASE = [
     ["name", "Full name *", "text", true],
     ["email", "Email *", "email", true],
     ["phone", "Phone number *", "tel", true],
     ["country", "Country *", "country", true],
     ["role", "Role you are applying for *", "role", true],
     ["school", "College or university *", "text", true],
-    ["resumeLink", "Link to your resume *", "url", true],
-    ["q1", "What ML topic or paper are you most excited about right now? Why? *", "textarea", true],
-    ["q2", "Describe an ML project you have worked on. What did you learn? *", "textarea", true],
-    ["q3", "Give an example of your deepest ML work. *", "textarea", true],
-    ["q4", "Any interesting ideas you have about current model architectures? *", "textarea", true],
-    ["message", "Anything else you want us to know", "textarea", false]
+    ["resumeLink", "Link to your resume *", "url", true]
   ];
+
+  function fieldsFor(role) {
+    var qs = questionsFor(role);
+    return BASE
+      .concat(qs.map(function (q, i) {
+        return ["q" + (i + 1), q + " *", "textarea", true];
+      }))
+      .concat([["message", "Anything else you want us to know", "textarea", false]]);
+  }
 
   var PLACEHOLDER = {
     name: "Jordan Rivera",
@@ -57,8 +61,50 @@
     phone: "+91 91008 62186",
     school: "Your college or university",
     resumeLink: "https://drive.google.com/file/d/.../view",
-    message: "A system you shipped that learned something. One paragraph is plenty."
+    message: "Anything else you want us to know.",
+    q1: "A paper, a problem, or a direction \u2014 and why it holds your attention.",
+    q2: "What you built, what broke, and what you would do differently.",
+    q3: "The piece of work you would want us to read first.",
+    q4: "What you think is wrong, missing, or worth trying."
   };
+
+
+  /*
+    Questions per role, lifted from the job descriptions rather than invented.
+    The ML Researcher and its intern share a set; the Training & Inference
+    Systems role asks its own three; engineering roles get engineering
+    questions, because asking a distributed systems candidate for their
+    "deepest ML work" is asking the wrong person the wrong thing.
+
+    The CRM has four generic answer slots. Each answer is stored with its
+    question attached, so a record is readable without knowing which set the
+    applicant saw.
+  */
+  var RESEARCH = [
+    "What ML topic or paper are you most excited about right now? Why?",
+    "Describe an ML project you have worked on. What did you learn?",
+    "Give an example of your deepest ML work.",
+    "Any interesting ideas you have about current model architectures?"
+  ];
+  var QUESTIONS = {
+    "Machine Learning Engineer": [
+      "Describe the most impactful efficiency or latency improvement you have made to a model or system. What was the constraint, what did you change, and what was the measurable outcome?",
+      "What is your favourite paper on efficiency or latency for training or inference? What made it stand out?",
+      "Pick one part of a modern architecture where you think there is still real headroom for efficiency or latency. What is your thesis, and what would you try?"
+    ],
+    "Machine Learning Engineer Intern": RESEARCH,
+    "Software Engineer, Distributed Systems": [
+      "Describe a system you have run in production. What broke, and what did you change afterwards?",
+      "Tell us about a time you found where the latency actually was, rather than where it seemed to be. How did you find it?",
+      "What is a piece of infrastructure you have built that another team depended on? What did you get wrong first?"
+    ],
+    "Founders Office": [
+      "What would you want to own here, and why you?",
+      "Describe something you started that did not exist before. What happened to it?",
+      "What do you think is the hardest thing about selling a research product to engineers?"
+    ]
+  };
+  function questionsFor(role) { return QUESTIONS[role] || RESEARCH; }
 
   var state = { values: {}, invalid: [], status: "idle" };
 
@@ -79,7 +125,9 @@
     var n;
     if (type === "textarea") {
       n = el("textarea", inputStyle(bad) + ";resize:vertical");
-      n.rows = 4;
+      // three lines, not four: closer to the single-line fields above them,
+      // and it still scrolls, so nothing is capped
+      n.rows = key.charAt(0) === "q" ? 3 : 3;
     } else if (type === "country" || type === "role") {
       n = el("select", inputStyle(bad) + ";cursor:pointer");
       n.innerHTML = type === "country"
@@ -93,7 +141,11 @@
     n.id = "ap-" + key;
     if (PLACEHOLDER[key]) n.placeholder = PLACEHOLDER[key];
     n.value = state.values[key] || "";
-    n.addEventListener("change", function (e) { set(key, e.target.value); });
+    n.addEventListener("change", function (e) {
+      set(key, e.target.value);
+      // the questions below depend on the role, so picking one redraws the form
+      if (key === "role") render(document.querySelector("[data-apply-form]"));
+    });
     n.addEventListener("input", function (e) { set(key, e.target.value); });
     return n;
   }
@@ -114,7 +166,7 @@
 
   function validate() {
     var bad = [];
-    FIELDS.forEach(function (f) {
+    fieldsFor(state.values.role).forEach(function (f) {
       if (f[3] && !String(state.values[f[0]] || "").trim()) bad.push(f[0]);
     });
     var email = String(state.values.email || "").trim();
@@ -154,20 +206,19 @@
     if (state.status === "sent") return panel(mount);
     mount.innerHTML = "";
 
-    var head = el("div", "margin-bottom:26px");
-    head.appendChild(el("p", "margin:0 0 10px;font-family:" + MONO +
-      ";font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:" + INK3,
+    var head = el("div", "margin-bottom:22px");
+    head.appendChild(el("p", "margin:0;display:inline-block;padding:6px 14px;" +
+      "border-radius:8px;background:" + BROWN + ";color:#F9F9F7;font-family:" + MONO +
+      ";font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase",
       "Apply"));
-    head.appendChild(el("p", "margin:0;max-width:44rem;font-size:1.0625rem;line-height:1.6;color:" + INK2,
-      "One paragraph is plenty. No cover letter."));
-
+    
     var form = el("form", "border-radius:10px;border:1px solid " + LINE + ";background:" + WHITE +
       ";padding:clamp(1.75rem,2.4vw,2.25rem);box-shadow:0 1px 3px 0 rgba(20,22,26,.06)");
 
     var grid = el("div", "display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px");
     grid.setAttribute("data-apply-grid", "");
 
-    FIELDS.forEach(function (f) {
+    fieldsFor(state.values.role).forEach(function (f) {
       var key = f[0], wide = key === "message" || key === "resumeLink"
         || key.charAt(0) === "q";
       var cell = el("div", "display:flex;flex-direction:column;gap:8px" +
@@ -219,6 +270,12 @@
       render(mount);
       var body = Object.assign({}, state.values);
       body.website = pot.value;
+      // store each answer with the question it answered - the CRM has four
+      // generic slots and the set differs by role
+      questionsFor(state.values.role).forEach(function (q, i) {
+        var k = "q" + (i + 1);
+        if (body[k]) body[k] = q + "\n\n" + body[k];
+      });
       fetch("/api/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

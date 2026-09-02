@@ -20,8 +20,13 @@
  * form-submission API, meant to be called from a browser.
  */
 
+/*
+  q1-q3 are required because every question set has at least three; q4 only
+  exists for the research roles, so it is optional here and enforced in the
+  form, which knows which set was shown.
+*/
 const REQUIRED = ["name", "email", "phone", "country", "role", "school",
-                  "resumeLink", "q1", "q2", "q3", "q4"];
+                  "resumeLink", "q1", "q2", "q3"];
 const MAX = 4000;
 
 /*
@@ -35,7 +40,7 @@ const ROLES = {
   "Machine Learning Engineer": "ml_engineer",
   "Machine Learning Engineer Intern": "ml_engineer_intern",
   "Founders Office": "founders_office",
-  "Software Engineer": "software_engineer"
+  "Software Engineer, Distributed Systems": "software_engineer"
 };
 
 const clean = v => (typeof v === "string" ? v.trim().slice(0, MAX) : "");
@@ -47,6 +52,7 @@ function validate(body) {
     if (!out[k]) missing.push(k);
   }
   out.message = clean(body.message);
+  out.q4 = clean(body.q4);
 
   if (out.email && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(out.email)) missing.push("email");
   if (out.role && !ROLES[out.role]) missing.push("role");

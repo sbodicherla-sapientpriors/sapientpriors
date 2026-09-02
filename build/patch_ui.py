@@ -798,8 +798,10 @@ def apply(out):
             # the dip every line shares sits at month one, x~21% y~18%; ours
             # climbs from there to month three, straight above x~32%. Both sit
             # in the lower half, which is otherwise empty grid.
-            block = (annotation("37%", "45%", "Context rot starts")
-                     + annotation("41%", "74%", "Trained on your data"))
+            block = (annotation("18%", "43%", "Context rot starts",
+                                 "the window fills, the earliest turns fall out")
+                     + annotation("40%", "70%", "Trained on your data",
+                                 "it recovers, and keeps recovering"))
             s = s[:j - len("</div>")] + block + s[j - len("</div>"):]
 
 
@@ -1305,7 +1307,16 @@ def _careers_hero_and_scroll(out):
 
     # the detail panel gets an id, and select scrolls to it after the state
     # change has actually rendered it
-    s = s.replace('<div data-detail-grid', '<div id="role-detail" data-detail-grid', 1)
+    # The anchor goes on the section that holds the detail, not on the grid
+    # inside it - the grid starts below the role's title block, so scrolling to
+    # it put the heading off-screen and the next thing in view was the form.
+    i = s.find('<div data-detail-grid')
+    if i == -1:
+        print("  Careers.dc.html  detail grid not found - CHECK")
+    else:
+        k = s.rfind("<sc-if", 0, i)
+        anchor_at = k if k != -1 else i
+        s = s[:anchor_at] + '<div id="role-detail" style="scroll-margin-top:96px"></div>' + s[anchor_at:]
     old = "select: () => this.setState({ active: j.id })"
     if old not in s:
         print("  Careers.dc.html  role select handler not found - CHECK")
@@ -1950,37 +1961,42 @@ CHART_DRAW_CSS = """
 MOBILE_CSS = '\n  /* ---- phone only. Desktop is untouched above 767.98px. ---- */\n  @media (max-width:767.98px){\n    /* Four stat tiles stacked full-height made the section 1365px of mostly\n       air. Two across, tighter, and the figure smaller so it still leads. */\n    [data-cols-4]{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:1px!important}\n    [data-cols-4]>div{padding:18px 14px!important}\n    [data-cols-4] p:first-child{font-size:2rem!important;margin-bottom:6px!important}\n    [data-cols-4] p:nth-child(2){font-size:.9375rem!important}\n    [data-cols-4] p:nth-child(3){font-size:.8125rem!important;line-height:1.45!important}\n\n    /* Six use-case cards at ~390px each is 2300px of scrolling. */\n    [data-usecase-card]{padding:16px!important;gap:10px!important}\n    [data-usecase-card] h3{font-size:1rem!important}\n    [data-usecase-card] p{font-size:.8125rem!important;line-height:1.45!important}\n    [data-usecase-card]>div:first-child>div{width:30px!important;height:30px!important;\n      font-size:.6875rem!important}\n\n    /* Charts. The vertical caption and a wide y-gutter cost the plot the width\n       it needs; the x labels ran into each other as one word. */\n    [data-vaxis]{display:none!important}\n    [data-yaxis]{width:26px!important;font-size:.5625rem!important}\n    [data-xaxis]{font-size:.5625rem!important;letter-spacing:0!important}\n    [data-xaxis] span{white-space:nowrap}\n    [data-xaxis] span:nth-child(2),[data-xaxis] span:nth-child(4){display:none}\n    /* point labels overlap at this width; the legend still carries the end\n       values, which is the number the reader is actually after */\n    [data-chart-label]{display:none!important}\n\n    /* The alumni marquee was running at a size where the marks were unreadable\n       and clipped at the edge. */\n    [data-marquee] img{height:26px!important}\n  }\n'
 
 
-def annotation(left, top, text):
+def annotation(left, top, text, sub=None):
     """
-    A callout box on the accuracy chart. The line connecting it to its point is
-    drawn separately, in the chart's own coordinates - see LEADERS.
-
-    A short arrow beside the box was not enough: the box sits in the empty
-    lower half and its subject is near the top, so a 22px arrow pointed at
-    nothing in particular and read as a stray mark. A leader has to reach.
+    A callout box on the accuracy chart, optionally with a smaller line of
+    explanation under the label. The connector is drawn separately - see
+    LEADERS - in the chart's own coordinates, because it has to reach a point
+    near the top from a box sitting in the empty lower half.
     """
+    body = '<span style="display:block">%s</span>' % text
+    if sub:
+        body += ('<span style="display:block;margin-top:3px;font-size:.5625rem;'
+                 'letter-spacing:.02em;line-height:1.4;color:#7A7F87">%s</span>' % sub)
     return (
         '<span data-chart-label data-ann style="position:absolute;left:%s;top:%s;'
-        'transform:translate(-50%%,-50%%);padding:3px 8px;border-radius:5px;'
-        'background:rgba(246,246,244,.96);border:1px solid #E4E4E0;'
+        'transform:translate(-50%%,-50%%);padding:5px 9px;border-radius:6px;'
+        'background:rgba(246,246,244,.97);border:1px solid #CFCFC9;'
         'font-family:\'Cascadia Code\',ui-monospace,SFMono-Regular,Menlo,monospace;'
-        'font-size:.625rem;letter-spacing:.04em;line-height:1.5;color:#3A3E45;'
-        'white-space:nowrap">%s</span>' % (left, top, text)
+        'font-size:.625rem;letter-spacing:.04em;line-height:1.45;color:#3A3E45;'
+        'white-space:nowrap;text-align:left">%s</span>' % (left, top, body)
     )
 
 
 # Leader lines, in the accuracy chart's own 800x260 viewBox.
 #   y = 16 + ((100 - v) / 75) * 234 ;  x = 10 + (i / 5) * 780
 #   month 1 is x=166, month 3 is x=322; v=90 is y=47, v=96 is y=28
-# Inside the clipped group, so they wipe in with the lines. Non-scaling stroke,
-# so the horizontal stretch of preserveAspectRatio="none" cannot thicken them.
+#
+# Solid and 1.8px, not a dotted hairline: at this size a 1px dashed line in
+# light grey is invisible against the gridlines, so the reader cannot tell what
+# the box is pointing at - which was the whole job of the line. The second one
+# takes the green of the series it names.
 LEADERS = (
-    '<line x1="296" y1="116" x2="176" y2="58" stroke="#A9AEB6" stroke-width="1" '
-    'stroke-dasharray="3 3" vector-effect="non-scaling-stroke"></line>'
-    '<circle cx="170" cy="54" r="3" fill="#A9AEB6"></circle>'
-    '<line x1="330" y1="192" x2="324" y2="40" stroke="#A9AEB6" stroke-width="1" '
-    'stroke-dasharray="3 3" vector-effect="non-scaling-stroke"></line>'
-    '<circle cx="322" cy="31" r="3" fill="#2E8A56"></circle>'
+    '<line x1="152" y1="112" x2="170" y2="60" stroke="#6B7078" stroke-width="1.8" '
+    'vector-effect="non-scaling-stroke"></line>'
+    '<circle cx="170" cy="54" r="3.5" fill="#6B7078"></circle>'
+    '<line x1="322" y1="182" x2="322" y2="42" stroke="#2E8A56" stroke-width="1.8" '
+    'vector-effect="non-scaling-stroke"></line>'
+    '<circle cx="322" cy="31" r="3.5" fill="#2E8A56"></circle>'
 )
 
 
