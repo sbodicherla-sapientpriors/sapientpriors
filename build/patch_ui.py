@@ -541,16 +541,30 @@ def apply(out):
         # initials mean nothing to a reader. Placed inline rather than beneath,
         # because every item in the marquee is a fixed 36px row and stacking
         # would push that row taller than all the others.
-        # A sibling of the logo branch, not nested inside it. The runtime does
-        # not render an sc-if placed within another sc-if - the inner one
-        # produced nothing at all, silently.
+        # The name sits under its own mark, inside the same track.
+        #
+        # A second marquee below would have to stay in step with the first, and
+        # two independent CSS animations drift - they start at different times
+        # and there is nothing holding them together. One track cannot drift
+        # from itself, and the name stays under TIFR rather than under whatever
+        # happens to be passing.
+        #
+        # The item becomes a column, so the row grows from 36px to 54px. Only
+        # entries with a caption show anything in the lower half.
+        s = s.replace(
+            '<div style="margin-right:64px;display:flex;height:36px;'
+            'flex-shrink:0;align-items:center">',
+            '<div style="margin-right:64px;display:flex;height:54px;'
+            'flex-shrink:0;flex-direction:column;align-items:center;'
+            'justify-content:center;gap:5px">')
         s = s.replace(
             "mask-position:center\"></span>\n              </sc-if>",
             "mask-position:center\"></span>\n              </sc-if>\n"
             "              <sc-if value=\"{{ a.hasCaption }}\" hint-placeholder-val=\"{{ false }}\">"
-            "<span style=\"margin-left:12px;white-space:nowrap;font-family:'Cascadia Code',"
-            "ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6875rem;"
-            "letter-spacing:.04em;color:#8A8F97\">{{ a.caption }}</span></sc-if>")
+            "<span style=\""
+            "white-space:nowrap;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,"
+            "Menlo,monospace;font-size:.5625rem;letter-spacing:.06em;text-transform:uppercase;"
+            "color:#7A7F87\">{{ a.caption }}</span></sc-if>")
 
         # Anchored on the field list alone: "return {" sits on its own line in
         # the export, so a one-line search string matched nothing.

@@ -378,11 +378,11 @@
       <div style="position:relative;margin-top:28px;overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent);mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent)">
         <div data-marquee="" style="display:flex;width:max-content;align-items:center;animation:marquee-scroll 38s linear infinite" style-hover="animation-play-state:paused">
           <sc-for list="{{ alumniTrack }}" as="a" hint-placeholder-count="32">
-            <div style="margin-right:64px;display:flex;height:36px;flex-shrink:0;align-items:center">
+            <div style="margin-right:64px;display:flex;height:54px;flex-shrink:0;flex-direction:column;align-items:center;justify-content:center;gap:5px">
               <sc-if value="{{ a.isLogo }}" hint-placeholder-val="{{ false }}">
                 <span role="img" style="display:block;flex-shrink:0;background:#D2D2CD;height:{{ a.h }};width:{{ a.w }};-webkit-mask-image:{{ a.mask }};mask-image:{{ a.mask }};-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-position:center;mask-position:center"></span>
               </sc-if>
-              <sc-if value="{{ a.hasCaption }}" hint-placeholder-val="{{ false }}"><span style="margin-left:12px;white-space:nowrap;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6875rem;letter-spacing:.04em;color:#8A8F97">{{ a.caption }}</span></sc-if>
+              <sc-if value="{{ a.hasCaption }}" hint-placeholder-val="{{ false }}"><span style="white-space:nowrap;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.5625rem;letter-spacing:.06em;text-transform:uppercase;color:#7A7F87">{{ a.caption }}</span></sc-if>
               <sc-if value="{{ a.isWord }}" hint-placeholder-val="{{ true }}">
                 <span style="white-space:nowrap;font-family:Newsreader,Georgia,serif;font-size:1.3rem;line-height:1;letter-spacing:-.015em;color:#D2D2CD">{{ a.name }}</span>
               </sc-if>
