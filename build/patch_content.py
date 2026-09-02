@@ -131,6 +131,13 @@ def apply(out):
                       "{ name: 'Indian Institute of Science', logo: 'logos/iisc.webp', "
                       "aspect: 0.92, scale: 1.30, "
                       "caption: 'Indian Institute of Science' }")
+        # ISRO sat noticeably smaller than its neighbours. The strip sizes by
+        # equal optical area, which is right for a wordmark but under-serves a
+        # dense circular emblem: the same area spread over a disc reads smaller
+        # than it does across a horizontal logotype.
+        s = s.replace("{ name: 'ISRO', logo: 'logos/isro.svg', aspect: 1, scale: 1.12 }",
+                      "{ name: 'ISRO', logo: 'logos/isro.svg', aspect: 1, scale: 1.5 }")
+
         # Marks that do not say their own name.
         #
         # Dropbox is a box and Twitter is a bird: nothing in either drawing

@@ -273,6 +273,72 @@
     }
   }
 
+  /* ------------------------------------------------------- in-page anchors */
+
+  /* The nav CTA points at "SapientPriors.dc.html#access". The runtime builds
+     that href from the page's own name, and on the home page it does so after
+     hydration, so it is not something the build can rewrite there.
+
+     Followed literally it is a navigation to a different document: the page
+     reloads, the curtain plays again, and because #access does not exist until
+     React has rendered, the browser's own fragment jump finds nothing and
+     leaves you at the top. Which is what it looked like from outside - a button
+     that reloads the page and goes nowhere.
+
+     So a link whose fragment names something already on this page is treated as
+     an in-page jump whatever its path claims. A link to a section that really
+     is on another page still navigates. */
+
+  function navOffset() {
+    var best = 0;
+    [].forEach.call(document.querySelectorAll("div,header,nav"), function (el) {
+      var cs = getComputedStyle(el);
+      if (cs.position !== "fixed" || cs.visibility === "hidden") return;
+      var r = el.getBoundingClientRect();
+      if (r.top <= 1 && r.height > 24 && r.height < 140 && r.width > window.innerWidth * 0.6)
+        best = Math.max(best, r.height);
+    });
+    return best ? best + 12 : 84;
+  }
+
+  function fragmentTarget(href) {
+    var h = (href || "").indexOf("#");
+    if (h === -1) return null;
+    var id = href.slice(h + 1);
+    if (!id) return null;
+    try { return document.getElementById(decodeURIComponent(id)); } catch (e) { return null; }
+  }
+
+  function goTo(el) {
+    var y = el.getBoundingClientRect().top + window.scrollY - navOffset();
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+  }
+
+  document.addEventListener("click", function (e) {
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target && e.target.closest && e.target.closest("a[href]");
+    if (!a || a.target === "_blank") return;
+    var el = fragmentTarget(a.getAttribute("href"));
+    if (!el) return;                       /* really is on another page */
+    e.preventDefault();
+    goTo(el);
+    var id = a.getAttribute("href").split("#")[1];
+    if (window.history && history.replaceState) {
+      try { history.replaceState(null, "", "#" + id); } catch (err) {}
+    }
+  }, true);
+
+  /* Arriving with a fragment already in the URL - which is what the redirect
+     from the old duplicate home page produces - the element does not exist yet
+     at load, so the browser's jump has already failed by the time it does. */
+  function honourHash() {
+    if (!location.hash || location.hash.length < 2) return;
+    var el = null;
+    try { el = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (e) {}
+    if (el && window.scrollY < 40) goTo(el);
+  }
+
   /* --------------------------------------------------------- smooth scroll */
 
   /* The reference lerps the page rather than letting it land where the wheel
@@ -368,6 +434,8 @@
   else boot();
   /* The curtain holds the page for ~3s; re-arm after it lifts. */
   setTimeout(boot, 3600);
+  setTimeout(honourHash, 3800);
+  window.addEventListener("hashchange", honourHash);
 
   window.__spMotion = { flags: on, boot: boot,
     set: function (k, v) {
