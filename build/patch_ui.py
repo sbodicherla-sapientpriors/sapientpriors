@@ -610,10 +610,19 @@ def apply(out):
         # Ours settles at 98, not 100. A flat 100 across a year reads as a
         # placeholder rather than a measurement - nothing recalls perfectly,
         # and claiming it invites the reader to discount the whole chart.
+        #
+        # The dip goes to 87 rather than 90 so the climb out of it is an
+        # event rather than a wobble: the point the second callout marks is
+        # where training on the customer's own data lands, and a three-point
+        # recovery did not look like anything happened there. Eleven does.
+        #
+        # 86 and not lower: Haiku dips to 85 at the same x, and anything under
+        # that makes us briefly the worst line on the chart. The dip is meant
+        # to say we are still learning you, not that we are behind.
         s = s.replace("colour: '#2E8A56', dash: '9 5', style: 'dashed', "
                       "values: [100, 90, 100, 100, 100, 100] }",
                       "colour: '#2E8A56', dash: '9 5', style: 'dashed', "
-                      "values: [100, 90, 96, 98, 98, 98] }")
+                      "values: [100, 86, 97, 98, 98, 98] }")
 
         # Cost: context-stuffing grows with the square of the conversation,
         # because every turn re-sends every previous turn. The old series were
@@ -804,10 +813,10 @@ def apply(out):
             # the dip every line shares sits at month one, x~21% y~18%; ours
             # climbs from there to month three, straight above x~32%. Both sit
             # in the lower half, which is otherwise empty grid.
-            block = (annotation("18%", "43%", "Context rot starts",
-                                 "the window fills, the earliest turns fall out")
-                     + annotation("40%", "70%", "Trained on your data",
-                                 "it improves and keeps improving"))
+            block = (annotation("18%", "43%", "Deflection point",
+                                 "baseline models start losing the thread")
+                     + annotation("40%", "70%", "Now it\u2019s your model",
+                                 "trained on your data, and it climbs"))
             s = s[:j - len("</div>")] + block + s[j - len("</div>"):]
 
 

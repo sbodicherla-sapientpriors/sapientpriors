@@ -193,6 +193,10 @@ def main(src):
     import patch_ui
     print('ui')
     patch_ui.apply(out)
+    import patch_copyright
+    print('copyright')
+    patch_copyright.apply(out)
+
     import patch_api_demo
     print('api demo')
     patch_api_demo.apply(out)
