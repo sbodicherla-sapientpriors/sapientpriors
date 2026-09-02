@@ -321,8 +321,6 @@ def apply(out):
   { to: 200, dp: 0, zero: '200', suffix: '%', after: 'faster than Mem0',
     label: 'Response latency',
     detail: 'Where Mem0 has finished retrieving, we have retrieved and answered' },
-  { to: 91, dp: 0, zero: '91', suffix: '%', after: '', label: 'BEAM',
-    detail: 'Long-horizon episodic memory' },
   { to: 89, dp: 0, zero: '89', suffix: '%', after: '', label: 'LongMem',
     detail: 'Long-context retention across sessions' },
   { to: 91.6, dp: 1, zero: '91.6', suffix: '%', after: '', label: 'LoCoMo overall',
@@ -333,7 +331,7 @@ def apply(out):
         # which is still true, but "we can show the working for" promised a
         # method note next to each and two of these are now single figures.
         s = s.replace("Four numbers we can show the working for.",
-                      "Four numbers, on public benchmarks.")
+                      "Three numbers, on public benchmarks.")
 
         # The suffix rendered at .32em, which is right for a percent sign
         # riding a two-digit score and wrong for the multiplier that is the
@@ -590,6 +588,14 @@ def apply(out):
         s, n_sw = _re_sw.subn(r'<div data-stage-sweep[^>]*></div>\s*', "", s)
         if not n_sw:
             print("  stage sweeps not found - CHECK")
+
+        # Three tiles now, so the row is cut for three. Left at four it would
+        # leave a quarter of the row empty and read as a missing number rather
+        # than a deliberate set.
+        s = s.replace('<div data-cols-4="" style="margin-top:56px;display:grid;'
+                      'grid-template-columns:repeat(4,minmax(0,1fr))',
+                      '<div data-cols-4="" style="margin-top:56px;display:grid;'
+                      'grid-template-columns:repeat(3,minmax(0,1fr))')
 
         # "stick" was doing the work of "remember" without saying it.
         s = s.replace("Watch it stick.", "Watch it remember.")

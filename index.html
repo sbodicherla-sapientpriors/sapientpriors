@@ -243,10 +243,10 @@
       <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem)">
         <div data-reveal="" style="max-width:48rem;opacity:0;transform:translateY(10px);transition:opacity 400ms cubic-bezier(.16,1,.3,1),transform 400ms cubic-bezier(.16,1,.3,1)">
           <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:500;font-size:.8125rem;letter-spacing:.14em;text-transform:uppercase;color:#6B7078">What changes<span data-rule="" style="height:1px;flex:1;background:#E4E4E0;transform:scaleX(0);transform-origin:left center;transition:transform 700ms cubic-bezier(.16,1,.3,1) 120ms"></span></p>
-          <h2 style="margin:0;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.875rem,1rem + 2.7vw,3.5rem);line-height:1.1;letter-spacing:-.018em">Four numbers, on public benchmarks.</h2>
+          <h2 style="margin:0;font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(1.875rem,1rem + 2.7vw,3.5rem);line-height:1.1;letter-spacing:-.018em">Three numbers, on public benchmarks.</h2>
           <p style="margin:20px 0 0;max-width:42rem;font-size:clamp(1.0625rem,.98rem + .28vw,1.3125rem);line-height:1.6;color:#3A3E45">Memory is easy to claim and hard to measure. These are ours, on a public benchmark, with the method written down.</p>
         </div>
-        <div data-cols-4="" style="margin-top:56px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#E4E4E0">
+        <div data-cols-4="" style="margin-top:56px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden;border-radius:10px;border:1px solid #E4E4E0;background:#E4E4E0">
           <sc-for list="{{ tiles }}" as="tile" hint-placeholder-count="4">
             <div data-reveal="" style="background:#FFFFFF;padding:28px;opacity:0;transform:translateY(10px);transition:opacity 400ms cubic-bezier(.16,1,.3,1),transform 400ms cubic-bezier(.16,1,.3,1)">
               <p style="margin:0 0 12px;font-family:Newsreader,Georgia,serif;font-variant-numeric:tabular-nums;font-size:clamp(2.25rem,1.3rem + 3.2vw,4.5rem);line-height:1;letter-spacing:-.03em"><span data-count="" data-to="{{ tile.to }}" data-dp="{{ tile.dp }}">{{ tile.zero }}</span><span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.46em;letter-spacing:.02em;color:#84512E">{{ tile.suffix }}</span><span style="font-family:'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.2em;letter-spacing:.04em;color:#84512E;padding-left:.5em">{{ tile.after }}</span></p>
@@ -482,8 +482,6 @@ const TILES = [
   { to: 200, dp: 0, zero: '200', suffix: '%', after: 'faster than Mem0',
     label: 'Response latency',
     detail: 'Where Mem0 has finished retrieving, we have retrieved and answered' },
-  { to: 91, dp: 0, zero: '91', suffix: '%', after: '', label: 'BEAM',
-    detail: 'Long-horizon episodic memory' },
   { to: 89, dp: 0, zero: '89', suffix: '%', after: '', label: 'LongMem',
     detail: 'Long-context retention across sessions' },
   { to: 91.6, dp: 1, zero: '91.6', suffix: '%', after: '', label: 'LoCoMo overall',
