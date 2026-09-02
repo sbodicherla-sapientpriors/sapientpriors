@@ -801,7 +801,7 @@ def apply(out):
             block = (annotation("18%", "43%", "Context rot starts",
                                  "the window fills, the earliest turns fall out")
                      + annotation("40%", "70%", "Trained on your data",
-                                 "it recovers, and keeps recovering"))
+                                 "it improves and keeps improving"))
             s = s[:j - len("</div>")] + block + s[j - len("</div>"):]
 
 
