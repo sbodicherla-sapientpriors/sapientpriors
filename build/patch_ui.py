@@ -323,7 +323,7 @@ def apply(out):
   { to: 200, dp: 0, zero: '200', suffix: '%', after: 'faster than Mem0',
     label: 'Response latency',
     detail: 'Where Mem0 has finished retrieving, we have retrieved and answered' },
-  { to: 89, dp: 0, zero: '89', suffix: '%', after: '', label: 'LongMem',
+  { to: 95, dp: 0, zero: '95', suffix: '%', after: '', label: 'LongMem-S',
     detail: 'Long-context retention across sessions' },
   { to: 91.6, dp: 1, zero: '91.6', suffix: '%', after: '', label: 'LoCoMo overall',
     detail: 'Long-context conversational memory, LLM-as-judge' }
