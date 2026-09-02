@@ -549,12 +549,17 @@ def apply(out):
         # from itself, and the name stays under TIFR rather than under whatever
         # happens to be passing.
         #
-        # The item becomes a column, so the row grows from 36px to 54px. Only
+        # The item becomes a column, so the row grows from 36px to 66px. Only
         # entries with a caption show anything in the lower half.
+        #
+        # The caption wraps rather than running on: TIFR's full name on one
+        # line was wider than several logos put together and pulled the eye
+        # off the marks it is meant to label. 132px breaks it after
+        # "INSTITUTE OF", which is where the name divides anyway.
         s = s.replace(
             '<div style="margin-right:64px;display:flex;height:36px;'
             'flex-shrink:0;align-items:center">',
-            '<div style="margin-right:64px;display:flex;height:54px;'
+            '<div style="margin-right:64px;display:flex;height:66px;'
             'flex-shrink:0;flex-direction:column;align-items:center;'
             'justify-content:center;gap:5px">')
         s = s.replace(
@@ -562,7 +567,8 @@ def apply(out):
             "mask-position:center\"></span>\n              </sc-if>\n"
             "              <sc-if value=\"{{ a.hasCaption }}\" hint-placeholder-val=\"{{ false }}\">"
             "<span style=\""
-            "white-space:nowrap;font-family:'Cascadia Code',ui-monospace,SFMono-Regular,"
+            "max-width:132px;text-align:center;line-height:1.3;"
+            "font-family:'Cascadia Code',ui-monospace,SFMono-Regular,"
             "Menlo,monospace;font-size:.5625rem;letter-spacing:.06em;text-transform:uppercase;"
             "color:#7A7F87\">{{ a.caption }}</span></sc-if>")
 
