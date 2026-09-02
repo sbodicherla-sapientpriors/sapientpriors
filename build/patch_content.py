@@ -122,7 +122,7 @@ def apply(out):
         # (the checker is neutral, the mark is a saturated blue), then masked.
         s = s.replace("{ name: 'TCS Research', logo: 'logos/tcs.svg', aspect: 1, scale: 1.24 }",
                       "{ name: 'TIFR', logo: 'logos/tifr.webp', "
-                      "aspect: 2.14, scale: 1.0 }")
+                      "aspect: 2.14, scale: 1.0, caption: 'Tata Institute of Fundamental Research' }")
         s = s.replace("{ name: 'Indian Institute of Science' }",
                       "{ name: 'Indian Institute of Science', logo: 'logos/iisc.webp', "
                       "aspect: 1.24, scale: 1.45 }")
@@ -146,8 +146,11 @@ def apply(out):
                       "aspect: 0.70, scale: 1.05 }")
 
         # 3. South Park Commons was reading small against the wordmarks.
-        s = s.replace("{ name: 'South Park Commons', logo: 'logos/south-park-commons.svg', aspect: 3.4, scale: 1.15 }",
-                      "{ name: 'South Park Commons', logo: 'logos/south-park-commons.svg', aspect: 3.4, scale: 1.7 }")
+        # South Park Commons out of the alumni strip. It is an investor, and it
+        # is already named in "Backed by" - in a row captioned "where the team
+        # is from" it reads as a place someone worked.
+        import re as _re_spc
+        s = _re_spc.sub(r",?\s*\{ name: 'South Park Commons'[^}]*\}", "", s)
 
         # 4. One benchmark table instead of two blocks.
         if "{{ bench }}" not in s:

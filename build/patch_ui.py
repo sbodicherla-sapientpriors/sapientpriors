@@ -537,6 +537,46 @@ def apply(out):
         if "data-cols-4]>div{padding:18px" not in s:
             s = s.replace("\n</style>", MOBILE_CSS + "</style>", 1)
 
+        # A caption beside a mark in the alumni strip, for the ones whose
+        # initials mean nothing to a reader. Placed inline rather than beneath,
+        # because every item in the marquee is a fixed 36px row and stacking
+        # would push that row taller than all the others.
+        # A sibling of the logo branch, not nested inside it. The runtime does
+        # not render an sc-if placed within another sc-if - the inner one
+        # produced nothing at all, silently.
+        s = s.replace(
+            "mask-position:center\"></span>\n              </sc-if>",
+            "mask-position:center\"></span>\n              </sc-if>\n"
+            "              <sc-if value=\"{{ a.hasCaption }}\" hint-placeholder-val=\"{{ false }}\">"
+            "<span style=\"margin-left:12px;white-space:nowrap;font-family:'Cascadia Code',"
+            "ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6875rem;"
+            "letter-spacing:.04em;color:#8A8F97\">{{ a.caption }}</span></sc-if>")
+
+        # Anchored on the field list alone: "return {" sits on its own line in
+        # the export, so a one-line search string matched nothing.
+        if "isLogo: true, isWord: false, name: a.name," not in s:
+            print("  alumni mapping not found - caption will not render - CHECK")
+        s = s.replace(
+            "isLogo: true, isWord: false, name: a.name,",
+            "isLogo: true, isWord: false, name: a.name,\n"
+            "          hasCaption: !!a.caption, caption: a.caption || '',")
+
+        # The heading names what was built, not just that something was.
+        s = s.replace("We have built this before.",
+                      "We\u2019ve built state-of-the-art ML models before.")
+
+        # Remove the data-stage-sweep bars.
+        #
+        # Each section carried a 2px full-width gradient rule pinned to its top
+        # edge, scaled in on scroll. Mid-animation it is a short bright line
+        # sitting on a section boundary with nothing to do with the content -
+        # it reads as a rendering fault rather than as an accent, which is what
+        # "random lines" was describing.
+        import re as _re_sw
+        s, n_sw = _re_sw.subn(r'<div data-stage-sweep[^>]*></div>\s*', "", s)
+        if not n_sw:
+            print("  stage sweeps not found - CHECK")
+
         # "stick" was doing the work of "remember" without saying it.
         s = s.replace("Watch it stick.", "Watch it remember.")
 
