@@ -29,7 +29,7 @@
   var ROLES = [
     "Machine Learning Engineer",
     "Machine Learning Engineer Intern",
-    "Founders Office",
+    "Founder\u2019s Office \u2014 Engineering Intern",
     "Software Engineer, Distributed Systems"
   ];
 
@@ -98,10 +98,10 @@
       "Tell us about a time you found where the latency actually was, rather than where it seemed to be. How did you find it?",
       "What is a piece of infrastructure you have built that another team depended on? What did you get wrong first?"
     ],
-    "Founders Office": [
-      "What would you want to own here, and why you?",
-      "Describe something you started that did not exist before. What happened to it?",
-      "What do you think is the hardest thing about selling a research product to engineers?"
+    "Founder\u2019s Office \u2014 Engineering Intern": [
+      "Share your most impressive and high-leverage use of AI, preferably with artifacts. How much time did it take you?",
+      "Why are you interested in working closely with founders?",
+      "Describe a situation where you believed a project was heading in the wrong direction. How did you identify the misalignment, what did you do to advocate for a course correction, and what was the outcome?"
     ]
   };
   function questionsFor(role) { return QUESTIONS[role] || RESEARCH; }

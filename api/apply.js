@@ -39,7 +39,7 @@ const MAX = 4000;
 const ROLES = {
   "Machine Learning Engineer": "ml_engineer",
   "Machine Learning Engineer Intern": "ml_engineer_intern",
-  "Founders Office": "founders_office",
+  "Founder\u2019s Office \u2014 Engineering Intern": "founders_office",
   "Software Engineer, Distributed Systems": "software_engineer"
 };
 
