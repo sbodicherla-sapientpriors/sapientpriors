@@ -123,9 +123,41 @@ def apply(out):
         s = s.replace("{ name: 'TCS Research', logo: 'logos/tcs.svg', aspect: 1, scale: 1.24 }",
                       "{ name: 'TIFR', logo: 'logos/tifr.webp', "
                       "aspect: 2.14, scale: 1.0, caption: 'Tata Institute of Fundamental Research' }")
+        # IISc: replaced with the full emblem. The new artwork is portrait
+        # (0.92) where the old was landscape (1.24), and the strip sizes by
+        # equal optical area, so leaving the old aspect would have sized it
+        # against a shape it no longer is.
         s = s.replace("{ name: 'Indian Institute of Science' }",
                       "{ name: 'Indian Institute of Science', logo: 'logos/iisc.webp', "
-                      "aspect: 1.24, scale: 1.45 }")
+                      "aspect: 0.92, scale: 1.30, "
+                      "caption: 'Indian Institute of Science' }")
+        # Marks that do not say their own name.
+        #
+        # Dropbox is a box and Twitter is a bird: nothing in either drawing
+        # tells a reader which company it is. Written as a pass over the built
+        # string rather than as more literal replacements because these entries
+        # are defined in three different places - the export, the patch above,
+        # and each other - and a caption should not depend on which.
+        #
+        # There is no second marquee for this. A parallel track underneath would
+        # have to stay in step with the one above it, and two CSS animations
+        # drift: they start at different moments and nothing holds them
+        # together, so the names would slide out from under their logos. Each
+        # caption rides inside the same item as its mark instead, which cannot
+        # drift from itself.
+        # Only pages carrying the strip: most do not, and warning about a list
+        # that was never on the page buries the warning that matters.
+        for _nm, _cap in (("Dropbox", "Dropbox"), ("Twitter", "Twitter")) \
+                if "alumniTrack" in s else ():
+            _i = s.find("{ name: '%s'" % _nm)
+            if _i == -1:
+                print("  alumni entry %s not found - no caption - CHECK" % _nm)
+                continue
+            _j = s.index("}", _i)
+            if "caption:" in s[_i:_j]:
+                continue
+            s = s[:_j] + ", caption: '%s' " % _cap + s[_j:]
+
         # Kroger: white script inside a solid blue ellipse. This was on the
         # rejected list for months because flattening it produced a filled
         # blob; the knockout rule keeps the lettering as holes.
