@@ -1,0 +1,4 @@
+# The build pipeline is source, not site. Without this it was served verbatim
+# at /build/*.py - readable by anyone who guessed the path.
+build/
+*.md
