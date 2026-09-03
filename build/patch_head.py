@@ -38,6 +38,15 @@ DEFAULT = "SapientPriors"
 
 # SVG first for anything that takes it, .ico behind it for Safari and older
 # clients, which do not.
+# The section entrance animations translate horizontally (data-stage-fx="right"
+# slides in from the side). Nothing clipped the page, so while one of those is
+# mid-flight the document is wider than the viewport and the whole page scrolls
+# sideways - measured at 58px on desktop and 16px on a phone.
+#
+# clip, not hidden: overflow-x:hidden forces the other axis to auto and turns the
+# element into a scroll container, which breaks position:sticky. clip does not.
+CLIP = "<style>html,body{overflow-x:clip}</style>"
+
 ICONS = (
     '<link rel="icon" href="/favicon.svg" type="image/svg+xml">'
     '<link rel="icon" href="/favicon.ico" sizes="32x32">'
@@ -50,7 +59,8 @@ def apply(out):
     for path in sorted(glob.glob(os.path.join(out, "*.html"))):
         name = os.path.basename(path)
         s = io.open(path, encoding="utf-8", errors="surrogateescape").read()
-        if "<title>" in s and 'rel="icon"' in s:
+        if ("<title>" in s and 'rel="icon"' in s
+                and "overflow-x:clip" in s):
             continue
         head = s.find("<head>")
         if head == -1:
@@ -61,6 +71,8 @@ def apply(out):
             add += "\n<title>%s</title>" % TITLES.get(name, DEFAULT)
         if 'rel="icon"' not in s:
             add += "\n" + ICONS
+        if "overflow-x:clip" not in s:
+            add += "\n" + CLIP
         s = s[:head + len("<head>")] + add + s[head + len("<head>"):]
         io.open(path, "w", encoding="utf-8", errors="surrogateescape").write(s)
         n += 1

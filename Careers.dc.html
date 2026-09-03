@@ -3,6 +3,7 @@
 <head>
 <title>Careers — SapientPriors</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon.ico" sizes="32x32"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>html,body{overflow-x:clip}</style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
@@ -263,8 +264,27 @@ class Component extends DCLogic {
           requestAnimationFrame(() => requestAnimationFrame(() => {
             const el = document.getElementById('role-detail');
             if (!el) return;
-            const y = el.getBoundingClientRect().top + window.scrollY - 96;
-            window.scrollTo({ top: y, behavior: 'smooth' });
+            // The anchor lands BELOW the role's own title in the export's
+            // markup - measured at 67px below it - so scrolling to the
+            // anchor put the title behind the fixed nav. It looked like the
+            // jump had failed. Aim at the nearest heading above the anchor
+            // instead, and clear whatever fixed bar is actually at the top
+            // rather than a hardcoded 96.
+            const aY = el.getBoundingClientRect().top;
+            let best = null;
+            document.querySelectorAll('h1,h2,h3').forEach(h => {
+              const y = h.getBoundingClientRect().top;
+              if (y <= aY && (best === null || y > best)) best = y;
+            });
+            let nav = 0;
+            document.querySelectorAll('div,header,nav').forEach(e => {
+              const cs = getComputedStyle(e), r = e.getBoundingClientRect();
+              if (cs.position === 'fixed' && r.top <= 1 && r.height > 24 &&
+                  r.height < 140 && r.width > window.innerWidth * 0.6)
+                nav = Math.max(nav, r.height);
+            });
+            const top = (best === null ? aY : best) + window.scrollY - (nav + 24);
+            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
           }));
         }
       })),
