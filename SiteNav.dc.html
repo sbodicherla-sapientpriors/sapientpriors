@@ -32,9 +32,9 @@
           </div></sc-if>
         </div>
       </sc-for>
-      <a href="SapientPriors.dc.html#access" style="margin-left:16px;padding:10px 18px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.875rem;font-weight:500;text-decoration:none">Get access</a>
+      <a href="SapientPriors.dc.html#access" style="margin-left:16px;padding:10px 18px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.875rem;font-weight:500;text-decoration:none">Get beta access</a>
     </div>
-    <a data-nav-burger href="SapientPriors.dc.html#access" style="display:none;align-items:center;justify-content:center;padding:10px 16px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.8125rem;font-weight:500;text-decoration:none">Get access</a>
+    <a data-nav-burger href="SapientPriors.dc.html#access" style="display:none;align-items:center;justify-content:center;padding:10px 16px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.8125rem;font-weight:500;text-decoration:none">Get beta access</a>
   </div>
 </div>
 </x-dc>
@@ -43,12 +43,12 @@ const HOME = 'SapientPriors.dc.html';
 
 const GROUPS = [
   { label: 'Docs', href: 'API%20Docs.dc.html' },
+  { label: 'Team', href: 'Team.dc.html' },
   { label: 'Company', items: [
     { label: 'About', href: HOME + '#lab', description: 'The lab and how we work' },
-    { label: 'Team', href: 'Team.dc.html', description: 'Who is building it' },
-    { label: 'Careers', href: 'Careers.dc.html', description: 'Two open roles in Bangalore' },
     { label: 'Contact', href: HOME + '#access', description: 'Book a working session' }
-  ] }
+  ] },
+  { label: 'Careers', href: 'Careers.dc.html' }
 ];
 
 class Component extends DCLogic {

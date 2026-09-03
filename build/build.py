@@ -193,6 +193,10 @@ def main(src):
     import patch_ui
     print('ui')
     patch_ui.apply(out)
+    import patch_nav_copy
+    print('nav + copy')
+    patch_nav_copy.apply(out)
+
     import patch_address
     print('address')
     patch_address.apply(out)
