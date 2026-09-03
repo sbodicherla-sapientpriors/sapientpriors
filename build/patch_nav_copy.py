@@ -50,8 +50,12 @@ OLD_SUB = ("Two roles, both in Bangalore, both hybrid. Small team, so whatever "
 NEW_SUB = ("Remote and Bangalore, hybrid. You will work close to the research, "
            "with mentorship from ML veterans with twelve years behind them.")
 
-CTA_FROM = ">Get access<"
-CTA_TO = ">Get beta access<"
+# Every call to action on the site says the same thing, in title case: the nav
+# button, the hero button, and the ones in the page body. "Get API access" named
+# the artefact; "Get Beta Access" names the thing being offered, and two labels
+# for one action read as two different actions.
+CTA_TO = ">Get Beta Access<"
+CTA_FROM = (">Get access<", ">Get beta access<", ">Get API access<")
 
 
 def apply(out):
@@ -65,9 +69,10 @@ def apply(out):
         if OLD_SUB in s:
             s = s.replace(OLD_SUB, NEW_SUB, 1)
             sub += 1
-        if CTA_FROM in s:
-            cta += s.count(CTA_FROM)
-            s = s.replace(CTA_FROM, CTA_TO)
+        for label in CTA_FROM:
+            if label in s:
+                cta += s.count(label)
+                s = s.replace(label, CTA_TO)
         if s != before:
             io.open(path, "w", encoding="utf-8",
                     errors="surrogateescape").write(s)
