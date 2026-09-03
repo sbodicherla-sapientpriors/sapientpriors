@@ -11,6 +11,13 @@ short and cites its source.
 Two examples on one 14s loop, a different task each: the same call, two users,
 two sets of learned preferences.
 
+The paths read for meaning rather than matching the reference docs verbatim.
+They previously carried an ellipsis - /v1/&hellip;/completions - which reads as
+something elided rather than as anything, and "completions" named a generic
+LLM endpoint rather than what this call does. /v1/memory/answer says the
+product and the verb; ?task= is the only part carried over from the docs,
+because step 03 uses the same parameter.
+
 Content lives in EXAMPLES and nowhere else. To swap either exchange, edit that
 list - nothing below it needs touching.
 
@@ -39,7 +46,7 @@ LATENCY = "under a second"
 
 EXAMPLES = [
     {
-        "path": "/v1/&hellip;/completions?task=email_drafting",
+        "path": "/v1/memory/answer?task=email_drafting",
         "user": "u_8213",
         "query": "Can you draft an email to john",
         "context": ["prefers short replies, no preamble",
@@ -51,7 +58,7 @@ EXAMPLES = [
                    "store to run.",
     },
     {
-        "path": "/v1/&hellip;/completions?task=code_review",
+        "path": "/v1/memory/answer?task=code_review",
         "user": "u_4417",
         "query": "Add retries to the upload handler",
         "context": ["explicit error types, never a bare except",
