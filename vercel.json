@@ -29,24 +29,6 @@
       ]
     },
     {
-      "source": "/Research.dc.html",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        }
-      ]
-    },
-    {
-      "source": "/Pricing.dc.html",
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        }
-      ]
-    },
-    {
       "source": "/Company Brain.dc.html",
       "headers": [
         {
@@ -99,6 +81,24 @@
           "value": "noindex, nofollow"
         }
       ]
+    },
+    {
+      "source": "/research",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/pricing",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     }
   ],
   "redirects": [
@@ -116,6 +116,116 @@
       "source": "/Hero%20Motion.dc.html",
       "destination": "/",
       "permanent": true
+    },
+    {
+      "source": "/API Docs.dc.html",
+      "destination": "/docs",
+      "permanent": true
+    },
+    {
+      "source": "/API%20Docs.dc.html",
+      "destination": "/docs",
+      "permanent": true
+    },
+    {
+      "source": "/Careers.dc.html",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/Careers.dc.html",
+      "destination": "/careers",
+      "permanent": true
+    },
+    {
+      "source": "/Team.dc.html",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/Team.dc.html",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/TryIt.dc.html",
+      "destination": "/try",
+      "permanent": true
+    },
+    {
+      "source": "/TryIt.dc.html",
+      "destination": "/try",
+      "permanent": true
+    },
+    {
+      "source": "/Research.dc.html",
+      "destination": "/research",
+      "permanent": true
+    },
+    {
+      "source": "/Research.dc.html",
+      "destination": "/research",
+      "permanent": true
+    },
+    {
+      "source": "/Pricing.dc.html",
+      "destination": "/pricing",
+      "permanent": true
+    },
+    {
+      "source": "/Pricing.dc.html",
+      "destination": "/pricing",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/docs",
+      "destination": "/API%20Docs.dc.html"
+    },
+    {
+      "source": "/careers",
+      "destination": "/Careers.dc.html"
+    },
+    {
+      "source": "/team",
+      "destination": "/Team.dc.html"
+    },
+    {
+      "source": "/try",
+      "destination": "/TryIt.dc.html"
+    },
+    {
+      "source": "/research",
+      "destination": "/Research.dc.html"
+    },
+    {
+      "source": "/pricing",
+      "destination": "/Pricing.dc.html"
+    },
+    {
+      "source": "/docs/",
+      "destination": "/API%20Docs.dc.html"
+    },
+    {
+      "source": "/careers/",
+      "destination": "/Careers.dc.html"
+    },
+    {
+      "source": "/team/",
+      "destination": "/Team.dc.html"
+    },
+    {
+      "source": "/try/",
+      "destination": "/TryIt.dc.html"
+    },
+    {
+      "source": "/research/",
+      "destination": "/Research.dc.html"
+    },
+    {
+      "source": "/pricing/",
+      "destination": "/Pricing.dc.html"
     }
   ]
 }
