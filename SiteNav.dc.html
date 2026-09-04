@@ -12,7 +12,7 @@
 <x-dc>
 <div style="position:fixed;inset-inline:0;top:0;z-index:52;font-family:Inter,system-ui,sans-serif;border-bottom:1px solid #E4E4E0;background:rgba(246,246,244,.85);backdrop-filter:blur(12px)">
   <div style="padding-inline:clamp(1.25rem,3.2vw,4.5rem);height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px">
-    <a href="SapientPriors.dc.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:#14161A">
+    <a href="/" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:#14161A">
       <img src="logos/sapientpriors-sp-logo.svg" alt="" style="width:36px;height:36px;display:block">
       <span style="font-family:Inter,system-ui,sans-serif;font-size:1.125rem;font-weight:600;letter-spacing:-.035em;color:#14161A">SapientPriors<span style="font-weight:400;color:#9AA0A8;padding-left:.28em">Inc.</span></span>
     </a>
@@ -32,23 +32,23 @@
           </div></sc-if>
         </div>
       </sc-for>
-      <a href="SapientPriors.dc.html#access" style="margin-left:16px;padding:10px 18px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.875rem;font-weight:500;text-decoration:none">Get Beta Access</a>
+      <a href="/#access" style="margin-left:16px;padding:10px 18px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.875rem;font-weight:500;text-decoration:none">Get Beta Access</a>
     </div>
-    <a data-nav-burger href="SapientPriors.dc.html#access" style="display:none;align-items:center;justify-content:center;padding:10px 16px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.8125rem;font-weight:500;text-decoration:none">Get Beta Access</a>
+    <a data-nav-burger href="/#access" style="display:none;align-items:center;justify-content:center;padding:10px 16px;border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.8125rem;font-weight:500;text-decoration:none">Get Beta Access</a>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:72},&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;Product&quot;,&quot;Research&quot;,&quot;Docs&quot;,&quot;Company&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
-const HOME = 'SapientPriors.dc.html';
+const HOME = '/';
 
 const GROUPS = [
-  { label: 'Docs', href: 'API%20Docs.dc.html' },
-  { label: 'Team', href: 'Team.dc.html' },
+  { label: 'Docs', href: '/docs' },
+  { label: 'Team', href: '/team' },
   { label: 'Company', items: [
     { label: 'About', href: HOME + '#lab', description: 'The lab and how we work' },
     { label: 'Contact', href: HOME + '#access', description: 'Book a working session' }
   ] },
-  { label: 'Careers', href: 'Careers.dc.html' }
+  { label: 'Careers', href: '/careers' }
 ];
 
 class Component extends DCLogic {
