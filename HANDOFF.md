@@ -10,14 +10,30 @@ safely" first; the rest is reference.
 
 | | |
 |---|---|
-| **Production repo** | `github.com/sbodicherla-sapientpriors/sapientpriors` |
-| **Production branch** | `main` — pushing to it deploys to `sapientpriors.com` |
+| **Company repo** | `github.com/SapientPriors-Inc/sapientpriors` — the canonical home, work here |
+| **Deploy repo** | `github.com/sbodicherla-sapientpriors/sapientpriors` — a fork; **this is the one Vercel currently builds** |
 | **Live site** | https://www.sapientpriors.com |
 | **Host** | Vercel, static, with two serverless functions under `api/` |
 | **Internal review repo** | `github.com/sbodicherla-sapientpriors/sapientpriors-site` — same site, permanently de-indexed |
 
 Everything served is committed. There is no build step on Vercel: what is in the
 repo root is what is served.
+
+### Read this before pushing
+
+There are two repos and they are not interchangeable **yet**.
+
+The Vercel project that serves sapientpriors.com is connected to the *fork*, not
+to the company repo. So today:
+
+- push to the **company repo** — that is where the work belongs and where PRs
+  should be opened;
+- also push to the **fork**, or the change does not go live.
+
+Both are currently identical, and a change must reach both until the Vercel
+project is re-pointed at the company repo. Once that is done, the fork can be
+retired and this becomes one repo. Whoever owns the Vercel project needs to make
+that change; see the end of this file.
 
 ---
 
@@ -211,7 +227,9 @@ git push -u origin <branch>
 gh pr create --base main
 ```
 
-Merging to `main` deploys to production within about a minute. Then verify
+Merging to `main` on the **fork** deploys to production within about a minute.
+Merging on the company repo does not deploy anything yet — see "Read this before
+pushing" above. Then verify
 against the live site, not the local one:
 
 ```bash
@@ -347,3 +365,23 @@ or submissions for that role are rejected.
 
 No secrets are in this repo. The HubSpot portal ID and form GUIDs are public by
 design; the private token lives only in Vercel's environment variables.
+
+
+---
+
+## 12. Outstanding: one repo instead of two
+
+The Vercel project serving sapientpriors.com is connected to
+`sbodicherla-sapientpriors/sapientpriors`, a fork, rather than to the company
+repo. That is why every change has to be pushed twice.
+
+To fix it, on the Vercel project that owns the `sapientpriors.com` domain:
+
+1. **Settings → Git → Disconnect**
+2. **Connect Git Repository →** `SapientPriors-Inc/sapientpriors`, branch `main`
+3. Redeploy, and check the live site still serves 200 and still carries
+   `rel=canonical` and the analytics beacon
+4. Then the fork can be archived, and this section deleted
+
+Until then, pushing only to the company repo will look like it worked and change
+nothing on the live site.
