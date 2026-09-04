@@ -209,6 +209,10 @@ def main(src):
     print('api demo')
     patch_api_demo.apply(out)
 
+    import patch_copy
+    print('copy')
+    patch_copy.apply(out)
+
     import patch_urls
     print('urls')
     patch_urls.apply(out)
