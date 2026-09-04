@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Page titles, the tab icon, and the tracking script.
+Page titles, the tab icon, and the two measurement scripts.
 
 Neither existed. Every page shipped with no <title> at all, so browsers fell
 back to the bare hostname - a tab read "sapientpriors.com" - and with no icon
@@ -58,6 +58,19 @@ TRACKING = (
 )
 FRAGMENTS = ("SiteNav.dc.html", "SiteFooter.dc.html", "Hero Motion.dc.html")
 
+# Cloudflare Web Analytics: visitors, referrers and countries, no cookies, so no
+# consent banner is required. type=module defers by default, so like the tracker
+# above it cannot block first paint. Excluded from the fragments for the same
+# reason - three loads per page view would treble every count.
+ANALYTICS = (
+    "<!-- Cloudflare Web Analytics -->"
+    "<script type='module' src='https://static.cloudflareinsights.com/"
+    "beacon.min.js' data-cf-beacon='{\"token\": "
+    "\"c8a1f7b2684c402ea7081aea1ac5fa36\"}'></script>"
+    "<!-- End Cloudflare Web Analytics -->"
+)
+ANALYTICS_ID = "c8a1f7b2684c402ea7081aea1ac5fa36"
+
 ICONS = (
     '<link rel="icon" href="/favicon.svg" type="image/svg+xml">'
     '<link rel="icon" href="/favicon.ico" sizes="32x32">'
@@ -71,7 +84,8 @@ def apply(out):
         name = os.path.basename(path)
         s = io.open(path, encoding="utf-8", errors="surrogateescape").read()
         if ("<title>" in s and 'rel="icon"' in s and "overflow-x:clip" in s
-                and (name in FRAGMENTS or "3b5022db7d8a" in s)):
+                and (name in FRAGMENTS
+                     or ("3b5022db7d8a" in s and ANALYTICS_ID in s))):
             continue
         head = s.find("<head>")
         if head == -1:
@@ -86,6 +100,8 @@ def apply(out):
             add += "\n" + CLIP
         if name not in FRAGMENTS and "3b5022db7d8a" not in s:
             add += "\n" + TRACKING
+        if name not in FRAGMENTS and ANALYTICS_ID not in s:
+            add += "\n" + ANALYTICS
         s = s[:head + len("<head>")] + add + s[head + len("<head>"):]
         io.open(path, "w", encoding="utf-8", errors="surrogateescape").write(s)
         n += 1
