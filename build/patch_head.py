@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Page titles and the tab icon.
+Page titles, the tab icon, and the tracking script.
 
 Neither existed. Every page shipped with no <title> at all, so browsers fell
 back to the bare hostname - a tab read "sapientpriors.com" - and with no icon
@@ -47,6 +47,17 @@ DEFAULT = "SapientPriors"
 # element into a scroll container, which breaks position:sticky. clip does not.
 CLIP = "<style>html,body{overflow-x:clip}</style>"
 
+# Buying-intent tracking. async so it never blocks first paint, and kept out of
+# SiteNav/SiteFooter: those are fragments every page fetches at runtime, so a
+# script in them would load a second and third time on every page view and count
+# one visitor as three.
+TRACKING = (
+    '<script async src="https://pub-64d7c9742ee54006ae9f38e02aa8539e.r2.dev/'
+    '1bb2ab97-366d-4af4-a6c5-3b5022db7d8a/script.min.js" '
+    'data-pid="1bb2ab97-366d-4af4-a6c5-3b5022db7d8a"></script>'
+)
+FRAGMENTS = ("SiteNav.dc.html", "SiteFooter.dc.html", "Hero Motion.dc.html")
+
 ICONS = (
     '<link rel="icon" href="/favicon.svg" type="image/svg+xml">'
     '<link rel="icon" href="/favicon.ico" sizes="32x32">'
@@ -59,8 +70,8 @@ def apply(out):
     for path in sorted(glob.glob(os.path.join(out, "*.html"))):
         name = os.path.basename(path)
         s = io.open(path, encoding="utf-8", errors="surrogateescape").read()
-        if ("<title>" in s and 'rel="icon"' in s
-                and "overflow-x:clip" in s):
+        if ("<title>" in s and 'rel="icon"' in s and "overflow-x:clip" in s
+                and (name in FRAGMENTS or "3b5022db7d8a" in s)):
             continue
         head = s.find("<head>")
         if head == -1:
@@ -73,6 +84,8 @@ def apply(out):
             add += "\n" + ICONS
         if "overflow-x:clip" not in s:
             add += "\n" + CLIP
+        if name not in FRAGMENTS and "3b5022db7d8a" not in s:
+            add += "\n" + TRACKING
         s = s[:head + len("<head>")] + add + s[head + len("<head>"):]
         io.open(path, "w", encoding="utf-8", errors="surrogateescape").write(s)
         n += 1
