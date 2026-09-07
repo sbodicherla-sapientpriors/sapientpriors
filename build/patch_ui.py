@@ -244,14 +244,14 @@ def apply(out):
                  + s[close:])
 
         # The sub-line has to carry three words the eye should catch on its own:
-        # multi-model, real time, LoCoMo. Emphasis is weight and ink, not colour
+        # multi-modal, real time, LoCoMo. Emphasis is weight and ink, not colour
         # - the headline already spends the accent, and a sub-line with three
         # more coloured words would compete with it rather than support it.
         KEY = 'font-weight:600;color:#14161A'
         s = s.replace(
             "We build the memory layer it's missing. Preferences learned from real "
             "conversations, recalled in a single call, and sharper every week.",
-            'One <span style="%s">multi-model</span> memory layer behind whichever model '
+            'One <span style="%s">multi-modal</span> memory layer behind whichever model '
             'you run, <span style="%s">trainable</span> on your own data. '
             'Preferences learned from real conversations, returned in '
             '<span style="%s">real time</span>, and '
