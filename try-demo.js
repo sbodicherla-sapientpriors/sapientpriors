@@ -1,27 +1,29 @@
 /**
- * Try It — the shared-memory demo.
+ * Try It — the grounded-answer demo.
  *
  * The flow the page implements:
- *   1. Pick a username. Anything you like; it is the handle your memories are
- *      filed under.
- *   2. Ask questions about the MG Hector owner's manual, and tell it things
- *      worth remembering.
- *   3. Memories are attributed to the username that created them, and every
- *      visitor shares one pool — so you can ask what other people have stored,
- *      and who stored it.
+ *   1. Pick a display name for the session.
+ *   2. Ask questions about the MG Hector owner's manual, 288 pages of it, open
+ *      in the pane on the left.
+ *   3. The same question goes to all three contenders at once and each clock
+ *      runs independently. Ours answers from memory and cites the figures it
+ *      read; the rivals are handed the whole PDF and have to read it first.
  *
  * ── State of play ───────────────────────────────────────────────────────────
- * The interface is complete; the endpoint is not built. Every send posts to
- * /api/try and renders whatever comes back. Until that route exists the reply
- * says so rather than inventing an answer, because a demo whose whole claim is
- * "it remembers" cannot afford a scripted reply that only looks like memory.
+ * Every send opens three SSE streams against /api/try, one per pane, and each
+ * pane paints its own as it arrives. Nothing here is scripted: a pane that
+ * cannot reach its model says so, because a demo whose whole claim is "it
+ * answers from this document" cannot afford a canned reply that only looks
+ * like one.
  *
- * ── One thing to decide before this goes live ───────────────────────────────
- * A single shared pool means anything a visitor types is readable by every
- * later visitor, attributed to a handle they chose. That is the fun of it and
- * also the risk: people will type real names, numbers and grievances into a
- * box on a company website. The notice under the composer says so plainly;
- * moderation and a retention window are a backend decision.
+ * ── What the shared pool does and does not do ───────────────────────────────
+ * The playground agent has learning from turns switched OFF, so nothing a
+ * visitor types becomes a memory a later visitor can retrieve. Within one
+ * visitor's own session the conversation still carries — tell it you tow a
+ * trailer and it knows that two questions later — but cross-visitor recall is
+ * deliberately not there. That is a privacy decision, not an oversight: one
+ * shared agent behind an anonymous public box means every memory written is a
+ * memory a stranger can read, and people type real names into these.
  */
 (function () {
   "use strict";
@@ -51,21 +53,37 @@
   var MANUAL_EMBED = "https://drive.google.com/file/d/" + MANUAL_ID + "/preview";
   var MANUAL_OPEN = "https://drive.google.com/file/d/" + MANUAL_ID + "/view";
 
+  /*
+    WHY these four. Chosen to be answerable and to be worth watching. The first two are buried deep in a
+    288-page manual and come back with the figure they were read from, which is the pane's
+    whole argument; the third is a procedure, so the rivals have to read before they can
+    start. The last one is in-session memory, which still works with learning switched off.
+  */
+  // WHY these changed: the old set asked what other visitors had stored, which this
+  // agent no longer answers now that learning from turns is off.
   var SUGGESTIONS = [
-    "What tyre pressure does the Hector need?",
-    "Remember that I tow a trailer most weekends.",
-    "What has anyone else asked you to remember?",
-    "Who told you about the trailer?"
+    "How do I fit a child seat using ISOFIX?",
+    "What do the warning lights on the instrument cluster mean?",
+    "How do I change a flat tyre?",
+    "Remember that I tow a trailer most weekends."
   ];
 
   var CONTENDERS = [
     { id: "ours", name: "SapientPriors", ours: true },
     { id: "haiku", name: "Claude Haiku 4.5", ours: false },
-    { id: "opus", name: "Claude Opus 4.5", ours: false }
+    { id: "opus", name: "Claude Opus 5", ours: false }
   ];
 
-  /** How long a clock runs before it admits nothing is coming. */
-  var CUTOFF_MS = 3200;
+  /*
+    How long a pane waits for its FIRST token before admitting nothing is coming.
+
+    It is deliberately long, and it only governs silence: once text starts arriving the
+    clock runs until the answer ends, however long that takes. A rival handed 288 pages
+    cold can take most of a minute to say its first word — cutting it off at a few
+    seconds would hide the exact thing this page exists to show, and would read as our
+    demo being broken rather than as their latency being real.
+  */
+  var SILENT_CUTOFF_MS = 60000;
 
   var state = { user: null, manual: null, asked: null, askedAt: null,
                 results: {}, timers: [] };
@@ -88,8 +106,8 @@
       ";font-weight:400;font-size:clamp(1.4rem,1.1rem + .9vw,1.9rem);letter-spacing:-.015em;color:" + INK,
       "Pick a username."));
     card.appendChild(el("p", "margin:0 auto 22px;max-width:30rem;font-size:1rem;line-height:1.6;color:" + INK2,
-      "Anything you like. Everything you ask it to remember is filed under this name, " +
-      "and other people can find it."));
+      "A display name for this session, nothing more. Nothing you type is stored for " +
+      "anyone else to read."));
 
     var form = el("form", "display:flex;gap:10px;justify-content:center;flex-wrap:wrap");
     var input = el("input", "flex:1;min-width:14rem;padding:11px 14px;border:1px solid " + LINE +
@@ -148,10 +166,10 @@
       ";font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.75)",
       "Fun tip"));
     var p = el("p", "margin:0;font-size:.9375rem;line-height:1.6;color:#FFFFFF");
-    p.appendChild(document.createTextNode("You can reach memories other people have stored. Try "));
+    p.appendChild(document.createTextNode("Ask for something buried deep in the book. Try "));
     p.appendChild(el("span", "font-family:" + MONO + ";font-size:.85rem;background:rgba(255,255,255,.16);" +
-      "padding:1px 6px;border-radius:4px", "What has anyone else asked you to remember?"));
-    p.appendChild(document.createTextNode(" — then ask who stored it, and it will tell you the username."));
+      "padding:1px 6px;border-radius:4px", "How do I change a flat tyre?"));
+    p.appendChild(document.createTextNode(" — then open the figure it cites and check it against the manual on the left."));
     body.appendChild(p);
     box.appendChild(body);
     return box;
@@ -226,18 +244,30 @@
       "font-size:.82rem;line-height:1.55;background:" + (c.ours ? BROWN : INK) + ";color:#fff", state.asked));
     body.appendChild(qRow);
 
-    var clock = el("p", "margin:0;display:flex;align-items:center;justify-content:flex-end;gap:6px;" +
+    /*
+      WHY two numbers, not one. The first token is the claim this page is making, so it is
+      the one in ink; total time is the honest companion to it, because a fast first
+      word and a slow finish would otherwise read as a fast answer.
+    */
+    // WHY lbl and total are separate spans: each is set independently as the stream
+    // reaches a different state, and rebuilding one string would fight the interval.
+    var clock = el("p", "margin:0;display:flex;align-items:center;justify-content:flex-end;gap:8px;" +
       "font-family:" + MONO + ";font-size:.75rem;color:" + INK4);
     var dot = el("span", "width:6px;height:6px;border-radius:50%;background:" + BROWN);
     var num = el("span", "font-weight:500;color:" + INK2, "0 ms");
-    clock.appendChild(dot); clock.appendChild(num);
+    var lbl = el("span", "letter-spacing:.06em", "");
+    var total = el("span", "color:" + INK4, "");
+    clock.appendChild(dot); clock.appendChild(num); clock.appendChild(lbl); clock.appendChild(total);
     body.appendChild(clock);
 
     var aRow = el("div", "display:flex;justify-content:flex-start");
     var ans = el("p", "margin:0;max-width:94%;padding:9px 12px;border-radius:10px 10px 10px 3px;border:1px solid " +
-      LINE + ";background:" + BONE + ";font-size:.82rem;line-height:1.55;color:" + INK3, "\u2026");
+      LINE + ";background:" + BONE + ";font-size:.82rem;line-height:1.55;color:" + INK3 + ";white-space:pre-wrap", "\u2026");
     aRow.appendChild(ans);
     body.appendChild(aRow);
+
+    var cites = el("div", "display:none;flex-wrap:wrap;gap:8px;margin-top:2px");
+    body.appendChild(cites);
     box.appendChild(body);
 
     /*
@@ -245,27 +275,101 @@
       background tab, which freezes the clock at zero and reads as broken.
     */
     var started = state.askedAt;
+    // WHY painted tracks a length rather than re-setting textContent every tick: the
+    // answer arrives a few characters at a time and rewriting an unchanged node 25
+    // times a second is what collapses a text selection the reader is holding.
+    var painted = 0;
+    var drewCites = false;
     var t = setInterval(function () {
-      var done = state.results[c.id];
-      if (done) {
-        clearInterval(t);
-        num.textContent = fmt(done.ms);
-        dot.style.background = LINE;
-        ans.textContent = done.text;
-        return;
-      }
+      var r = state.results[c.id];
       var e = performance.now() - started;
-      if (e >= CUTOFF_MS) {
+
+      if (r && r.ttft !== null) {
+        num.textContent = fmt(r.ttft);
+        lbl.textContent = "to first word";
+      } else {
+        num.textContent = fmt(e);
+      }
+
+      if (r && r.text.length !== painted) {
+        painted = r.text.length;
+        ans.textContent = r.text;
+      }
+
+      if (r && r.done) {
         clearInterval(t);
-        num.textContent = "\u2014";
         dot.style.background = LINE;
-        ans.textContent = "Not connected yet \u2014 the answer streams in here.";
+        if (r.error) {
+          /*
+            The refusal IS the result for the Haiku pane, so it is shown as text rather
+            than swallowed \u2014 the page's claim is that the page cap is real, and the
+            API's own words are the evidence.
+          */
+          num.textContent = "\u2014";
+          lbl.textContent = "";
+          ans.textContent = r.error;
+          ans.style.color = INK4;
+        } else {
+          if (r.ttft === null) num.textContent = fmt(r.ms);
+          total.textContent = "\u00b7 " + fmt(r.ms) + " total";
+          if (!r.text) ans.textContent = "(empty reply)";
+        }
+        if (!drewCites) { drewCites = true; drawCitations(cites, r.citations); }
         return;
       }
-      num.textContent = fmt(e);
+
+      // The cutoff governs SILENCE only: a stream that has started is never cut off.
+      if (!r || (r.ttft === null && !r.text)) {
+        if (e >= SILENT_CUTOFF_MS) {
+          clearInterval(t);
+          num.textContent = "\u2014";
+          dot.style.background = LINE;
+          ans.textContent = "No answer came back.";
+          ans.style.color = INK4;
+        }
+      }
     }, 40);
     state.timers.push(t);
     return box;
+  }
+
+  /* \u2500\u2500 citations \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     The figures the answer drew on, straight out of the manual. This is the half of
+     the claim the text alone cannot carry: an answer about ISOFIX anchor points is
+     worth more when the diagram it read is sitting under it.
+
+     The wording stays "cited" and never "verified" or "proof". Each of these is the
+     model reporting which stored figure the memory it answered from came with \u2014 a real
+     pointer into the document, not an independent check that the figure supports the
+     sentence. The visitor does that check themselves, which is why every chip opens.
+  */
+  function drawCitations(mount, list) {
+    if (!list || !list.length) return;
+    mount.style.display = "flex";
+    mount.appendChild(el("p", "margin:0;width:100%;font-family:" + MONO +
+      ";font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:" + INK4,
+      "Cited from the manual"));
+
+    list.slice(0, 6).forEach(function (cit) {
+      var chip = el("a", "display:flex;align-items:center;gap:7px;max-width:100%;padding:5px 9px 5px 5px;" +
+        "border:1px solid " + LINE + ";border-radius:8px;background:" + WHITE + ";text-decoration:none");
+      chip.href = cit.href;
+      chip.target = "_blank";
+      chip.rel = "noopener";
+
+      if (String(cit.media_type || "").indexOf("image/") === 0) {
+        var thumb = document.createElement("img");
+        thumb.src = cit.href;
+        thumb.alt = "";
+        thumb.loading = "lazy";
+        thumb.setAttribute("style", "width:34px;height:34px;object-fit:cover;border-radius:5px;" +
+          "background:" + BONE + ";flex:none");
+        chip.appendChild(thumb);
+      }
+      chip.appendChild(el("span", "font-family:" + MONO + ";font-size:.68rem;color:" + INK2 +
+        ";overflow:hidden;text-overflow:ellipsis;white-space:nowrap", cit.label || "figure"));
+      mount.appendChild(chip);
+    });
   }
 
   function race() {
@@ -303,7 +407,7 @@
         ";font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:" + INK4, "The demo"));
       wrap.appendChild(el("h2", "margin:0 auto 2rem;max-width:24ch;text-align:center;font-family:" + SERIF +
         ";font-weight:400;font-size:clamp(1.9rem,3.4vw,2.9rem);line-height:1.1;letter-spacing:-.02em;color:" + INK,
-        "One manual, one shared memory, everyone who has been here before you."));
+        "One manual, 288 pages, three clocks running."));
       gate(wrap, function (u) { state.user = u; render(mount); });
       mount.appendChild(wrap);
       return;
@@ -422,6 +526,83 @@
     mqPanes.addEventListener("change", lay);
   }
 
+  /*
+    Read one pane's SSE stream into its live result object.
+
+    WHY it mutates state.results[id] rather than resolving a promise with the finished
+    answer: the pane already polls that object on an interval to paint its clock, so
+    streaming needs no second render path and no re-render of the page. The reader
+    fills the object in; the interval paints whatever is in it. render() rebuilds the
+    whole tree, and calling it per token would drop the caret and the scroll position.
+
+    WHY time-to-first-token is measured here and not on the server: this is the number
+    the visitor actually waits, browser hop included. All three panes pay the same hop
+    on the same connection, so the comparison stays fair and the absolute figure stays
+    honest — a server-side clock would quietly flatter every pane by the same amount.
+  */
+  function readStream(id, t0) {
+    // WHY the object is published before the fetch: pane()'s interval is already
+    // running, and a pane polling an id that is not there yet has no way to tell
+    // "the request has not been made" from "the answer never came".
+    var r = { text: "", ttft: null, ms: null, done: false, error: null, citations: [] };
+    state.results[id] = r;
+
+    fetch("/api/try", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user: state.user, model: id, message: state.asked })
+    }).then(function (res) {
+      if (!res.ok || !res.body) throw new Error(String(res.status));
+      var reader = res.body.getReader();
+      var dec = new TextDecoder();
+      var buf = "";
+
+      function frame(block) {
+        var ev = /^event:\s*(.+)$/m.exec(block);
+        var dat = /^data:\s*(.+)$/m.exec(block);
+        if (!ev || !dat) return;
+        var d;
+        try { d = JSON.parse(dat[1]); } catch (_) { return; }
+        if (ev[1].trim() === "delta") {
+          if (r.ttft === null) r.ttft = performance.now() - t0;
+          r.text += d.text || "";
+        } else if (ev[1].trim() === "done") {
+          if (d.text) r.text = d.text;          // the settled answer, not the deltas
+          r.citations = d.citations || [];
+          r.ms = performance.now() - t0;
+          r.done = true;
+        } else if (ev[1].trim() === "error") {
+          r.error = d.message || "the answer failed";
+          r.ms = performance.now() - t0;
+          r.done = true;
+        }
+      }
+
+      function pump() {
+        return reader.read().then(function (step) {
+          if (step.done) {
+            // A stream that ends without a done frame is a dropped connection, not an
+            // answer. Saying so beats leaving a half-written reply looking finished.
+            if (!r.done) { r.error = r.error || "the connection dropped"; r.done = true; }
+            return;
+          }
+          buf += dec.decode(step.value, { stream: true });
+          var cut;
+          while ((cut = buf.indexOf("\n\n")) !== -1) {
+            frame(buf.slice(0, cut));
+            buf = buf.slice(cut + 2);
+          }
+          return pump();
+        });
+      }
+      return pump();
+    }).catch(function () {
+      r.error = r.error || "not connected";
+      r.ms = r.ms || performance.now() - t0;
+      r.done = true;
+    });
+  }
+
   function ask(text, mount) {
     state.timers.forEach(clearInterval);
     state.timers = [];
@@ -430,19 +611,11 @@
     state.results = {};
     render(mount);
 
-    CONTENDERS.forEach(function (c) {
-      var t0 = performance.now();
-      fetch("/api/try", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user: state.user, model: c.id, message: state.asked })
-      })
-        .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
-        .then(function (d) {
-          state.results[c.id] = { ms: performance.now() - t0, text: d.reply || "(empty reply)" };
-        })
-        .catch(function () { /* the pane's own cutoff says so */ });
-    });
+    // WHY one t0 shared by all three: they are being compared, so they must be timed
+    // from the same instant. A per-pane clock started inside its own callback would
+    // silently hand whichever pane the event loop reached last a head start.
+    var t0 = performance.now();
+    CONTENDERS.forEach(function (c) { readStream(c.id, t0); });
   }
 
   /* ── mount ─────────────────────────────────────────────────────────────── */

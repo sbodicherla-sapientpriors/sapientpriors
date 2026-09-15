@@ -1,2 +1,5 @@
 .DS_Store
 __pycache__/
+# /api's dependencies. Vercel installs these from package.json at build time; committing
+# them would put ~50MB of third-party source in a repo whose whole point is a static site.
+node_modules/

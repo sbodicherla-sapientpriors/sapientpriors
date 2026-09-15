@@ -2,3 +2,5 @@
 # at /build/*.py - readable by anyone who guessed the path.
 build/
 *.md
+# Same reasoning: deploy/ is operator tooling run by hand, not something the site serves.
+deploy/
