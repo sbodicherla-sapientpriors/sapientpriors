@@ -382,9 +382,29 @@
     });
   }
 
+  /*
+    The answer sometimes arrives with the model's internal memory ids inlined into the
+    prose: "...on the back of the seat [cde2c551489d41f090cccaec14de5928, e59e8bddf41...]".
+    Seen live on 2026-09-15 and NOT on the same question a minute later, so it is
+    occasional rather than constant — which is worse, because it cannot be relied on to
+    show up in a test and it makes the page look broken the one time a visitor hits it.
+
+    Stripped here rather than in /api/try because this sees the whole accumulated answer:
+    a sentinel split across two delta frames would slip past a per-frame filter. The
+    trailing rule catches one that is still arriving, so a half-written id does not flash
+    on screen; it costs an unclosed "[" at the very end of an answer, which reappears as
+    soon as the next character does.
+  */
+  var MEMORY_IDS = /\s*\[\s*[0-9a-f]{32}(?:\s*,\s*[0-9a-f]{32})*\s*\]/g;
+  var PARTIAL_ID = /\s*\[\s*[0-9a-f]{0,32}(?:\s*,\s*[0-9a-f]{0,32})*\s*$/;
+
+  function clean(text) {
+    return text.replace(MEMORY_IDS, "").replace(PARTIAL_ID, "");
+  }
+
   function renderAnswer(node, text) {
     node.textContent = "";
-    text.split("\n").forEach(function (line) {
+    clean(text).split("\n").forEach(function (line) {
       if (!line.trim()) { node.appendChild(el("div", "height:.5em")); return; }
       var heading = /^\s*#{1,6}\s+(.*)$/.exec(line);
       if (heading) {
@@ -503,7 +523,7 @@
       wrap.appendChild(el("h2", "margin:0 auto 2rem;max-width:24ch;text-align:center;font-family:" + SERIF +
         ";font-weight:400;font-size:clamp(1.9rem,3.4vw,2.9rem);line-height:1.1;letter-spacing:-.02em;color:" + INK,
         "One manual, 288 pages, answered before it could be read."));
-      gate(wrap, function (u) { state.user = u; render(mount); });
+      gate(wrap, function (u) { state.user = u; warm(); render(mount); });
       mount.appendChild(wrap);
       return;
     }
@@ -721,6 +741,26 @@
     });
   }
 
+  /*
+    Fired the moment the visitor picks a name, while they are still reading the page and
+    deciding what to ask. It mints the credential and opens the thread, so the first
+    question's clock measures the answer rather than the handshake in front of it.
+
+    Deliberately silent: it reports nothing and its failure changes nothing on screen,
+    because the question that follows does the same work and will report properly if it is
+    still broken. A visitor who types instantly simply gets today's behaviour.
+  */
+  var warmed = false;
+  function warm() {
+    if (warmed) return;
+    warmed = true;
+    fetch("/api/try", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ warm: true, user: state.user })
+    }).catch(function () {});
+  }
+
   function ask(text, mount) {
     state.timers.forEach(clearInterval);
     state.timers = [];
@@ -764,16 +804,36 @@
 
   function mount() {
     if (document.querySelector("[data-try-demo]")) return true;
-    var anchor = findAnchor();
-    if (!anchor || !anchor.parentElement) return false;
 
+    /*
+      An explicit target wins over the heuristic. findAnchor() works by measuring which
+      ancestor of a <form> runs the full width of the page, which is fine on a page built
+      around a form and useless on one without: the demo simply never appears, silently and
+      with nothing in the console. A page that wants the demo says so with data-try-mount.
+    */
+    /*
+      WHY the x-dc guard: these pages ship as an <x-dc> template that the framework REPLACES
+      on hydration. data-try-mount is in the raw markup, so it matches immediately, and a
+      demo appended to it is thrown away seconds later when hydration swaps the subtree —
+      the page renders, the demo silently is not there. x-dc being gone is the signal that
+      hydration has finished. A page that never had one matches on the first frame.
+    */
+    var slot = document.querySelector("x-dc") ? null : document.querySelector("[data-try-mount]");
     var host = el("section", "padding:72px 0 8px");
     host.setAttribute("data-try-demo", "");
-    anchor.parentElement.insertBefore(host, anchor);
+
+    if (slot) {
+      slot.appendChild(host);
+    } else {
+      var anchor = findAnchor();
+      if (!anchor || !anchor.parentElement) return false;
+      anchor.parentElement.insertBefore(host, anchor);
+    }
 
     try {
       var saved = localStorage.getItem(STORE_KEY);
-      if (saved) state.user = saved;
+      // A returning visitor never sees the gate, so this is their only warm-up point.
+      if (saved) { state.user = saved; warm(); }
     } catch (_) {}
 
     fetch("data/manual.json")
@@ -785,10 +845,16 @@
     return true;
   }
 
-  var tries = 0;
+  /*
+    Time-bounded, not frame-bounded. 120 frames is two seconds on a 60Hz screen and less on
+    a 120Hz one, which is not enough budget for hydration on a slow connection — and running
+    out looks identical to the demo not existing. Ten seconds of wall clock is the same
+    intent expressed in the unit that actually matters.
+  */
+  var giveUpAt = Date.now() + 10000;
   (function wait() {
     if (mount()) return;
-    if (tries++ < 120) requestAnimationFrame(wait);
+    if (Date.now() < giveUpAt) requestAnimationFrame(wait);
   })();
 
   /*

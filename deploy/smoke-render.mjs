@@ -85,6 +85,20 @@ const partial = render("The **Brake Sys");
 check("an unclosed ** renders as text rather than bolding the rest",
   partial.textContent === "The **Brake Sys", partial.textContent);
 
+// Seen live: the model inlines its own memory ids into the prose. Occasional, so this is
+// the only place that pins the behaviour — a live run cannot be relied on to reproduce it.
+const LEAKED = "pull the strap [cde2c551489d41f090cccaec14de5928, e59e8bddf4154fb289fb88a00c320623] " +
+  "and shake it [48d134753954492e8717ef2165bbe70a].";
+const stripped = render(LEAKED).textContent;
+check("inlined memory ids are stripped", !/[0-9a-f]{32}/.test(stripped), stripped);
+check("the sentence survives the strip", stripped === "pull the strap and shake it.", stripped);
+check("a half-arrived id does not flash on screen",
+  render("pull the strap [cde2c551489d41f0").textContent === "pull the strap",
+  render("pull the strap [cde2c551489d41f0").textContent);
+check("ordinary brackets are left alone",
+  render("see note [A] and [see page 12]").textContent === "see note [A] and [see page 12]",
+  render("see note [A] and [see page 12]").textContent);
+
 check("a heading loses its hashes", !render("## Warning lights").textContent.includes("#"));
 check("plain prose is untouched", render("Just a sentence.").textContent === "Just a sentence.");
 check("an empty answer does not throw", render("").textContent === "");

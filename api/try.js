@@ -132,6 +132,8 @@ function clientIp(req) {
 /* ── the product API ───────────────────────────────────────────────────────── */
 
 let tokenClient = null;
+let cachedToken = null;
+let cachedUntil = 0;
 
 /** A Google ID token for the product API, minted as the playground service account.
  *  The client is cached across invocations on a warm instance; google-auth-library
@@ -209,9 +211,23 @@ async function productToken() {
       return null;
     }
   }
-  // The audience IS the Cloud Run URL: the server checks it, so a token minted for
-  // anything else is rejected there rather than accepted with the wrong scope here.
-  return tokenClient.fetchIdToken(API_BASE);
+  /*
+    Cached, because google-auth-library does not cache ID tokens. Impersonated.fetchIdToken
+    POSTs to iamcredentials generateIdToken on EVERY call, so without this each question
+    pays a full round trip to Google before the product API is even contacted — added
+    directly to the one number this page exists to show.
+
+    Refreshed at 50 minutes against a 60-minute lifetime. The margin covers a token minted
+    just before a slow request and clock skew between here and Google; being early costs
+    one extra mint an hour, being late costs a 401 on a visitor's question.
+
+    The audience IS the Cloud Run URL: the server checks it, so a token minted for anything
+    else is rejected there rather than accepted with the wrong scope here.
+  */
+  if (cachedToken && Date.now() < cachedUntil) return cachedToken;
+  cachedToken = await tokenClient.fetchIdToken(API_BASE);
+  cachedUntil = Date.now() + 50 * 60_000;
+  return cachedToken;
 }
 
 function readCookie(req, name) {
@@ -279,7 +295,9 @@ function asFigure(c) {
 /** Forward the product API's own SSE stream, translating its frames into ours.
  *  The product stream carries more than the page shows (stages, a trace, token
  *  counts); narrowing here rather than in the browser keeps internals off the wire. */
-async function streamOurs(res, token, thread, message) {
+async function streamOurs(res, token, thread, message, setupMs = 0) {
+  const started = Date.now();
+  let firstDelta = 0;
   const turnId = `turn_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
   const upstream = await fetch(
     `${API_BASE}/api/v1/agents/${encodeURIComponent(AGENT_ID)}` +
@@ -318,6 +336,14 @@ async function streamOurs(res, token, thread, message) {
         continue;
       }
       if (event === "delta" && data.delta) {
+        // WHY logged: time to first word is the page's whole claim, and when it looks slow
+        // the only useful question is WHICH leg was slow. setup is the credential and the
+        // thread, upstream is the product API actually thinking. Without the split, a slow
+        // number is unattributable and gets blamed on the model.
+        if (!firstDelta) {
+          firstDelta = Date.now() - started;
+          console.log(`try: ttft setup=${setupMs}ms upstream=${firstDelta}ms`);
+        }
         sse(res, "delta", { text: data.delta });
       } else if (event === "error") {
         sse(res, "error", { message: data.message || "the turn failed", code: data.code || "error" });
@@ -443,6 +469,33 @@ export default async function handler(req, res) {
   }
 
   const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+
+  /*
+    A warm-up the page fires as soon as the visitor picks a name, before they have typed
+    anything. It mints the token and creates the thread, which are the two round trips that
+    otherwise land INSIDE the first question's time-to-first-word.
+
+    WHY it matters more than it sounds: that first number is the claim this page is making,
+    and it is the one a visitor sees before they have decided whether to trust it. Measured
+    locally it was 11.03 s cold against 1.2 s warm — the same system, reported nine seconds
+    slower, on the only question most visitors will ask.
+
+    No model call and no credits: this is a handshake, not a turn.
+  */
+  if (body.warm) {
+    try {
+      const warmToken = await productToken();
+      if (warmToken && AGENT_ID) await ensureThread(req, res, warmToken, String(body.user || ""));
+      res.status(204).end();
+    } catch (err) {
+      // A failed warm-up is not worth an error on screen: the question that follows will
+      // do the same work and report properly if it is still broken.
+      console.error("try: warm", err);
+      res.status(204).end();
+    }
+    return;
+  }
+
   const message = String(body.message || "").trim().slice(0, 2000);
   const which = String(body.model || "");
   if (!message || !(which === "ours" || which in MODELS)) {
@@ -456,6 +509,7 @@ export default async function handler(req, res) {
   // response that already claimed, with a 200, to be working.
   let token = null;
   let thread = null;
+  const setupStarted = Date.now();
   if (which === "ours") {
     try {
       token = await productToken();
@@ -480,7 +534,7 @@ export default async function handler(req, res) {
   res.flushHeaders?.();
 
   try {
-    if (which === "ours") await streamOurs(res, token, thread, message);
+    if (which === "ours") await streamOurs(res, token, thread, message, Date.now() - setupStarted);
     else await streamRival(res, which, message);
   } catch (err) {
     sse(res, "error", { message: "the request could not be completed", code: "internal" });

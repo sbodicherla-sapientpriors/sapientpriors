@@ -103,6 +103,11 @@
   ],
   "redirects": [
     {
+      "source": "/Onboarding.dc.html",
+      "destination": "/onboarding",
+      "permanent": true
+    },
+    {
       "source": "/SapientPriors.dc.html",
       "destination": "/",
       "permanent": true
@@ -194,6 +199,14 @@
     {
       "source": "/try",
       "destination": "/TryIt.dc.html"
+    },
+    {
+      "source": "/onboarding",
+      "destination": "/Onboarding.dc.html"
+    },
+    {
+      "source": "/onboarding/",
+      "destination": "/Onboarding.dc.html"
     },
     {
       "source": "/research",
