@@ -96,7 +96,7 @@
   var SILENT_CUTOFF_MS = 60000;
 
   var state = { user: null, manual: null, asked: null, askedAt: null,
-                results: {}, timers: [] };
+                results: {}, timers: [], abort: null };
 
   function el(tag, style, text) {
     var n = document.createElement(tag);
@@ -311,14 +311,24 @@
         dot.style.background = LINE;
         if (r.error) {
           /*
-            The refusal IS the result for the Haiku pane, so it is shown as text rather
+            The refusal IS the result for a rival pane, so it is shown as text rather
             than swallowed \u2014 the page's claim is that the page cap is real, and the
             API's own words are the evidence.
+
+            But an error that arrives AFTER text has been painted is a different thing:
+            a dropped connection mid-answer. Replacing the half-written answer with
+            "the connection dropped" throws away what the reader was in the middle of,
+            so the text stays and the failure is said underneath it.
           */
           num.textContent = "\u2014";
           lbl.textContent = "";
-          ans.textContent = r.error;
-          ans.style.color = INK4;
+          if (r.text) {
+            body.insertBefore(el("p", "margin:0;font-family:" + MONO + ";font-size:.68rem;color:" +
+              INK4, r.error), cites);
+          } else {
+            ans.textContent = r.error;
+            ans.style.color = INK4;
+          }
         } else {
           if (r.ttft === null) num.textContent = fmt(r.ms);
           total.textContent = "\u00b7 " + fmt(r.ms) + " total";
@@ -504,10 +514,17 @@
 
     wrap.appendChild(grid);
 
+    /*
+      WHY this was rewritten and not just trimmed: it used to say "anything you store here
+      can be read by anyone who visits later", which stopped being true the moment learning
+      from turns was switched off. A privacy notice that overstates exposure is still a
+      false statement on a company page, and this one actively discourages the thing the
+      demo is for. What replaces it is the same promise the backend now actually keeps.
+    */
     wrap.appendChild(el("p", "margin:18px 0 26px;font-size:.75rem;line-height:1.6;color:" + INK4,
-      "Everyone shares one memory pool, and each memory carries the username that created it. " +
-      "Anything you store here can be read by anyone who visits later \u2014 so keep it to things " +
-      "you would happily say out loud."));
+      "Your conversation stays in this session and is not stored for other visitors to read. " +
+      "The manual is the only thing in shared memory. Questions are sent to our API to be " +
+      "answered."));
 
     mount.appendChild(wrap);
 
@@ -557,7 +574,7 @@
     on the same connection, so the comparison stays fair and the absolute figure stays
     honest — a server-side clock would quietly flatter every pane by the same amount.
   */
-  function readStream(id, t0) {
+  function readStream(id, t0, signal) {
     // WHY the object is published before the fetch: pane()'s interval is already
     // running, and a pane polling an id that is not there yet has no way to tell
     // "the request has not been made" from "the answer never came".
@@ -567,7 +584,8 @@
     fetch("/api/try", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user: state.user, model: id, message: state.asked })
+      body: JSON.stringify({ user: state.user, model: id, message: state.asked }),
+      signal: signal
     }).then(function (res) {
       if (!res.ok || !res.body) throw new Error(String(res.status));
       var reader = res.body.getReader();
@@ -613,7 +631,10 @@
         });
       }
       return pump();
-    }).catch(function () {
+    }).catch(function (err) {
+      // An abort is this code superseding itself, not a failure. Its result object is
+      // already orphaned, and marking it failed would be a lie if anything still read it.
+      if (err && err.name === "AbortError") return;
       r.error = r.error || "not connected";
       r.ms = r.ms || performance.now() - t0;
       r.done = true;
@@ -623,16 +644,24 @@
   function ask(text, mount) {
     state.timers.forEach(clearInterval);
     state.timers = [];
+    // WHY the previous question's streams are aborted: without this, asking again while
+    // an answer is still arriving leaves the old fetch running to completion, billing a
+    // turn nobody will ever see and holding a connection open behind the new one.
+    if (state.abort) state.abort.abort();
+    state.abort = new AbortController();
     state.asked = text.trim();
     state.askedAt = performance.now();
     state.results = {};
     render(mount);
 
-    // WHY one t0 shared by all three: they are being compared, so they must be timed
-    // from the same instant. A per-pane clock started inside its own callback would
+    // WHY state.askedAt and not a second performance.now(): every pane's clock counts up
+    // from askedAt, so measuring the first token from a later instant would let the final
+    // figure land BELOW the number the reader just watched tick past.
+    //
+    // WHY one origin shared by every contender: they are being compared, so they must be
+    // timed from the same instant. A per-pane clock started inside its own callback would
     // silently hand whichever pane the event loop reached last a head start.
-    var t0 = performance.now();
-    CONTENDERS.forEach(function (c) { readStream(c.id, t0); });
+    CONTENDERS.forEach(function (c) { readStream(c.id, state.askedAt, state.abort.signal); });
   }
 
   /* ── mount ─────────────────────────────────────────────────────────────── */
