@@ -139,6 +139,49 @@ let cachedUntil = 0;
  *  The client is cached across invocations on a warm instance; google-auth-library
  *  refreshes the token itself, so caching the client is what avoids a token exchange
  *  per question without ever serving an expired one. */
+/*
+  WHY the OIDC token is fetched through a helper rather than read from the environment:
+
+  This endpoint gated on process.env.VERCEL_OIDC_TOKEN and reported "enable and SAVE
+  OIDC Federation" when it was empty. The panel was saved, with Team selected and the
+  right iss/aud/sub, and a build dated after the save still saw nothing - so the
+  message was accusing the configuration of a fault it did not have.
+
+  The token is not an environment variable on this runtime. It arrives as a request
+  header: calling getVercelOidcToken() without one throws "The 'x-vercel-oidc-token'
+  header is missing from the request", which is the whole explanation for an empty
+  process.env.VERCEL_OIDC_TOKEN however correct the Vercel panel is. Vercel ships
+  @vercel/oidc to read it, and their own examples use it instead of the variable.
+
+  The import is dynamic and its failure is swallowed on purpose. A static import of a
+  package that is missing or unresolvable takes the whole module down, and this is the
+  file behind a page that is already linked in the nav - a dependency problem must
+  degrade to "not connected", not to a 500 on every request.
+
+  The environment variable stays as the fallback, so wherever it IS populated the
+  behaviour is exactly what it was before this change.
+*/
+let oidcHelper;
+
+async function oidcToken() {
+  if (oidcHelper === undefined) {
+    try {
+      ({ getVercelOidcToken: oidcHelper } = await import("@vercel/oidc"));
+    } catch {
+      oidcHelper = null;
+    }
+  }
+  if (oidcHelper) {
+    try {
+      const viaHelper = await oidcHelper();
+      if (viaHelper) return viaHelper;
+    } catch {
+      /* fall through to the variable */
+    }
+  }
+  return process.env.VERCEL_OIDC_TOKEN || null;
+}
+
 async function productToken() {
   if (!API_BASE) return null;
   if (!tokenClient) {
@@ -173,7 +216,7 @@ async function productToken() {
             delegates: [],
             targetScopes: ["https://www.googleapis.com/auth/cloud-platform"],
           });
-    } else if (provider && account && process.env.VERCEL_OIDC_TOKEN) {
+    } else if (provider && account && (await oidcToken())) {
       /*
         Two steps, not one. The federated client can only exchange Vercel's OIDC token
         for an access token; it has no fetchIdToken, and the product API wants an ID
@@ -190,7 +233,7 @@ async function productToken() {
         subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
         token_url: "https://sts.googleapis.com/v1/token",
         subject_token_supplier: {
-          getSubjectToken: async () => process.env.VERCEL_OIDC_TOKEN,
+          getSubjectToken: async () => await oidcToken(),
         },
       });
       tokenClient = new Impersonated({
@@ -527,12 +570,13 @@ export default async function handler(req, res) {
 
       token = await productToken();
       if (!token) {
-        // productToken returns null when no credential path is configured at all. The most
-        // common cause by far is OIDC Federation being left unsaved in the Vercel project,
-        // which means VERCEL_OIDC_TOKEN is never injected however correct the rest is.
+        // productToken returns null when no credential path is configured at all.
+        // Both sources are named, because the earlier message blamed the Vercel panel
+        // for an empty environment variable and sent someone to re-save a setting that
+        // was already correct.
         throw new Error(
-          process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && !process.env.VERCEL_OIDC_TOKEN
-            ? "no VERCEL_OIDC_TOKEN: enable and SAVE OIDC Federation in the Vercel project"
+          process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && !(await oidcToken())
+            ? "no OIDC token from @vercel/oidc or VERCEL_OIDC_TOKEN: check OIDC Federation is enabled and Saved (Issuer Mode: Team) in the Vercel project"
             : "no credential: set GCP_WORKLOAD_IDENTITY_PROVIDER and GCP_SERVICE_ACCOUNT_EMAIL",
         );
       }

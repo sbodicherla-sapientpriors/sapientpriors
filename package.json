@@ -7,6 +7,7 @@
   "description": "Static marketing site plus the Vercel functions beside it. The site itself has no build step; these dependencies exist only for /api/try, which is the one endpoint that talks to something other than a form provider.",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",
+    "@vercel/oidc": "^3.8.7",
     "google-auth-library": "^10.4.0"
   }
 }
