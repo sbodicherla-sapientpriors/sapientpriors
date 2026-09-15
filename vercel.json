@@ -103,8 +103,8 @@
   ],
   "redirects": [
     {
-      "source": "/Onboarding.dc.html",
-      "destination": "/onboarding",
+      "source": "/Playground.dc.html",
+      "destination": "/playground",
       "permanent": true
     },
     {
@@ -201,12 +201,12 @@
       "destination": "/TryIt.dc.html"
     },
     {
-      "source": "/onboarding",
-      "destination": "/Onboarding.dc.html"
+      "source": "/playground",
+      "destination": "/Playground.dc.html"
     },
     {
-      "source": "/onboarding/",
-      "destination": "/Onboarding.dc.html"
+      "source": "/playground/",
+      "destination": "/Playground.dc.html"
     },
     {
       "source": "/research",
