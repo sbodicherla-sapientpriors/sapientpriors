@@ -140,13 +140,23 @@ async function productToken() {
             --impersonate-service-account=<GCP_SERVICE_ACCOUNT_EMAIL>
         It is never the path in production: Vercel sets GCP_WORKLOAD_IDENTITY_PROVIDER.
       */
-      tokenClient = new Impersonated({
-        sourceClient: await new GoogleAuth().getClient(),
-        targetPrincipal: account,
-        lifetime: 3600,
-        delegates: [],
-        targetScopes: ["https://www.googleapis.com/auth/cloud-platform"],
-      });
+      const adc = await new GoogleAuth().getClient();
+      // WHY the capability check and not an unconditional wrap: `gcloud auth
+      // application-default login --impersonate-service-account` writes an ADC file that is
+      // ALREADY an impersonated client, and wrapping that in a second Impersonated asks the
+      // service account to impersonate itself -- which IAM Credentials rejects with a 400
+      // INVALID_ARGUMENT, surfacing here as a flat "not connected". Anything that can mint
+      // an ID token itself (impersonated ADC, a JWT from a key) is used as-is; only a plain
+      // user or federated credential needs the wrapper.
+      tokenClient = typeof adc.fetchIdToken === "function"
+        ? adc
+        : new Impersonated({
+            sourceClient: adc,
+            targetPrincipal: account,
+            lifetime: 3600,
+            delegates: [],
+            targetScopes: ["https://www.googleapis.com/auth/cloud-platform"],
+          });
     } else if (provider && account && process.env.VERCEL_OIDC_TOKEN) {
       /*
         Two steps, not one. The federated client can only exchange Vercel's OIDC token
