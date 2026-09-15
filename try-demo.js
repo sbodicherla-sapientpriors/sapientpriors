@@ -56,13 +56,14 @@
   var MANUAL_OPEN = "https://drive.google.com/file/d/" + MANUAL_ID + "/view";
 
   /*
-    WHY these four. Chosen to be answerable and to be worth watching. The first two are buried deep in a
-    288-page manual and come back with the figure they were read from, which is the pane's
-    whole argument; the third is a procedure, so the rivals have to read before they can
-    start. The last one is in-session memory, which still works with learning switched off.
+    WHY these four, and why they changed. The old set asked what OTHER visitors had
+    stored, which this agent no longer answers now that learning from turns is off.
+
+    These are chosen to be answerable and to be worth watching: the first two are buried
+    deep in a 288-page manual and come back with the figure they were read from, which is
+    the pane's whole argument; the third is a procedure, so a rival pane has to read
+    before it can start. The last is in-session memory, which still works.
   */
-  // WHY these changed: the old set asked what other visitors had stored, which this
-  // agent no longer answers now that learning from turns is off.
   var SUGGESTIONS = [
     "How do I fit a child seat using ISOFIX?",
     "What do the warning lights on the instrument cluster mean?",
