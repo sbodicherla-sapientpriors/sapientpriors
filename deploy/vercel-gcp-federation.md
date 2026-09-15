@@ -20,6 +20,19 @@ Values below are the real ones, read off the Vercel project's OIDC Federation pa
 Make sure that panel is **Saved** with Team selected. Switching it to Global later
 changes `iss` and silently breaks the provider below.
 
+## Status: done on the GCP side
+
+Applied to `adaptive-agent-sp` on 2026-09-15. Pool `vercel` and provider `vercel-oidc` are
+ACTIVE, and `playground-runtime@` carries `roles/iam.workloadIdentityUser` for both the
+**production** and **preview** subjects of the `sapientpriors` Vercel project. Preview is
+bound so a PR deployment can be tested end to end; it spends the same credits as production
+against the same agent, and revoking it is the same command with `--remove-iam-policy-binding`.
+
+**What is left is the four environment variables in section 2.** Until they are set,
+`/api/try` answers 503 and the pane reports that it is not connected.
+
+Section 1 is kept as the record of what was applied, and to rebuild it in another project.
+
 ## Who can run this
 
 Needs `roles/iam.workloadIdentityPoolAdmin` and `roles/iam.serviceAccountAdmin` on
