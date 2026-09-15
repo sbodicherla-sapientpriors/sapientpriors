@@ -271,8 +271,11 @@
     body.appendChild(clock);
 
     var aRow = el("div", "display:flex;justify-content:flex-start");
-    var ans = el("p", "margin:0;max-width:94%;padding:9px 12px;border-radius:10px 10px 10px 3px;border:1px solid " +
-      LINE + ";background:" + BONE + ";font-size:.82rem;line-height:1.55;color:" + INK3 + ";white-space:pre-wrap", "\u2026");
+    // A div, not a p: renderAnswer puts block children inside it for bullets and headings,
+    // and a <p> may not legally contain them \u2014 browsers silently close the paragraph and
+    // the bubble's border ends up wrapped around the first line only.
+    var ans = el("div", "margin:0;max-width:94%;padding:9px 12px;border-radius:10px 10px 10px 3px;border:1px solid " +
+      LINE + ";background:" + BONE + ";font-size:.82rem;line-height:1.55;color:" + INK3, "\u2026");
     aRow.appendChild(ans);
     body.appendChild(aRow);
 
@@ -303,7 +306,7 @@
 
       if (r && r.text.length !== painted) {
         painted = r.text.length;
-        ans.textContent = r.text;
+        renderAnswer(ans, r.text);
       }
 
       if (r && r.done) {
@@ -354,6 +357,56 @@
     }, 40);
     state.timers.push(t);
     return box;
+  }
+
+  /* \u2500\u2500 the answer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     WHY the answer is parsed at all: the model writes Markdown. Real answers from this
+     manual come back with "**Brake System:**" and "- " bullets, and a text node prints
+     those markers literally. On a page whose entire job is to look finished, visible
+     asterisks read as a broken renderer \u2014 the exact impression this demo cannot afford.
+
+     Deliberately tiny: bold, bullets, and headings, which are the only three that actually
+     appear here. Everything else stays text. Built from DOM nodes and never innerHTML, so
+     a document that happens to contain markup cannot inject it into the page.
+  */
+  function inline(node, text) {
+    var parts = text.split("**");
+    // An odd count means a ** was left open \u2014 mid-stream, usually. Rendering it as text
+    // beats bolding the rest of the answer until the closing pair arrives.
+    if (parts.length % 2 === 0) { node.appendChild(document.createTextNode(text)); return; }
+    parts.forEach(function (part, i) {
+      if (!part) return;
+      node.appendChild(i % 2
+        ? el("strong", "font-weight:600;color:" + INK2, part)
+        : document.createTextNode(part));
+    });
+  }
+
+  function renderAnswer(node, text) {
+    node.textContent = "";
+    text.split("\n").forEach(function (line) {
+      if (!line.trim()) { node.appendChild(el("div", "height:.5em")); return; }
+      var heading = /^\s*#{1,6}\s+(.*)$/.exec(line);
+      if (heading) {
+        var h = el("div", "margin:.2em 0 .1em");
+        inline(h, "**" + heading[1] + "**");
+        node.appendChild(h);
+        return;
+      }
+      var bullet = /^\s*[-*]\s+(.*)$/.exec(line);
+      if (bullet) {
+        var row = el("div", "display:flex;gap:7px;align-items:baseline");
+        row.appendChild(el("span", "flex:none;color:" + INK4, "\u2022"));
+        var body = el("span", "min-width:0");
+        inline(body, bullet[1]);
+        row.appendChild(body);
+        node.appendChild(row);
+        return;
+      }
+      var p = el("div", "");
+      inline(p, line);
+      node.appendChild(p);
+    });
   }
 
   /* \u2500\u2500 citations \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -737,4 +790,15 @@
     if (mount()) return;
     if (tries++ < 120) requestAnimationFrame(wait);
   })();
+
+  /*
+    A test hook, not an API. `module` does not exist in a browser, so this is dead code on
+    the page and the file stays a plain <script>. It exists because renderAnswer turns model
+    output into DOM and is the one piece here whose failure is silently ugly rather than
+    loud — literal asterisks in the answer — and deploy/smoke-render.mjs can check it
+    without a browser only if it can reach it.
+  */
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = { renderAnswer: renderAnswer };
+  }
 })();

@@ -104,10 +104,19 @@ check("no error frames", errors.length === 0, errors.map((e) => e.data.message).
 check("delta frames arrived", deltas.length > 0, `${deltas.length} deltas`);
 check("a done frame closed the stream", !!done);
 check("the answer has text", !!done?.data.text, `${done?.data.text?.length || 0} chars`);
+// The pane paints deltas as they arrive and then swaps in done.text. If the two differ the
+// reader watches the answer rewrite itself at the last moment, which looks like a glitch.
+const streamed = deltas.map((d) => d.data.text).join("");
 check(
-  "the streamed deltas match the settled answer",
-  deltas.map((d) => d.data.text).join("").length > 0,
-  "the page shows deltas first, then replaces them with done.text",
+  "the settled answer matches what was streamed",
+  streamed === (done?.data.text || ""),
+  streamed === done?.data.text ? "" : `streamed ${streamed.length} vs settled ${done?.data.text?.length}`,
+);
+// Not an assertion: the model writes Markdown some of the time and that is fine, because
+// the pane renders it. Reported so a run that happens to return none is not mistaken for
+// proof that the renderer was exercised — deploy/smoke-render.mjs is what proves that.
+console.log(
+  `  note  markdown in this answer: ${/\*\*|^\s*[-*]\s|^#{1,6}\s/m.test(done?.data.text || "") ? "yes" : "no"}`,
 );
 
 const cites = done?.data.citations || [];
