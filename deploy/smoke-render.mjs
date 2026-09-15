@@ -13,7 +13,8 @@
  *   node deploy/smoke-render.mjs
  */
 
-import { createRequire } from "node:module";
+import { readFile } from "node:fs/promises";
+import { runInNewContext } from "node:vm";
 
 function node(tag) {
   return {
@@ -48,7 +49,22 @@ globalThis.fetch = () => new Promise(() => {});
 document.querySelector = () => null;
 document.body = node("body");
 
-const { renderAnswer } = createRequire(import.meta.url)("../try-demo.js");
+/*
+  Evaluated in a vm rather than imported. try-demo.js is a browser <script>, and the
+  package is "type": "module" for the api/ functions, which would make Node read it as ESM
+  and hand back none of its test hook. Running the source against an explicit CommonJS-ish
+  frame keeps this test independent of how the package happens to be configured.
+*/
+const source = await readFile(new URL("../try-demo.js", import.meta.url), "utf8");
+const frame = { module: { exports: {} }, document, window: globalThis.window,
+                requestAnimationFrame, localStorage, performance, fetch };
+frame.exports = frame.module.exports;
+runInNewContext(source, frame);
+const { renderAnswer } = frame.module.exports;
+if (typeof renderAnswer !== "function") {
+  console.error("try-demo.js did not expose renderAnswer — is the test hook still at the bottom?");
+  process.exit(1);
+}
 
 let failures = 0;
 function check(label, ok, detail = "") {

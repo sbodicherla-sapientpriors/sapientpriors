@@ -2,6 +2,8 @@
   "//": "WHY a package.json on a site with no build step: /api/try is the one endpoint that talks to something other than a form provider, and Vercel installs its two dependencies from here. diffguard: skip (JSON takes no comments).",
   "name": "sapientpriors-site",
   "private": true,
+  "//type": "All three api/ functions are ESM (export default handler). apply.js and contact.js predate this package.json and worked because Node falls back to ESM detection when no type is declared - a fallback that warns on every cold start and is not something two live form endpoints should depend on. Declared explicitly so the runtime is told rather than left to guess.",
+  "type": "module",
   "description": "Static marketing site plus the Vercel functions beside it. The site itself has no build step; these dependencies exist only for /api/try, which is the one endpoint that talks to something other than a form provider.",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.70.0",
