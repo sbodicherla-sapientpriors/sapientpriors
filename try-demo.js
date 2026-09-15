@@ -342,6 +342,9 @@
       if (!r || (r.ttft === null && !r.text)) {
         if (e >= SILENT_CUTOFF_MS) {
           clearInterval(t);
+          // Stop the request as well as the clock, so what the pane says and what is
+          // actually still running cannot disagree. See readStream for why r owns this.
+          if (r && r.abort) r.abort();
           num.textContent = "\u2014";
           dot.style.background = LINE;
           ans.textContent = "No answer came back.";
@@ -370,16 +373,20 @@
       ";font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:" + INK4,
       "Cited from the manual"));
 
-    list.slice(0, 6).forEach(function (cit) {
+    var SHOWN = 6;
+    list.slice(0, SHOWN).forEach(function (cit) {
       var chip = el("a", "display:flex;align-items:center;gap:7px;max-width:100%;padding:5px 9px 5px 5px;" +
         "border:1px solid " + LINE + ";border-radius:8px;background:" + WHITE + ";text-decoration:none");
       chip.href = cit.href;
       chip.target = "_blank";
       chip.rel = "noopener";
+      if (cit.title) chip.title = cit.title;
 
       if (String(cit.media_type || "").indexOf("image/") === 0) {
         var thumb = document.createElement("img");
         thumb.src = cit.href;
+        // Decorative: the chip's own text is the accessible name, so alt text here would
+        // make a screen reader announce every figure twice.
         thumb.alt = "";
         thumb.loading = "lazy";
         thumb.setAttribute("style", "width:34px;height:34px;object-fit:cover;border-radius:5px;" +
@@ -387,9 +394,18 @@
         chip.appendChild(thumb);
       }
       chip.appendChild(el("span", "font-family:" + MONO + ";font-size:.68rem;color:" + INK2 +
-        ";overflow:hidden;text-overflow:ellipsis;white-space:nowrap", cit.label || "figure"));
+        ";overflow:hidden;text-overflow:ellipsis;white-space:nowrap", cit.label || "Figure"));
       mount.appendChild(chip);
     });
+
+    // WHY the overflow is stated rather than silently sliced: a well-cited answer really
+    // does come back with eight or more crops, and quietly showing six would misreport how
+    // much of the document the answer rests on — on the one page whose argument is exactly
+    // that. Six is the display cap; the count stays honest.
+    if (list.length > SHOWN) {
+      mount.appendChild(el("span", "align-self:center;font-family:" + MONO +
+        ";font-size:.68rem;color:" + INK4, "+" + (list.length - SHOWN) + " more"));
+    }
   }
 
   function race() {
@@ -575,17 +591,28 @@
     honest — a server-side clock would quietly flatter every pane by the same amount.
   */
   function readStream(id, t0, signal) {
+    /*
+      WHY each pane gets its own controller, chained to the shared one: the shared signal
+      supersedes the whole question, but a single pane also needs to give up alone when its
+      own clock runs out. Without r.abort the pane would print "No answer came back" while
+      its request carried on in the background — the screen saying one thing and the
+      billing another, and a late answer arriving with no timer left to paint it.
+    */
+    var ctrl = new AbortController();
+    if (signal) signal.addEventListener("abort", function () { ctrl.abort(); });
+
     // WHY the object is published before the fetch: pane()'s interval is already
     // running, and a pane polling an id that is not there yet has no way to tell
     // "the request has not been made" from "the answer never came".
-    var r = { text: "", ttft: null, ms: null, done: false, error: null, citations: [] };
+    var r = { text: "", ttft: null, ms: null, done: false, error: null, citations: [],
+              abort: function () { ctrl.abort(); } };
     state.results[id] = r;
 
     fetch("/api/try", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user: state.user, model: id, message: state.asked }),
-      signal: signal
+      signal: ctrl.signal
     }).then(function (res) {
       if (!res.ok || !res.body) throw new Error(String(res.status));
       var reader = res.body.getReader();

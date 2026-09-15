@@ -126,6 +126,11 @@ check(
   "hrefs point at this function's own proxy",
   cites.every((c) => c.href.startsWith("/api/try?source=")),
 );
+check(
+  "the reading-order ordinal is on the tooltip, not the caption",
+  cites.every((c) => /reading order|from the manual/.test(c.title || "")),
+  cites[0]?.title || "",
+);
 
 console.log("\n--- answer ---\n" + (done?.data.text || "").slice(0, 600));
 console.log("--- citations ---\n" + JSON.stringify(cites, null, 1) + "\n");

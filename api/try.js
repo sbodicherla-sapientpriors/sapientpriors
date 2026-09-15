@@ -92,14 +92,26 @@ function sse(res, event, data) {
    metering: Vercel KV or Upstash, same window, same key.
 */
 const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 12;
+/*
+  Two budgets, because the two verbs cost wildly different things.
+
+  A POST is a model turn and real money. It is counted per REQUEST, and one question costs
+  one request per visible pane — so with the rival panes switched back on this is five
+  questions a minute, not fifteen. Sized for the three-pane case deliberately.
+
+  A GET is a proxied thumbnail. One answer loads up to six, so sharing the POST budget
+  would let a single well-cited answer eat a visitor's entire allowance for the minute and
+  block their next question. They get their own, much looser one.
+*/
+const MAX_PER_WINDOW = { POST: 15, GET: 120 };
 const hits = new Map();
 
-function overLimit(ip) {
+function overLimit(ip, kind) {
   const now = Date.now();
-  const recent = (hits.get(ip) || []).filter((t) => now - t < WINDOW_MS);
+  const key = `${kind} ${ip}`;
+  const recent = (hits.get(key) || []).filter((t) => now - t < WINDOW_MS);
   recent.push(now);
-  hits.set(ip, recent);
+  hits.set(key, recent);
   // Unbounded growth is the failure mode of a Map keyed on client input; one sweep per
   // call over a map that only holds a minute of traffic is cheaper than a timer.
   if (hits.size > 5000) {
@@ -107,7 +119,9 @@ function overLimit(ip) {
       if (!times.length || now - times[times.length - 1] > WINDOW_MS) hits.delete(key);
     }
   }
-  return recent.length > MAX_PER_WINDOW;
+  // An unknown verb falls to the tight budget rather than an undefined comparison, which
+  // would be `> undefined` — always false, i.e. silently no limit at all.
+  return recent.length > (MAX_PER_WINDOW[kind] ?? MAX_PER_WINDOW.POST);
 }
 
 function clientIp(req) {
@@ -236,9 +250,15 @@ async function ensureThread(req, res, token, username) {
    are shown, because a diagram of the thing you asked about is evidence a visitor can
    check, and it is the half of the claim the prose cannot carry.
 
-   The label is rebuilt too. The product returns the stored crop's filename, which is
-   the upload's name plus an ordinal ("manual4.pdf_img-19.jpg") — an internal artefact
-   that would put our own re-upload bookkeeping on a public page.
+   The label is rebuilt too. The product returns the stored crop's filename, which is the
+   upload's name plus an ordinal ("manual.pdf_img-19.jpg") — internal bookkeeping that does
+   not belong on a public page.
+
+   WHY the ordinal becomes a `title` and not the visible label: it is the crop's position in
+   READING ORDER, not a figure number the manual itself prints. Captioning a thumbnail
+   "Figure 294" invites a reader to go looking for Figure 294 in the document, where there
+   is no such label. The picture is the caption; the ordinal stays available on hover for
+   anyone who wants to match it back to the extraction.
 */
 function isFigure(c) {
   return String(c.media_type || "").startsWith("image/");
@@ -247,7 +267,8 @@ function isFigure(c) {
 function asFigure(c) {
   const ordinal = /img-(\d+)/.exec(c.label || "");
   return {
-    label: ordinal ? `Figure ${ordinal[1]}` : "Figure",
+    label: "Figure",
+    title: ordinal ? `Figure ${ordinal[1]} of the manual, in reading order` : "Figure from the manual",
     media_type: c.media_type,
     // The product's href points at an authenticated route the browser cannot call,
     // so it is rewritten to this function's own proxy.
@@ -364,7 +385,19 @@ async function streamRival(res, which, message) {
   }
 }
 
-/** Proxy one cited figure out of the product API, which the browser cannot reach. */
+// The product's own id shape. Checked here so a malformed id is a cheap 400 instead of an
+// authenticated round trip that comes back 422 and gets reported as a bad gateway.
+const SOURCE_ID = /^(?:img|src)_[0-9a-f]{32}$/;
+
+/** Proxy one cited figure out of the product API, which the browser cannot reach.
+ *
+ *  CEILING worth knowing: any visitor holding a thread cookie can fetch ANY source id on
+ *  this agent, not only the ones cited back to them. That is safe today because the agent
+ *  holds exactly one public document and ids carry 128 bits of entropy, so there is nothing
+ *  to enumerate and nothing private to reach. It stops being safe the moment a second,
+ *  non-public document is ingested into this same agent — at which point this needs to
+ *  check the id against the citations actually issued to that thread.
+ */
 async function serveSource(req, res, sourceId) {
   const token = await productToken();
   const thread = readCookie(req, COOKIE);
@@ -388,10 +421,17 @@ async function serveSource(req, res, sourceId) {
 }
 
 export default async function handler(req, res) {
+  // WHY the limiter covers GET too: every thumbnail is an authenticated round trip made as
+  // the service account, so leaving it unmetered hands anyone an unthrottled proxy into the
+  // product API. It has its own budget — see MAX_PER_WINDOW.
+  if (overLimit(clientIp(req), req.method)) {
+    res.status(429).json({ error: "too many questions, give it a minute" });
+    return;
+  }
   if (req.method === "GET") {
     const sourceId = new URL(req.url, "http://localhost").searchParams.get("source");
-    if (!sourceId) {
-      res.status(400).json({ error: "missing source" });
+    if (!SOURCE_ID.test(sourceId || "")) {
+      res.status(400).json({ error: "missing or malformed source" });
       return;
     }
     await serveSource(req, res, sourceId);
@@ -399,10 +439,6 @@ export default async function handler(req, res) {
   }
   if (req.method !== "POST") {
     res.status(405).json({ error: "method not allowed" });
-    return;
-  }
-  if (overLimit(clientIp(req))) {
-    res.status(429).json({ error: "too many questions, give it a minute" });
     return;
   }
 
