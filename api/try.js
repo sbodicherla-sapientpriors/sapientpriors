@@ -1,9 +1,14 @@
 /**
  * /api/try — the endpoint behind the Try It playground.
  *
- * Three contenders answer one question about the MG Hector owner's manual, and the
- * page races their clocks. This function is the only authenticated party: the browser
- * holds no credential for anything, and every visitor is anonymous.
+ * Up to three contenders answer one question about the MG Hector owner's manual, and
+ * the page times them. This function is the only authenticated party: the browser holds
+ * no credential for anything, and every visitor is anonymous.
+ *
+ * The page currently asks for "ours" only — the two rival panes are switched off there,
+ * not here. They are kept implemented because switching them back on is a two-line
+ * change in try-demo.js, and because the asymmetry below is the argument the page makes
+ * when they are on.
  *
  * ── Why the three panes are not symmetrical ─────────────────────────────────
  * "ours" asks the product API, which retrieves from memory and streams an answer

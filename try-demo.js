@@ -5,13 +5,15 @@
  *   1. Pick a display name for the session.
  *   2. Ask questions about the MG Hector owner's manual, 288 pages of it, open
  *      in the pane on the left.
- *   3. The same question goes to all three contenders at once and each clock
- *      runs independently. Ours answers from memory and cites the figures it
- *      read; the rivals are handed the whole PDF and have to read it first.
+ *   3. The answer comes back from memory, with the figures it drew on cited
+ *      underneath, and the clock reports how long the first word took.
+ *
+ * The Claude Opus and Haiku panes that raced this one are switched off for now;
+ * see CONTENDERS for what turning them back on costs and takes.
  *
  * ── State of play ───────────────────────────────────────────────────────────
- * Every send opens three SSE streams against /api/try, one per pane, and each
- * pane paints its own as it arrives. Nothing here is scripted: a pane that
+ * Every send opens one SSE stream against /api/try per contender, and each pane
+ * paints its own as it arrives. Nothing here is scripted: a pane that
  * cannot reach its model says so, because a demo whose whole claim is "it
  * answers from this document" cannot afford a canned reply that only looks
  * like one.
@@ -68,10 +70,17 @@
     "Remember that I tow a trailer most weekends."
   ];
 
+  /*
+    WHY one pane and not three: the rival panes are switched off for now. /api/try still
+    implements them, so restoring the race is adding the two rows back here — nothing
+    else in this file is hard-coded to a count. Every layout below reads the length.
+
+    They cost real money per question (Opus reads 288 scanned pages on every ask) and
+    they need ANTHROPIC_MANUAL_FILE_ID, so a page shipped without that key would show
+    two permanently broken panes beside a working one.
+  */
   var CONTENDERS = [
-    { id: "ours", name: "SapientPriors", ours: true },
-    { id: "haiku", name: "Claude Haiku 4.5", ours: false },
-    { id: "opus", name: "Claude Opus 5", ours: false }
+    { id: "ours", name: "SapientPriors", ours: true }
   ];
 
   /*
@@ -376,14 +385,20 @@
     var wrap = el("div", "");
     if (!state.asked) {
       var empty = el("div", "border:1px dashed " + LINE + ";border-radius:12px;padding:52px 24px;text-align:center");
+      // WHY the copy changed: it used to invite you to "tell it something to remember"
+      // and to watch three clocks. Neither is true now — learning from turns is off and
+      // the rival panes are hidden, so the empty state promises what the page delivers.
       empty.appendChild(el("p", "margin:0 0 6px;font-family:" + SERIF + ";font-size:1.15rem;color:" + INK,
-        "Ask the manual something, or tell it something to remember."));
+        "Ask the manual something."));
       empty.appendChild(el("p", "margin:0;font-size:.85rem;color:" + INK3,
-        "The same question goes to all three at once. Watch the clocks."));
+        "The clock starts on send and stops on the first word back."));
       wrap.appendChild(empty);
       return wrap;
     }
-    var cols = el("div", "display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px");
+    // One column per contender, read from the list rather than pinned at three, so
+    // turning the rivals back on is a data change and not a CSS hunt.
+    var cols = el("div", "display:grid;grid-template-columns:repeat(" + CONTENDERS.length +
+      ",minmax(0,1fr));gap:14px");
     cols.setAttribute("data-race-cols", "");
     CONTENDERS.forEach(function (c) { cols.appendChild(pane(c)); });
     wrap.appendChild(cols);
@@ -407,7 +422,7 @@
         ";font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:" + INK4, "The demo"));
       wrap.appendChild(el("h2", "margin:0 auto 2rem;max-width:24ch;text-align:center;font-family:" + SERIF +
         ";font-weight:400;font-size:clamp(1.9rem,3.4vw,2.9rem);line-height:1.1;letter-spacing:-.02em;color:" + INK,
-        "One manual, 288 pages, three clocks running."));
+        "One manual, 288 pages, answered before it could be read."));
       gate(wrap, function (u) { state.user = u; render(mount); });
       mount.appendChild(wrap);
       return;
@@ -440,7 +455,8 @@
     input.placeholder = "Ask about the manual, or tell it something to remember";
     input.setAttribute("aria-label", "Message");
     var send = el("button", "flex:none;padding:11px 20px;border:0;border-radius:8px;background:" + BROWN +
-      ";color:#fff;font-size:.875rem;font-weight:500;cursor:pointer", "Ask all three");
+      ";color:#fff;font-size:.875rem;font-weight:500;cursor:pointer",
+      CONTENDERS.length > 1 ? "Ask all " + CONTENDERS.length : "Ask");
     send.type = "submit";
     row.appendChild(input); row.appendChild(send);
     form.appendChild(row);
@@ -518,7 +534,7 @@
       if (rc) {
         rc.style.gridTemplateColumns = mqPanes.matches
           ? "minmax(0,1fr)"
-          : "repeat(3,minmax(0,1fr))";
+          : "repeat(" + CONTENDERS.length + ",minmax(0,1fr))";
       }
     }
     lay();
