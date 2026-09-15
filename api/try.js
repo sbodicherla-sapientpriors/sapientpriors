@@ -512,12 +512,34 @@ export default async function handler(req, res) {
   const setupStarted = Date.now();
   if (which === "ours") {
     try {
+      /*
+        WHY the 503 names the missing piece: "not connected" was all this said, and it is
+        the same message for an unset env var, an OIDC federation that was never switched
+        on, and a thread the API refused. Diagnosing it meant reading Vercel logs, which
+        needs an account. `reason` names a CONFIGURATION KEY or a step, never a value, a
+        token or an upstream body — enough to fix it from a curl, nothing worth leaking.
+      */
+      const missing = [
+        !API_BASE && "PRODUCT_API_BASE_URL",
+        !AGENT_ID && "PLAYGROUND_AGENT_ID",
+      ].filter(Boolean);
+      if (missing.length) throw new Error(`unset: ${missing.join(", ")}`);
+
       token = await productToken();
-      if (!token || !AGENT_ID) throw new Error("unconfigured");
+      if (!token) {
+        // productToken returns null when no credential path is configured at all. The most
+        // common cause by far is OIDC Federation being left unsaved in the Vercel project,
+        // which means VERCEL_OIDC_TOKEN is never injected however correct the rest is.
+        throw new Error(
+          process.env.GCP_WORKLOAD_IDENTITY_PROVIDER && !process.env.VERCEL_OIDC_TOKEN
+            ? "no VERCEL_OIDC_TOKEN: enable and SAVE OIDC Federation in the Vercel project"
+            : "no credential: set GCP_WORKLOAD_IDENTITY_PROVIDER and GCP_SERVICE_ACCOUNT_EMAIL",
+        );
+      }
       thread = await ensureThread(req, res, token, String(body.user || ""));
     } catch (err) {
       console.error("try: ours setup", err);
-      res.status(503).json({ error: "not connected" });
+      res.status(503).json({ error: "not connected", reason: String(err?.message || err) });
       return;
     }
   }
