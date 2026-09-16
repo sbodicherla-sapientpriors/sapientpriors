@@ -349,19 +349,21 @@
     body.appendChild(qRow);
 
     /*
-      WHY two numbers, not one. The first token is the claim this page is making, so it is
-      the one in ink; total time is the honest companion to it, because a fast first
-      word and a slow finish would otherwise read as a fast answer.
+      One number: time to the first token. That is the claim this page makes, and
+      it is the number the reader is watching count up while they wait.
+
+      Total time used to be printed beside it. Removed by request. Nothing
+      simulates or rounds what is left - it is still measured in the browser, so
+      it includes the hop the visitor actually pays for.
     */
-    // WHY lbl and total are separate spans: each is set independently as the stream
-    // reaches a different state, and rebuilding one string would fight the interval.
+    // WHY lbl is its own span: it is set independently of num as the stream reaches
+    // a different state, and rebuilding one string would fight the interval.
     var clock = el("p", "margin:0;display:flex;align-items:center;justify-content:flex-end;gap:8px;" +
       "font-family:" + MONO + ";font-size:.75rem;color:" + INK4);
     var dot = el("span", "width:6px;height:6px;border-radius:50%;background:" + BROWN);
     var num = el("span", "font-weight:500;color:" + INK2, "0 ms");
     var lbl = el("span", "letter-spacing:.06em", "");
-    var total = el("span", "color:" + INK4, "");
-    clock.appendChild(dot); clock.appendChild(num); clock.appendChild(lbl); clock.appendChild(total);
+    clock.appendChild(dot); clock.appendChild(num); clock.appendChild(lbl);
     body.appendChild(clock);
 
     var aRow = el("div", "display:flex;justify-content:flex-start");
@@ -430,8 +432,9 @@
             ans.style.color = INK4;
           }
         } else {
+          // No first token ever arrived but the turn finished, so the only honest
+          // figure left is how long the whole thing took.
           if (r.ttft === null) num.textContent = fmt(r.ms);
-          total.textContent = "\u00b7 " + fmt(r.ms) + " total";
           if (!r.text) ans.textContent = "(empty reply)";
         }
         if (!drewCites) { drewCites = true; drawCitations(cites, r.citations); }

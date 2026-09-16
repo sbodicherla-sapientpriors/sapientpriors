@@ -112,11 +112,13 @@ GLOW = (
 # button, so it must change in lockstep with the href in TRY_BUTTON below.
 TRY_HREF = 'href="/#playground"'
 
-# 26px on top of the row's own 12px gap. The rays reach past the button on every
-# side, and without it they crossed the Get Beta Access button beside it -
-# decoration drawn over a different control reads as a rendering fault.
+# 26px on top of the row's own 12px gap, on the RIGHT now that Try It comes
+# first. The rays reach past the button on every side, and without the extra gap
+# they crossed the Get Beta Access button beside it - decoration drawn over a
+# different control reads as a rendering fault. The margin has to sit on
+# whichever side the neighbour is.
 TRY_BUTTON = (
-    '<div style="position:relative;display:inline-flex;margin-left:26px">'
+    '<div style="position:relative;display:inline-flex;margin-right:26px">'
     + GLOW +
     '<a href="/#playground" style="position:relative;padding:12px 28px;'
     'border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.9375rem;'
@@ -146,7 +148,7 @@ def apply(out):
             removed += 1
 
         if HERO_CTA in s and TRY_HREF not in s:
-            s = s.replace(HERO_CTA, HERO_CTA + TRY_BUTTON, 1)
+            s = s.replace(HERO_CTA, TRY_BUTTON + HERO_CTA, 1)
             added += 1
             if "@keyframes try-glow" not in s:
                 s = s.replace("\n</style>", KEYFRAMES + "</style>", 1)
