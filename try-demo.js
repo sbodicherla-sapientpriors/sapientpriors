@@ -32,6 +32,25 @@
 
   var INK = "#14161A", INK2 = "#3A3E45", INK3 = "#6B7078", INK4 = "#9AA0A8";
   var LINE = "#E4E4E0", LINE_SOFT = "#EFEFEC", BONE = "#F6F6F4", WHITE = "#FFFFFF";
+  // A step DOWN from the page, not up: the cards inside the demo are white, so a
+  // white frame around them would dissolve the thing it is meant to separate.
+  var SUNKEN = "#EFEFEC";
+
+  /*
+    How tall the two columns are, and therefore how tall the panel is.
+
+    With STICK_TOP below, the panel's top border rests 89px down - sixteen clear
+    of the 73px nav - and its bottom edge lands ~60px above the fold, so the demo
+    is visibly smaller than the window on both axes. Both columns use the one
+    expression, because the whole point of bounding them is that they end on the
+    same line.
+  */
+  var COL_HEIGHT = "calc(100vh - 189px)";
+
+  /* Where the manual card stops when the page scrolls past it. One padding step
+     below the panel's own resting top edge, so the frame keeps its inset instead
+     of the card climbing out through it. */
+  var STICK_TOP = "109px";
   var BROWN = "#84512E", BROWN_D = "#6B4226";
   var MONO = "'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace";
   var SERIF = "Newsreader,Georgia,serif";
@@ -94,6 +113,24 @@
     demo being broken rather than as their latency being real.
   */
   var SILENT_CUTOFF_MS = 60000;
+
+  /*
+    The backdrop behind the username card.
+
+    Capped, because it is a glimpse and not the page: at full height the card
+    centred in 790px of blur and landed below the fold, and the one thing it
+    cannot do is be out of sight. Faded at the cut so it reads as more-below
+    rather than as a component that stops.
+
+    A constant rather than an inline string because lock() has to restore
+    precisely what render() applied; two hand-copied copies drift apart the
+    first time one of them is edited.
+  */
+  var LOCKED_BACKDROP =
+    "filter:blur(5px);pointer-events:none;user-select:none;opacity:.65;" +
+    "max-height:440px;overflow:hidden;" +
+    "-webkit-mask-image:linear-gradient(to bottom,#000 62%,transparent);" +
+    "mask-image:linear-gradient(to bottom,#000 62%,transparent)";
 
   var state = { user: null, manual: null, asked: null, askedAt: null,
                 results: {}, timers: [], abort: null };
@@ -197,8 +234,8 @@
   */
   function source() {
     var card = el("div", "border:1px solid " + LINE + ";border-radius:12px;background:" + WHITE +
-      ";overflow:hidden;position:sticky;top:88px;display:flex;flex-direction:column;" +
-      "max-height:calc(100vh - 108px)");
+      ";overflow:hidden;position:sticky;top:" + STICK_TOP + ";display:flex;flex-direction:column;" +
+      "max-height:" + COL_HEIGHT);
 
     var head = el("div", "padding:12px 14px;border-bottom:1px solid " + LINE_SOFT + ";flex:none");
     head.appendChild(el("p", "margin:0 0 2px;font-family:" + MONO + ";font-size:.7rem;letter-spacing:.14em;" +
@@ -535,7 +572,8 @@
   function reveal(mount) {
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
-        var grid = mount.querySelector("[data-try-grid]");
+        var grid = mount.querySelector("[data-try-panel]") ||
+                   mount.querySelector("[data-try-grid]");
         if (!grid) return;
         var nav = 0;
         document.querySelectorAll("div,header,nav").forEach(function (e) {
@@ -551,6 +589,77 @@
     });
   }
 
+  /* ── updating without rebuilding ──────────────────────────────────────────
+     render() is a full teardown: mount.innerHTML = "" and the whole tree again.
+     That is fine once, and wrong every time after, because the left column holds
+     an iframe. Detaching an iframe from the document does not move it, it
+     restarts it — so every question refetched 10.2MB of manual from Drive and
+     threw the reader back to page one of 288, mid-sentence, on the one page whose
+     argument is "open the figure it cites and check it".
+
+     It also read as amnesia. The API is a single thread and genuinely remembers
+     the conversation - a follow-up with no subject in it is answered correctly -
+     but wiping the screen on send made a continuing conversation look like a
+     fresh one every time.
+
+     So nothing below tears anything down. Each function changes the one part
+     that actually differs and leaves the iframe attached and playing.
+  */
+
+  /* The answers, and only the answers. race() is the only node that reads
+     state.asked or state.results, so it is the only node a new question
+     invalidates. */
+  function repaint(mount) {
+    var right = mount.querySelector("[data-try-right]");
+    if (!right || !right.firstChild) { render(mount); return; }
+    right.replaceChild(race(), right.firstChild);
+    // The fresh pane grid has no column count on it yet, and lay() is what owns
+    // that decision at each breakpoint.
+    if (state.lay) state.lay();
+  }
+
+  /* Clearing the gate: unblur, reveal the bar, drop the card. Everything the
+     visitor was already looking at through the blur stays exactly where it was,
+     including a manual that has had the whole time they spent reading the card
+     to finish loading. */
+  function unlock(mount) {
+    var body = mount.querySelector("[data-try-body]");
+    var veil = mount.querySelector("[data-try-veil]");
+    var bar = mount.querySelector("[data-try-bar]");
+    var who = mount.querySelector("[data-try-who]");
+    if (!body) { render(mount); return; }
+    body.setAttribute("style", "");
+    body.removeAttribute("aria-hidden");
+    if (who) who.textContent = state.user;
+    if (bar) bar.style.visibility = "";
+    if (veil && veil.parentNode) veil.parentNode.removeChild(veil);
+    if (state.lay) state.lay();
+  }
+
+  /* And back, for "Change username". */
+  function lock(mount) {
+    var stage = mount.querySelector("[data-try-stage]");
+    var body = mount.querySelector("[data-try-body]");
+    var bar = mount.querySelector("[data-try-bar]");
+    if (!stage || !body) { render(mount); return; }
+    body.setAttribute("style", LOCKED_BACKDROP);
+    body.setAttribute("aria-hidden", "true");
+    if (bar) bar.style.visibility = "hidden";
+    if (mount.querySelector("[data-try-veil]")) return;
+    var veil = el("div", "position:absolute;inset:0;display:flex;align-items:center;" +
+      "justify-content:center;padding:24px");
+    veil.setAttribute("data-try-veil", "");
+    var holder = el("div", "width:100%;max-width:34rem");
+    gate(holder, function (u) {
+      state.user = u;
+      warm();
+      unlock(mount);
+      reveal(mount);
+    });
+    veil.appendChild(holder);
+    stage.appendChild(veil);
+  }
+
   function render(mount) {
     mount.innerHTML = "";
     /*
@@ -561,7 +670,7 @@
       three panes wide enough to read instead of three columns crushed into two
       thirds of 1400px.
     */
-    var wrap = el("div", "margin:0 auto;padding:0 clamp(1.25rem,3.2vw,4.5rem)");
+    var wrap = el("div", "margin:0 auto;max-width:1720px;padding:0 clamp(1.25rem,3.2vw,4.5rem)");
 
     /*
       The gate no longer replaces the demo, it sits on top of it.
@@ -580,25 +689,20 @@
     */
     var locked = !state.user;
     var stage = el("div", "position:relative");
-    var body = el("div", locked
-      ? "filter:blur(5px);pointer-events:none;user-select:none;opacity:.65;" +
-        // Capped, because the backdrop is a glimpse and not the page. At full
-        // height the card centred in 790px of blur and landed below the fold -
-        // the one thing it cannot do is be out of sight.
-        "max-height:440px;overflow:hidden;" +
-        // and faded at the cut, so it reads as more-below rather than as a
-        // component that stops
-        "-webkit-mask-image:linear-gradient(to bottom,#000 62%,transparent);" +
-        "mask-image:linear-gradient(to bottom,#000 62%,transparent)"
-      : "");
+    stage.setAttribute("data-try-stage", "");
+    var body = el("div", locked ? LOCKED_BACKDROP : "");
+    body.setAttribute("data-try-body", "");
     if (locked) body.setAttribute("aria-hidden", "true");
 
     var bar = el("div", "display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 20px;flex-wrap:wrap");
+    bar.setAttribute("data-try-bar", "");
     // "Signed in as" with nothing after it is worse than no bar at all.
     if (locked) bar.style.visibility = "hidden";
     var who = el("p", "margin:0;font-size:.9375rem;color:" + INK2);
     who.appendChild(document.createTextNode("Signed in as "));
-    who.appendChild(el("span", "font-family:" + MONO + ";color:" + INK, state.user));
+    var whoName = el("span", "font-family:" + MONO + ";color:" + INK, state.user);
+    whoName.setAttribute("data-try-who", "");
+    who.appendChild(whoName);
     bar.appendChild(who);
     var swap = el("button", "border:1px solid " + LINE + ";background:transparent;border-radius:8px;" +
       "padding:7px 14px;font-size:.8125rem;color:" + INK3 + ";cursor:pointer", "Change username");
@@ -606,11 +710,11 @@
       state.timers.forEach(clearInterval); state.timers = [];
       state.user = null; state.asked = null; state.results = {};
       try { localStorage.removeItem(STORE_KEY); } catch (_) {}
-      render(mount);
+      repaint(mount);
+      lock(mount);
     });
     bar.appendChild(swap);
     body.appendChild(bar);
-
     body.appendChild(tip());
 
     var form = el("form", "border:1px solid " + LINE + ";border-radius:12px;background:" + WHITE +
@@ -654,6 +758,30 @@
       layout - which just follows DOM order - puts the interactive half first
       rather than burying it under a 288-page document.
     */
+    /*
+      The frame.
+
+      Both columns were bounded to the viewport and the wrap ran to the page's
+      own gutter, so the demo met all four edges of the window with nothing
+      between it and the page - it read as the page rather than as a thing
+      sitting on it. A border, a step down in tone from the page behind it, and
+      a legend riding the top edge make it one panel; the column heights below
+      are cut so it clears the nav at the top and the fold at the bottom.
+
+      overflow stays visible. The manual card inside is position:sticky, and an
+      overflow of anything but visible makes this element its scroll container,
+      which stops the sticky working at all.
+    */
+    var panel = el("div", "position:relative;border:1px solid " + LINE + ";border-radius:16px;" +
+      "background:" + SUNKEN + ";padding:clamp(14px,1.4vw,20px)");
+    panel.setAttribute("data-try-panel", "");
+    // Sits ON the border and paints the page colour over it, so the rule breaks
+    // for the width of the word the way a fieldset legend does.
+    var legend = el("span", "position:absolute;top:0;left:clamp(18px,2vw,30px);" +
+      "transform:translateY(-50%);background:" + BONE + ";padding:0 10px;font-family:" + MONO +
+      ";font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:" + INK4, "Live demo");
+    panel.appendChild(legend);
+
     var grid = el("div", "display:grid;gap:clamp(1rem,1.8vw,1.5rem);align-items:start");
     grid.setAttribute("data-try-grid", "");
 
@@ -668,7 +796,8 @@
     left.appendChild(source());
     grid.appendChild(left);
 
-    body.appendChild(grid);
+    panel.appendChild(grid);
+    body.appendChild(panel);
 
     /*
       WHY this was rewritten and not just trimmed: it used to say "anything you store here
@@ -687,11 +816,12 @@
     if (locked) {
       var veil = el("div", "position:absolute;inset:0;display:flex;align-items:center;" +
         "justify-content:center;padding:24px");
+      veil.setAttribute("data-try-veil", "");
       var holder = el("div", "width:100%;max-width:34rem");
       gate(holder, function (u) {
         state.user = u;
         warm();
-        render(mount);
+        unlock(mount);
         reveal(mount);
       });
       veil.appendChild(holder);
@@ -720,7 +850,7 @@
       // The same height the manual card is bounded to, so both columns end on
       // the same line. On one column there is nothing to align to, and a fixed
       // height would just cut the page off.
-      right.style.height = mqPage.matches ? "auto" : "calc(100vh - 108px)";
+      right.style.height = mqPage.matches ? "auto" : COL_HEIGHT;
 
       var card = left.firstChild;
       if (card) {
@@ -735,7 +865,7 @@
           iframe is flex:1 and grows to fill it, and both columns end on the
           same line.
         */
-        card.style.height = mqPage.matches ? "auto" : "calc(100vh - 108px)";
+        card.style.height = mqPage.matches ? "auto" : COL_HEIGHT;
       }
 
       var rc = wrap.querySelector("[data-race-cols]");
@@ -745,6 +875,7 @@
           : "repeat(" + CONTENDERS.length + ",minmax(0,1fr))";
       }
     }
+    state.lay = lay;
     lay();
     mqPage.addEventListener("change", lay);
     mqPanes.addEventListener("change", lay);
@@ -873,7 +1004,7 @@
     state.asked = text.trim();
     state.askedAt = performance.now();
     state.results = {};
-    render(mount);
+    repaint(mount);
 
     // WHY state.askedAt and not a second performance.now(): every pane's clock counts up
     // from askedAt, so measuring the first token from a later instant would let the final
