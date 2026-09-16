@@ -21,6 +21,13 @@ demo's frame carries a legend that sits ON its top border and paints the page
 colour over it to break the rule. On a white section that legend would be a
 grey chip floating on white instead of a gap in a line.
 
+data-scroll-target names where the Try It anchor should come to rest. The
+default in the markup is the heading, because landing on the section's own top
+edge put a padding-step of empty background under the nav and pushed the
+username card most of the way down the viewport. try-demo.js swaps it to the
+demo itself once a username exists, so a returning visitor - who never sees the
+gate - is taken straight to the thing they came back for.
+
 The slot is a div inside the <x-dc> template, not appended to the body, because
 the runtime replaces the whole subtree on hydration — see the same note in
 Playground.dc.html, and the x-dc guard in try-demo.js's mount().
@@ -34,11 +41,11 @@ MONO = ("'Cascadia Code',ui-monospace,SFMono-Regular,Menlo,monospace")
 # Kept verbatim from the Playground page it replaces, rather than rewritten:
 # the copy was already reviewed and it is the same demo.
 SECTION = (
-    '\n    <div id="playground" data-home-playground="" '
+    '\n    <div id="playground" data-home-playground="" data-scroll-target="[data-try-head]" '
     'style="scroll-margin-top:90px;position:relative;border-bottom:1px solid #E4E4E0;'
     'background:#F6F6F4;padding-block:clamp(3.5rem,5vw,5rem) clamp(3rem,5vw,5rem)">\n'
     '      <div style="position:relative;padding-inline:clamp(1.25rem,3.2vw,4.5rem)">\n'
-    '        <div style="max-width:48rem">\n'
+    '        <div data-try-head="" style="max-width:48rem;scroll-margin-top:88px">\n'
     '          <p style="margin:0 0 20px;display:flex;align-items:center;gap:12px;'
     'font-family:' + MONO + ';font-weight:500;font-size:.8125rem;letter-spacing:.14em;'
     'text-transform:uppercase;color:#6B7078">Playground'

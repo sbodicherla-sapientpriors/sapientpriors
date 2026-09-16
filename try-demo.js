@@ -149,6 +149,26 @@
   */
   var state = { user: null, manual: null, turns: [], timers: [], abort: null };
 
+  /*
+    Where the /#playground anchor should come to rest, asked at click time by
+    scroll-motion.js.
+
+    Gate up: the heading, so the kicker sits just under the nav and the username
+    card lands near the middle of the viewport instead of near its bottom.
+
+    Gate cleared - which includes a returning visitor, who never sees it - the
+    demo itself. Scrolling someone to a heading they have already read, with the
+    thing they came back for below the fold, is a step they would only undo.
+
+    WHY a function on a shared registry rather than an attribute on the section:
+    it has to be evaluated when the anchor is clicked, not when the demo last
+    rendered, and it must not depend on which of the two scripts loaded first.
+    The registry is created by whichever gets there.
+  */
+  (window.__spAims = window.__spAims || {}).playground = function (sec) {
+    return sec.querySelector(state.user ? "[data-try-panel]" : "[data-try-head]");
+  };
+
   function el(tag, style, text) {
     var n = document.createElement(tag);
     if (style) n.setAttribute("style", style);

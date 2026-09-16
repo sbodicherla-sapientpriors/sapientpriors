@@ -309,8 +309,58 @@
     try { return document.getElementById(decodeURIComponent(id)); } catch (e) { return null; }
   }
 
+  /*
+    Where an anchor should actually come to rest.
+
+    Two escapes from "the top of the element, under the nav":
+
+      data-scroll-target  a selector for a descendant to align instead. A
+                          section is a background and padding; the thing the
+                          reader came for is usually inside it, and landing on
+                          the section's own top edge leaves that thing pushed a
+                          padding-step down the viewport. The playground uses
+                          this to aim at its heading while the gate is up and at
+                          the demo itself once it is not.
+
+      scroll-margin-top   honoured as the WHOLE offset when set, which is what
+                          the property means - the gap between the viewport top
+                          and the element. Falls back to the measured nav.
+  */
+  function aimFor(el) {
+    /*
+      A registered function first, because the answer can depend on state the
+      markup cannot express - the playground aims at its heading or at the demo
+      depending on whether the visitor already has a username.
+
+      WHY a function and not just the attribute: the pages hydrate through a
+      runtime that reconciles attributes on the nodes it owns, so an attribute
+      written onto a section by another script is quietly reverted to the value
+      in the template. Measured: try-demo set data-scroll-target to the panel and
+      it read back as the template's default. A function is ours, is asked at
+      click time, and is therefore always current.
+
+      The registry is created by whichever script loads first, so neither has to
+      wait for the other.
+    */
+    var reg = window.__spAims || {};
+    var fn = el.id && reg[el.id];
+    if (fn) {
+      var picked = null;
+      try { picked = fn(el); } catch (e) {}
+      if (picked) return picked;
+    }
+    var sel = el.getAttribute && el.getAttribute("data-scroll-target");
+    return (sel && el.querySelector(sel)) || el;
+  }
+
+  function offsetFor(el) {
+    var sm = parseFloat(getComputedStyle(el).scrollMarginTop);
+    return sm > 0 ? sm : navOffset();
+  }
+
   function goTo(el) {
-    var y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - navOffset());
+    el = aimFor(el);
+    var y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - offsetFor(el));
     /* Through the lerp when it owns scrolling, natively when it does not. Using
        the native one while the lerp is live means both write scrollY every frame
        and the anchor loses. */
