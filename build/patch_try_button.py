@@ -19,7 +19,6 @@ Short rays around an ellipse, pointing outward, pulsing and turning slowly.
                                      visible at once and drew the ellipse itself
                                      - a hard ring floating around the button,
                                      the one shape this effect must not have
-  every ray is fully lit             the motion is length, not brightness
   colour cycles per ray              within the brand's own family: the brown,
                                      and the golds and rusts either side of it,
                                      so it reads as light coming off the button
@@ -58,47 +57,33 @@ NAV_BUTTON_PREFIX = '<a href="/try" style="margin-left:16px;padding:9px 17px;'
 RAY_COLOURS = ["#84512E", "#C2703A", "#E8A94E", "#D2643C", "#A8452A", "#E0B15F"]
 
 
-CYCLE = 1.3   # seconds for one trip of the wave around the ring
-RAY_LEN = 26  # the drawn length of every ray, in viewBox units
+CYCLE = 2.4  # seconds, one full trip of the shimmer around the ring
 
 
-def _rays(count=28, cx=130, cy=62, rx=40, ry=18):
+def _rays(count=28, cx=130, cy=62, rx=40, ry=18, short=13, long_=20):
     """
-    Rays around an ellipse whose LENGTHS travel, like a level meter bent into a
-    ring. Every ray is fully lit; the motion is how far each one reaches.
+    Rays around an ellipse: alternating length, cycling colour, and each one
+    lit on a delay taken from its position, so brightness chases around the
+    ring rather than every ray breathing in unison.
 
-    Three things make that work:
-
-      every ray is drawn the same length, stepping outward along the unit
-      direction rather than by a step in the ellipse's own parameter space -
-      that way a single pair of stroke-dashoffset keyframes fits all 28, where
-      rays of differing true lengths would each have needed their own;
-
-      stroke-dasharray is that length, so animating stroke-dashoffset trims the
-      ray from its far end and it grows and shrinks outward from behind the
-      button rather than sliding;
-
-      the delay comes from the ray's position, so neighbours are a fraction of
-      the cycle apart and the heights read as one wave travelling rather than
-      28 rays flickering.
-
-    Not rotation. A turning ellipse sweeps a circle, and this one is wider than
-    it is tall, so it climbed into the sub-line above and the logo row below.
-    Lengths move without the footprint ever changing.
+    The movement is opacity, not geometry. Rotation was tried and removed - a
+    turning ellipse sweeps a circle, and this one is wider than it is tall, so
+    it climbed into the sub-line above and the logo row below. A shimmer moves
+    without the footprint ever changing.
     """
     out = []
     for i in range(count):
         a = (2 * math.pi * i) / count
         ux, uy = math.cos(a), math.sin(a)
-        x1, y1 = cx + rx * ux, cy + ry * uy
+        reach = long_ if i % 2 == 0 else short
+        delay = -(i / float(count)) * CYCLE
         out.append(
             '<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" '
-            'stroke-dasharray="%d" '
-            'style="animation:try-ray %.2fs ease-in-out infinite;'
+            'style="animation:try-ray %.1fs ease-in-out infinite;'
             'animation-delay:%.2fs"/>' % (
-                x1, y1, x1 + RAY_LEN * ux, y1 + RAY_LEN * uy,
-                RAY_COLOURS[i % len(RAY_COLOURS)], RAY_LEN, CYCLE,
-                -(i / float(count)) * CYCLE))
+                cx + rx * ux, cy + ry * uy,
+                cx + (rx + reach) * ux, cy + (ry + reach) * uy,
+                RAY_COLOURS[i % len(RAY_COLOURS)], CYCLE, delay))
     return "".join(out)
 
 
@@ -111,7 +96,7 @@ GLOW = (
     '<svg viewBox="0 0 260 124" focusable="false" '
     'style="width:100%;height:100%;overflow:visible;stroke-width:2.1;'
     'stroke-linecap:round;filter:drop-shadow(0 0 4px rgba(200,130,60,.4));'
-    '">' + _rays() + '</svg>'
+    'animation:try-glow 2.6s ease-in-out infinite">' + _rays() + '</svg>'
     '</span>'
 )
 
@@ -128,13 +113,12 @@ TRY_BUTTON = (
 )
 
 KEYFRAMES = (
-    "\n  /* The hero Try It glow: ray LENGTHS travel around the ring, like a"
-    "\n     level meter bent into an ellipse. stroke-dashoffset trims each ray"
-    "\n     from its far end, so it grows and shrinks outward from behind the"
-    "\n     button. Never below 6 units drawn - a ray that reaches zero reads as"
-    "\n     a gap in the ring rather than as a quiet part of the wave. */"
-    "\n  @keyframes try-ray{0%,100%{stroke-dashoffset:20}"
-    "50%{stroke-dashoffset:2}}\n"
+    "\n  /* The hero Try It glow. The group breathes; each ray lights on its own"
+    "\n     delay so the brightness travels around the ring. opacity and scale"
+    "\n     only - both compositor-only, so 28 animated rays cannot cost layout"
+    "\n     on a page already doing scroll-driven work. */"
+    "\n  @keyframes try-glow{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}"
+    "\n  @keyframes try-ray{0%,100%{opacity:.2}50%{opacity:1}}\n"
 )
 
 
