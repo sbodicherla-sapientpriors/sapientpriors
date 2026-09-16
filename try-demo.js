@@ -661,8 +661,18 @@
             nav = Math.max(nav, r.height);
           }
         });
-        var y = grid.getBoundingClientRect().top + window.scrollY - (nav + 16);
-        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+        var y = Math.max(0, grid.getBoundingClientRect().top + window.scrollY - (nav + 16));
+        /*
+          Through scroll-motion's lerp when it is present, not around it.
+
+          That script owns the wheel and drives the page from its own rAF loop.
+          A native smooth scroll started here writes scrollY on the same frames
+          the lerp does, and the lerp wins - so this scroll simply did not
+          happen for anyone who had touched the wheel.
+        */
+        var m = window.__spMotion;
+        if (m && m.scrollTo) m.scrollTo(y);
+        else window.scrollTo({ top: y, behavior: "smooth" });
       });
     });
   }

@@ -310,8 +310,20 @@
   }
 
   function goTo(el) {
-    var y = el.getBoundingClientRect().top + window.scrollY - navOffset();
-    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+    var y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - navOffset());
+    /* Through the lerp when it owns scrolling, natively when it does not. Using
+       the native one while the lerp is live means both write scrollY every frame
+       and the anchor loses. */
+    if (lerpTo) lerpTo(y);
+    else window.scrollTo({ top: y, behavior: "smooth" });
+  }
+
+  /* The one way anything else on the page should scroll it - try-demo.js uses
+     this after Start, for exactly the reason above. */
+  function scrollPageTo(y) {
+    y = Math.max(0, y);
+    if (lerpTo) lerpTo(y);
+    else window.scrollTo({ top: y, behavior: "smooth" });
   }
 
   document.addEventListener("click", function (e) {
@@ -347,16 +359,75 @@
      transformed wrapper would break. Off unless asked for: it overrides trackpad
      momentum, which is a taste question, not an improvement. */
   var smooth = null;
+
+  /* Set by initSmooth to a function that scrolls the page THROUGH the lerp.
+     Null when the custom smooth scroll is off, in which case callers fall back
+     to the browser's own smooth scroll. See goTo. */
+  var lerpTo = null;
+
   function initSmooth() {
     if (smooth || !on.smooth) return;
-    var target = window.scrollY, running = false;
+    var target = window.scrollY, running = false, prevY = -1, stalled = 0;
+
+    function maxY() {
+      return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    }
+
+    /*
+      The exit test used to be |target - next| < 0.4, which reduces to
+      |target - y| < 0.4545: the loop only ends if the page can be positioned
+      within half a pixel of the target.
+
+      It often cannot. A wheel gesture leaves target at a fractional value, the
+      browser lands scrollY on a whole device pixel, and y then never moves
+      again - so next is recomputed identically every frame, the test never
+      passes, and requestAnimationFrame runs forever with running stuck true.
+
+      That is not a cosmetic leak. While running is true:
+        - the scroll listener below stops re-syncing target, so the lerp is
+          pinned to a stale position, and
+        - step() calls window.scrollTo every frame, which CANCELS any native
+          smooth scroll in progress.
+      Which is to say every anchor on the site, and the demo's own scroll after
+      Start, silently stopped working for the rest of the page's life the moment
+      the visitor used the wheel. Measured: 153 scrollTo(0, 4) calls in 2.5s,
+      still going, with the anchor's scroll to 1824 overridden 7ms after it began.
+
+      So: a whole-pixel tolerance, and a stall detector. If the page has not
+      moved for two consecutive frames the target is unreachable - give up on it
+      and hand scrolling back rather than fighting the browser forever.
+    */
     function step() {
       var y = window.scrollY;
-      var next = y + (target - y) * 0.12;
-      if (Math.abs(target - next) < 0.4) { window.scrollTo(0, target); running = false; return; }
-      window.scrollTo(0, next);
+      var lim = maxY();
+      if (target < 0) target = 0; else if (target > lim) target = lim;
+
+      if (Math.abs(target - y) < 1) { window.scrollTo(0, target); stop(); return; }
+
+      if (y === prevY) {
+        if (++stalled >= 2) { target = y; stop(); return; }
+      } else {
+        stalled = 0;
+      }
+      prevY = y;
+
+      window.scrollTo(0, y + (target - y) * 0.12);
       requestAnimationFrame(step);
     }
+
+    function stop() { running = false; prevY = -1; stalled = 0; }
+
+    function start(y) {
+      var lim = maxY();
+      target = Math.max(0, Math.min(lim, y));
+      prevY = -1; stalled = 0;
+      if (!running) { running = true; requestAnimationFrame(step); }
+    }
+
+    /* Programmatic scrolls go through the lerp rather than around it. A native
+       smooth scroll and this loop cannot both own the scroll position - whichever
+       writes last wins, every frame - so anchors ask the lerp to move instead. */
+    lerpTo = start;
     /* Anything the pointer is over that can still scroll on its own keeps its
        wheel. Without this, taking the page's wheel event would freeze every
        nested scroller on the site - the wide tables and code blocks that scroll
@@ -382,9 +453,7 @@
       else if (e.deltaMode === 2) dy *= window.innerHeight;
       if (nestedScroller(e.target, dy)) return;
       e.preventDefault();
-      var max = document.documentElement.scrollHeight - window.innerHeight;
-      target = Math.max(0, Math.min(max, target + dy));
-      if (!running) { running = true; requestAnimationFrame(step); }
+      start(target + dy);
     };
     window.addEventListener("wheel", smooth, { passive: false });
     window.addEventListener("scroll", function () {
@@ -437,7 +506,7 @@
   setTimeout(honourHash, 3800);
   window.addEventListener("hashchange", honourHash);
 
-  window.__spMotion = { flags: on, boot: boot,
+  window.__spMotion = { flags: on, boot: boot, scrollTo: scrollPageTo,
     set: function (k, v) {
       on[k] = v;
       try { localStorage.setItem("sp-motion", JSON.stringify(on)); } catch (e) {}
