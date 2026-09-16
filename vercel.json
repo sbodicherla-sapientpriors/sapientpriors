@@ -104,7 +104,7 @@
   "redirects": [
     {
       "source": "/Playground.dc.html",
-      "destination": "/playground",
+      "destination": "/#playground",
       "permanent": true
     },
     {
@@ -181,6 +181,16 @@
       "source": "/Pricing.dc.html",
       "destination": "/pricing",
       "permanent": true
+    },
+    {
+      "source": "/playground",
+      "destination": "/#playground",
+      "permanent": true
+    },
+    {
+      "source": "/playground/",
+      "destination": "/#playground",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -199,14 +209,6 @@
     {
       "source": "/try",
       "destination": "/TryIt.dc.html"
-    },
-    {
-      "source": "/playground",
-      "destination": "/Playground.dc.html"
-    },
-    {
-      "source": "/playground/",
-      "destination": "/Playground.dc.html"
     },
     {
       "source": "/research",

@@ -147,8 +147,14 @@ def main(src):
         s = s.replace('preload="auto"', 'preload="metadata"')
 
         i = s.rfind("</body>")
-        add = HASH_FIX + (TRY_DEMO if os.path.basename(p) == "TryIt.dc.html" else "")
-        if os.path.basename(p) in ("SapientPriors.dc.html", "index.html"):
+        # The home page carries the demo now (see patch_home_playground), so it
+        # needs the script as well. Playground.dc.html asks for it in its own
+        # markup and is not listed here.
+        base = os.path.basename(p)
+        add = HASH_FIX
+        if base in ("TryIt.dc.html", "SapientPriors.dc.html", "index.html"):
+            add += TRY_DEMO
+        if base in ("SapientPriors.dc.html", "index.html"):
             add += CHART_SCROLL
         if "Deploy-time fix" not in s and "hash ? location.hash" not in s:
             s = (s[:i] + add + s[i:]) if i != -1 else (s + add)
@@ -216,6 +222,10 @@ def main(src):
     import patch_urls
     print('urls')
     patch_urls.apply(out)
+
+    import patch_home_playground
+    print('home playground')
+    patch_home_playground.apply(out)
 
     import patch_try_button
     print('try button')

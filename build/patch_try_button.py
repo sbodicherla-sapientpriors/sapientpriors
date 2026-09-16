@@ -2,10 +2,15 @@
 """
 A "Try It" button beside Get Beta Access in the hero, with a glow around it.
 
-Points at /playground, the live demo - not /try, which is the pitch page that
-asks you to book a session. A button labelled "Try It" beside "Get Beta Access"
-promises the thing you can use now, and /try is the same kind of ask as the
-button next to it.
+Points at /#playground - the demo now lives on the home page, straight after
+"What changes", rather than on a page of its own. Not /try, which is the pitch
+page that asks you to book a session: a button labelled "Try It" beside "Get
+Beta Access" promises the thing you can use now, and /try is the same kind of
+ask as the button next to it.
+
+A plain hash link, so clicking it is a scroll and nothing else - no transition,
+no entrance animation. Nothing on the site sets scroll-behavior, so the browser
+jumps; the section carries scroll-margin-top for the fixed nav.
 
 It sits in the hero rather than the nav, in the same fill as Get Beta Access, so
 the two read as a pair of equal offers rather than a primary and a fallback.
@@ -103,13 +108,17 @@ GLOW = (
     '</span>'
 )
 
+# The guard string, named once. It is what stops a rebuild adding a second
+# button, so it must change in lockstep with the href in TRY_BUTTON below.
+TRY_HREF = 'href="/#playground"'
+
 # 26px on top of the row's own 12px gap. The rays reach past the button on every
 # side, and without it they crossed the Get Beta Access button beside it -
 # decoration drawn over a different control reads as a rendering fault.
 TRY_BUTTON = (
     '<div style="position:relative;display:inline-flex;margin-left:26px">'
     + GLOW +
-    '<a href="/playground" style="position:relative;padding:12px 28px;'
+    '<a href="/#playground" style="position:relative;padding:12px 28px;'
     'border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.9375rem;'
     'font-weight:500;text-decoration:none;white-space:nowrap">Try It</a>'
     '</div>'
@@ -136,7 +145,7 @@ def apply(out):
             s = s[:i] + s[s.find("</a>", i) + 4:]
             removed += 1
 
-        if HERO_CTA in s and 'href="/playground"' not in s:
+        if HERO_CTA in s and TRY_HREF not in s:
             s = s.replace(HERO_CTA, HERO_CTA + TRY_BUTTON, 1)
             added += 1
             if "@keyframes try-glow" not in s:
@@ -149,7 +158,7 @@ def apply(out):
     print("  try button: added to %d hero(s), removed from %d nav(s)"
           % (added, removed))
     if added == 0:
-        present = any('href="/playground"' in io.open(p, encoding="utf-8", errors="surrogateescape").read()
+        present = any(TRY_HREF in io.open(p, encoding="utf-8", errors="surrogateescape").read()
                       for p in glob.glob(os.path.join(out, "*.html")))
         if not present:
             print("  hero CTA not found - no Try It button - CHECK")

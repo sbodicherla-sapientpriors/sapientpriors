@@ -132,8 +132,22 @@
     "-webkit-mask-image:linear-gradient(to bottom,#000 62%,transparent);" +
     "mask-image:linear-gradient(to bottom,#000 62%,transparent)";
 
-  var state = { user: null, manual: null, asked: null, askedAt: null,
-                results: {}, timers: [], abort: null };
+  /*
+    turns is the conversation, oldest first. Each entry is
+      { q: the question, at: the clock origin, results: { contenderId: r } }
+    where r is the live object readStream fills in.
+
+    WHY a list and not one current question: the demo used to hold exactly one
+    turn - ask() wiped state.results and rebuilt the panes - so sending a second
+    question erased the first and its answer. The API never behaved that way (one
+    thread, full history, follow-ups resolve correctly), so the screen was
+    contradicting the product on the page built to demonstrate it.
+
+    WHY each turn owns its results rather than a shared state.results keyed by
+    contender: two turns are on screen at once now, and a shared map would have
+    the second answer stream into the first turn's bubble.
+  */
+  var state = { user: null, manual: null, turns: [], timers: [], abort: null };
 
   function el(tag, style, text) {
     var n = document.createElement(tag);
@@ -275,20 +289,63 @@
     return ms < 1000 ? Math.round(ms) + " ms" : (ms / 1000).toFixed(2) + " s";
   }
 
-  function pane(c) {
-    var box = el("div", "display:flex;flex-direction:column;min-height:17rem;border-radius:12px;border:1px solid " +
-      (c.ours ? "#E4D3C4" : LINE) + ";background:" + (c.ours ? "#FBF6F1" : WHITE));
+  /*
+    One contender's column: a fixed head, and under it a log that scrolls.
 
-    var head = el("div", "padding:11px 14px;border-bottom:1px solid " + LINE_SOFT);
+    The log is the scroller, not the grid around it. Scrolling the grid would
+    move every column together and take the contenders' names off the top with
+    it; scrolling the log keeps each name pinned over its own transcript, which
+    is what a column of answers is for.
+  */
+  function column(c) {
+    var box = el("div", "display:flex;flex-direction:column;min-height:0;overflow:hidden;" +
+      "border-radius:12px;border:1px solid " + (c.ours ? "#E4D3C4" : LINE) +
+      ";background:" + (c.ours ? "#FBF6F1" : WHITE));
+
+    var head = el("div", "padding:11px 14px;border-bottom:1px solid " + LINE_SOFT + ";flex:none");
     head.appendChild(el("p", "margin:0;font-family:" + SERIF + ";font-size:1rem;color:" +
       (c.ours ? BROWN_D : INK), c.name));
     box.appendChild(head);
 
-    var body = el("div", "display:flex;flex-direction:column;gap:11px;padding:14px;flex:1");
+    /*
+      No scroll-behavior:smooth here, deliberately.
+
+      The log is pinned to the bottom 25 times a second while an answer streams,
+      and each tick first asks whether the reader is still at the bottom. A smooth
+      scroll is in flight across several of those ticks, so the question gets
+      answered mid-animation - "no, they are 200px up" - and the follow switches
+      itself off one tick after the new question was appended. Instant assignment
+      makes the reading true at the moment it is taken; the motion the reader sees
+      is the text arriving and pushing the conversation up, which is the thing that
+      should be moving anyway.
+    */
+    var log = el("div", "flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;" +
+      "gap:22px;padding:14px");
+    log.setAttribute("data-log", c.id);
+    box.appendChild(log);
+    return box;
+  }
+
+  /* Is the reader at the bottom of this log? Asked BEFORE anything is appended,
+     so that streaming text follows them down only when they were already there -
+     pinning unconditionally would yank the page out from under someone who had
+     scrolled up to re-read an earlier answer. */
+  function atBottom(log) {
+    return log.scrollHeight - log.scrollTop - log.clientHeight < 48;
+  }
+
+  function toBottom(log) { log.scrollTop = log.scrollHeight; }
+
+  /* One question and its answer, for one contender. Appended to a log and never
+     rebuilt: the interval below writes into the nodes it closed over, so an
+     earlier turn keeps its text, its clock and its citations for the rest of
+     the session. */
+  function turnBlock(c, turn, log) {
+    var body = el("div", "display:flex;flex-direction:column;gap:11px");
 
     var qRow = el("div", "display:flex;justify-content:flex-end");
     qRow.appendChild(el("p", "margin:0;max-width:88%;padding:9px 12px;border-radius:10px 10px 3px 10px;" +
-      "font-size:.82rem;line-height:1.55;background:" + (c.ours ? BROWN : INK) + ";color:#fff", state.asked));
+      "font-size:.82rem;line-height:1.55;background:" + (c.ours ? BROWN : INK) + ";color:#fff", turn.q));
     body.appendChild(qRow);
 
     /*
@@ -318,21 +375,23 @@
 
     var cites = el("div", "display:none;flex-wrap:wrap;gap:8px;margin-top:2px");
     body.appendChild(cites);
-    box.appendChild(body);
 
     /*
       An interval, not requestAnimationFrame: rAF is suspended outright in a
       background tab, which freezes the clock at zero and reads as broken.
     */
-    var started = state.askedAt;
+    var started = turn.at;
     // WHY painted tracks a length rather than re-setting textContent every tick: the
     // answer arrives a few characters at a time and rewriting an unchanged node 25
     // times a second is what collapses a text selection the reader is holding.
     var painted = 0;
     var drewCites = false;
     var t = setInterval(function () {
-      var r = state.results[c.id];
+      var r = turn.results[c.id];
       var e = performance.now() - started;
+      // Read before the paint below changes the height, so "were they at the
+      // bottom" means before this tick's text arrived, not after it.
+      var follow = log && atBottom(log);
 
       if (r && r.ttft !== null) {
         num.textContent = fmt(r.ttft);
@@ -344,6 +403,7 @@
       if (r && r.text.length !== painted) {
         painted = r.text.length;
         renderAnswer(ans, r.text);
+        if (follow && log) toBottom(log);
       }
 
       if (r && r.done) {
@@ -393,7 +453,7 @@
       }
     }, 40);
     state.timers.push(t);
-    return box;
+    return body;
   }
 
   /* \u2500\u2500 the answer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -527,7 +587,7 @@
       composer on the manual's bottom edge, and the two halves read as one box.
     */
     var wrap = el("div", "flex:1;min-height:0;display:flex;flex-direction:column");
-    if (!state.asked) {
+    if (!state.turns.length) {
       // centred in the space rather than padded down from the top: the padding
       // was a guess at the height, and this is the height.
       var empty = el("div", "flex:1;min-height:0;display:flex;flex-direction:column;" +
@@ -545,11 +605,26 @@
     }
     // One column per contender, read from the list rather than pinned at three, so
     // turning the rivals back on is a data change and not a CSS hunt.
-    var cols = el("div", "flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(" +
+    // overflow hidden, not auto: each column scrolls its own log now, and a
+    // scrollbar here as well would give the reader two nested scrollers over the
+    // same content.
+    var cols = el("div", "flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:repeat(" +
       CONTENDERS.length + ",minmax(0,1fr));gap:14px");
     cols.setAttribute("data-race-cols", "");
-    CONTENDERS.forEach(function (c) { cols.appendChild(pane(c)); });
+    CONTENDERS.forEach(function (c) {
+      var box = column(c);
+      var log = box.querySelector("[data-log]");
+      // Replayed rather than kept, because this path only runs on a full render()
+      // - first mount, or a fallback - and the turn objects hold everything a
+      // block needs to be rebuilt exactly as it was.
+      state.turns.forEach(function (turn) { log.appendChild(turnBlock(c, turn, log)); });
+      cols.appendChild(box);
+    });
     wrap.appendChild(cols);
+    // The newest turn is the one being read, and a replayed log opens at the top.
+    requestAnimationFrame(function () {
+      cols.querySelectorAll("[data-log]").forEach(toBottom);
+    });
     return wrap;
   }
 
@@ -606,9 +681,45 @@
      that actually differs and leaves the iframe attached and playing.
   */
 
-  /* The answers, and only the answers. race() is the only node that reads
-     state.asked or state.results, so it is the only node a new question
-     invalidates. */
+  /* Settle anything still streaming, so an aborted turn stops counting.
+
+     An abort resolves nothing: readStream's catch returns early on AbortError
+     precisely because the result object is normally orphaned. Now that the turn
+     stays on screen, its interval would keep ticking under a superseded answer
+     until the silence cutoff, ~60s later. */
+  function settlePending() {
+    state.turns.forEach(function (turn) {
+      Object.keys(turn.results).forEach(function (k) {
+        var r = turn.results[k];
+        if (r.done) return;
+        r.done = true;
+        r.ms = r.ms || (performance.now() - turn.at);
+        // Half an answer is still the answer it got, so text is kept and the
+        // reason is said under it. Nothing arrived at all - say so plainly.
+        if (!r.text) r.error = "superseded by the next question";
+      });
+    });
+  }
+
+  /* Add one turn to the bottom of every column, leaving every earlier turn
+     exactly where it is. This is the whole of what asking does to the screen. */
+  function appendTurn(mount, turn) {
+    var cols = mount.querySelector("[data-race-cols]");
+    // No columns yet means the empty state is still up; race() builds them and
+    // replays the turn list, which this turn is already in.
+    if (!cols) { repaint(mount); return; }
+    CONTENDERS.forEach(function (c) {
+      var log = cols.querySelector('[data-log="' + c.id + '"]');
+      if (!log) return;
+      log.appendChild(turnBlock(c, turn, log));
+      // Unconditional here, unlike during streaming: the reader just pressed
+      // send, so the new question is what they are looking for.
+      requestAnimationFrame(function () { toBottom(log); });
+    });
+  }
+
+  /* A full rebuild of the answer side. Only the reset path and the first turn
+     need it now - a question appends. */
   function repaint(mount) {
     var right = mount.querySelector("[data-try-right]");
     if (!right || !right.firstChild) { render(mount); return; }
@@ -708,7 +819,8 @@
       "padding:7px 14px;font-size:.8125rem;color:" + INK3 + ";cursor:pointer", "Change username");
     swap.addEventListener("click", function () {
       state.timers.forEach(clearInterval); state.timers = [];
-      state.user = null; state.asked = null; state.results = {};
+      if (state.abort) state.abort.abort();
+      state.user = null; state.turns = [];
       try { localStorage.removeItem(STORE_KEY); } catch (_) {}
       repaint(mount);
       lock(mount);
@@ -868,6 +980,15 @@
         card.style.height = mqPage.matches ? "auto" : COL_HEIGHT;
       }
 
+      /*
+        On one column the right-hand side is height:auto, so nothing above the
+        log bounds it and a long conversation would push the composer off the
+        bottom of the page. A ceiling here gives the log its own scroll instead.
+      */
+      wrap.querySelectorAll("[data-log]").forEach(function (lg) {
+        lg.style.maxHeight = mqPage.matches ? "68vh" : "";
+      });
+
       var rc = wrap.querySelector("[data-race-cols]");
       if (rc) {
         rc.style.gridTemplateColumns = mqPanes.matches
@@ -884,7 +1005,7 @@
   /*
     Read one pane's SSE stream into its live result object.
 
-    WHY it mutates state.results[id] rather than resolving a promise with the finished
+    WHY it mutates turn.results[id] rather than resolving a promise with the finished
     answer: the pane already polls that object on an interval to paint its clock, so
     streaming needs no second render path and no re-render of the page. The reader
     fills the object in; the interval paints whatever is in it. render() rebuilds the
@@ -895,7 +1016,8 @@
     on the same connection, so the comparison stays fair and the absolute figure stays
     honest — a server-side clock would quietly flatter every pane by the same amount.
   */
-  function readStream(id, t0, signal) {
+  function readStream(turn, id, signal) {
+    var t0 = turn.at;
     /*
       WHY each pane gets its own controller, chained to the shared one: the shared signal
       supersedes the whole question, but a single pane also needs to give up alone when its
@@ -906,17 +1028,17 @@
     var ctrl = new AbortController();
     if (signal) signal.addEventListener("abort", function () { ctrl.abort(); });
 
-    // WHY the object is published before the fetch: pane()'s interval is already
+    // WHY the object is published before the fetch: turnBlock()'s interval is already
     // running, and a pane polling an id that is not there yet has no way to tell
     // "the request has not been made" from "the answer never came".
     var r = { text: "", ttft: null, ms: null, done: false, error: null, citations: [],
               abort: function () { ctrl.abort(); } };
-    state.results[id] = r;
+    turn.results[id] = r;
 
     fetch("/api/try", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user: state.user, model: id, message: state.asked }),
+      body: JSON.stringify({ user: state.user, model: id, message: turn.q }),
       signal: ctrl.signal
     }).then(function (res) {
       if (!res.ok || !res.body) throw new Error(String(res.status));
@@ -994,26 +1116,32 @@
   }
 
   function ask(text, mount) {
-    state.timers.forEach(clearInterval);
-    state.timers = [];
     // WHY the previous question's streams are aborted: without this, asking again while
     // an answer is still arriving leaves the old fetch running to completion, billing a
-    // turn nobody will ever see and holding a connection open behind the new one.
+    // turn nobody will ever see and holding a connection open behind the new one. The
+    // thread upstream is also a single conversation, so two turns in flight on it at once
+    // is not a thing to allow.
     if (state.abort) state.abort.abort();
     state.abort = new AbortController();
-    state.asked = text.trim();
-    state.askedAt = performance.now();
-    state.results = {};
-    repaint(mount);
+    /*
+      An aborted turn stays on screen, so it has to be settled rather than left
+      running. Its interval polls r.done, and abort never sets it — the clock would
+      count up to the silence cutoff under an answer that was already superseded.
+    */
+    settlePending();
 
-    // WHY state.askedAt and not a second performance.now(): every pane's clock counts up
-    // from askedAt, so measuring the first token from a later instant would let the final
+    var turn = { q: text.trim(), at: performance.now(), results: {} };
+    state.turns.push(turn);
+    appendTurn(mount, turn);
+
+    // WHY turn.at and not a second performance.now(): every pane's clock counts up
+    // from it, so measuring the first token from a later instant would let the final
     // figure land BELOW the number the reader just watched tick past.
     //
     // WHY one origin shared by every contender: they are being compared, so they must be
     // timed from the same instant. A per-pane clock started inside its own callback would
     // silently hand whichever pane the event loop reached last a head start.
-    CONTENDERS.forEach(function (c) { readStream(c.id, state.askedAt, state.abort.signal); });
+    CONTENDERS.forEach(function (c) { readStream(turn, c.id, state.abort.signal); });
   }
 
   /* ── mount ─────────────────────────────────────────────────────────────── */
@@ -1051,7 +1179,7 @@
       hydration has finished. A page that never had one matches on the first frame.
     */
     var slot = document.querySelector("x-dc") ? null : document.querySelector("[data-try-mount]");
-    var host = el("section", "padding:72px 0 8px");
+    var host = el("section", "padding:40px 0 8px");
     host.setAttribute("data-try-demo", "");
 
     if (slot) {
