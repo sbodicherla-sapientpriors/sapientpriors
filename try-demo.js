@@ -482,9 +482,20 @@
   }
 
   function race() {
-    var wrap = el("div", "");
+    /*
+      A column, not a block, and it grows. The manual beside it is sticky and
+      viewport-tall, so leaving this content-height ended the right-hand side
+      hundreds of pixels above the manual's bottom edge and left the composer
+      floating near the top of an empty half. Filling the height puts the
+      composer on the manual's bottom edge, and the two halves read as one box.
+    */
+    var wrap = el("div", "flex:1;min-height:0;display:flex;flex-direction:column");
     if (!state.asked) {
-      var empty = el("div", "border:1px dashed " + LINE + ";border-radius:12px;padding:52px 24px;text-align:center");
+      // centred in the space rather than padded down from the top: the padding
+      // was a guess at the height, and this is the height.
+      var empty = el("div", "flex:1;min-height:0;display:flex;flex-direction:column;" +
+        "align-items:center;justify-content:center;border:1px dashed " + LINE +
+        ";border-radius:12px;padding:24px;text-align:center");
       // WHY the copy changed: it used to invite you to "tell it something to remember"
       // and to watch three clocks. Neither is true now — learning from turns is off and
       // the rival panes are hidden, so the empty state promises what the page delivers.
@@ -497,8 +508,8 @@
     }
     // One column per contender, read from the list rather than pinned at three, so
     // turning the rivals back on is a data change and not a CSS hunt.
-    var cols = el("div", "display:grid;grid-template-columns:repeat(" + CONTENDERS.length +
-      ",minmax(0,1fr));gap:14px");
+    var cols = el("div", "flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(" +
+      CONTENDERS.length + ",minmax(0,1fr));gap:14px");
     cols.setAttribute("data-race-cols", "");
     CONTENDERS.forEach(function (c) { cols.appendChild(pane(c)); });
     wrap.appendChild(cols);
@@ -517,18 +528,39 @@
     */
     var wrap = el("div", "margin:0 auto;padding:0 clamp(1.25rem,3.2vw,4.5rem)");
 
-    if (!state.user) {
-      wrap.appendChild(el("p", "margin:0 0 1.25rem;text-align:center;font-family:" + MONO +
-        ";font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:" + INK4, "The demo"));
-      wrap.appendChild(el("h2", "margin:0 auto 2rem;max-width:24ch;text-align:center;font-family:" + SERIF +
-        ";font-weight:400;font-size:clamp(1.9rem,3.4vw,2.9rem);line-height:1.1;letter-spacing:-.02em;color:" + INK,
-        "One manual, 288 pages, answered before it could be read."));
-      gate(wrap, function (u) { state.user = u; warm(); render(mount); });
-      mount.appendChild(wrap);
-      return;
-    }
+    /*
+      The gate no longer replaces the demo, it sits on top of it.
+
+      A lone "pick a username" card said nothing about what picking one got you,
+      so the ask came before any reason to agree to it. The real interface is
+      built either way now and shown behind the card, blurred: the manual, the
+      composer and the suggestions are all legible enough as shapes to tell you
+      there is something here, and unreadable enough that the demo is still
+      something you start rather than something you watched.
+
+      Blurred is not disabled. pointer-events and user-select are off on the
+      backdrop as well, so nothing behind the card can be clicked, tabbed into
+      or selected while it is locked - a blur alone would leave a working form
+      under a frosted pane.
+    */
+    var locked = !state.user;
+    var stage = el("div", "position:relative");
+    var body = el("div", locked
+      ? "filter:blur(5px);pointer-events:none;user-select:none;opacity:.65;" +
+        // Capped, because the backdrop is a glimpse and not the page. At full
+        // height the card centred in 790px of blur and landed below the fold -
+        // the one thing it cannot do is be out of sight.
+        "max-height:440px;overflow:hidden;" +
+        // and faded at the cut, so it reads as more-below rather than as a
+        // component that stops
+        "-webkit-mask-image:linear-gradient(to bottom,#000 62%,transparent);" +
+        "mask-image:linear-gradient(to bottom,#000 62%,transparent)"
+      : "");
+    if (locked) body.setAttribute("aria-hidden", "true");
 
     var bar = el("div", "display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 20px;flex-wrap:wrap");
+    // "Signed in as" with nothing after it is worse than no bar at all.
+    if (locked) bar.style.visibility = "hidden";
     var who = el("p", "margin:0;font-size:.9375rem;color:" + INK2);
     who.appendChild(document.createTextNode("Signed in as "));
     who.appendChild(el("span", "font-family:" + MONO + ";color:" + INK, state.user));
@@ -542,9 +574,9 @@
       render(mount);
     });
     bar.appendChild(swap);
-    wrap.appendChild(bar);
+    body.appendChild(bar);
 
-    wrap.appendChild(tip());
+    body.appendChild(tip());
 
     var form = el("form", "border:1px solid " + LINE + ";border-radius:12px;background:" + WHITE +
       ";padding:14px");
@@ -601,7 +633,7 @@
     left.appendChild(source());
     grid.appendChild(left);
 
-    wrap.appendChild(grid);
+    body.appendChild(grid);
 
     /*
       WHY this was rewritten and not just trimmed: it used to say "anything you store here
@@ -610,11 +642,23 @@
       false statement on a company page, and this one actively discourages the thing the
       demo is for. What replaces it is the same promise the backend now actually keeps.
     */
-    wrap.appendChild(el("p", "margin:18px 0 26px;font-size:.75rem;line-height:1.6;color:" + INK4,
+    body.appendChild(el("p", "margin:18px 0 26px;font-size:.75rem;line-height:1.6;color:" + INK4,
       "Your conversation stays in this session and is not stored for other visitors to read. " +
       "The manual is the only thing in shared memory. Questions are sent to our API to be " +
       "answered."));
 
+    stage.appendChild(body);
+
+    if (locked) {
+      var veil = el("div", "position:absolute;inset:0;display:flex;align-items:center;" +
+        "justify-content:center;padding:24px");
+      var holder = el("div", "width:100%;max-width:34rem");
+      gate(holder, function (u) { state.user = u; warm(); render(mount); });
+      veil.appendChild(holder);
+      stage.appendChild(veil);
+    }
+
+    wrap.appendChild(stage);
     mount.appendChild(wrap);
 
     /*
@@ -633,9 +677,26 @@
       left.style.gridRow = mqPage.matches ? "auto" : "1";
       right.style.gridColumn = mqPage.matches ? "auto" : "2";
       right.style.gridRow = mqPage.matches ? "auto" : "1";
+      // The same height the manual card is bounded to, so both columns end on
+      // the same line. On one column there is nothing to align to, and a fixed
+      // height would just cut the page off.
+      right.style.height = mqPage.matches ? "auto" : "calc(100vh - 108px)";
 
       var card = left.firstChild;
-      if (card) card.style.position = mqPage.matches ? "static" : "sticky";
+      if (card) {
+        card.style.position = mqPage.matches ? "static" : "sticky";
+        /*
+          height, not max-height, and the same expression the right column uses.
+
+          max-height let the card stop at its content - the manual rendered 498px
+          tall inside a 792px allowance - so pinning the right column to the
+          viewport height put the composer 294px BELOW the manual's bottom edge
+          and made the misalignment worse than it started. Given a height, the
+          iframe is flex:1 and grows to fill it, and both columns end on the
+          same line.
+        */
+        card.style.height = mqPage.matches ? "auto" : "calc(100vh - 108px)";
+      }
 
       var rc = wrap.querySelector("[data-race-cols]");
       if (rc) {
