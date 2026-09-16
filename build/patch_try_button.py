@@ -23,7 +23,7 @@ Short rays around an ellipse, pointing outward, pulsing and turning slowly.
                                      and the golds and rusts either side of it,
                                      so it reads as light coming off the button
                                      rather than as confetti stuck to it
-  it does not rotate                 a rotating ellipse sweeps a circle, and
+  the movement is opacity, not      a rotating ellipse sweeps a circle, and
                                      this one is wider than it is tall: turning
                                      it pushed the burst up into the sub-line
                                      and down into the logo row, and grew its
@@ -57,17 +57,33 @@ NAV_BUTTON_PREFIX = '<a href="/try" style="margin-left:16px;padding:9px 17px;'
 RAY_COLOURS = ["#84512E", "#C2703A", "#E8A94E", "#D2643C", "#A8452A", "#E0B15F"]
 
 
-def _rays(count=28, cx=130, cy=62, rx=40, ry=18, short=20, long_=29):
+CYCLE = 2.4  # seconds, one full trip of the shimmer around the ring
+
+
+def _rays(count=28, cx=130, cy=62, rx=40, ry=18, short=13, long_=20):
+    """
+    Rays around an ellipse: alternating length, cycling colour, and each one
+    lit on a delay taken from its position, so brightness chases around the
+    ring rather than every ray breathing in unison.
+
+    The movement is opacity, not geometry. Rotation was tried and removed - a
+    turning ellipse sweeps a circle, and this one is wider than it is tall, so
+    it climbed into the sub-line above and the logo row below. A shimmer moves
+    without the footprint ever changing.
+    """
     out = []
     for i in range(count):
         a = (2 * math.pi * i) / count
         ux, uy = math.cos(a), math.sin(a)
         reach = long_ if i % 2 == 0 else short
+        delay = -(i / float(count)) * CYCLE
         out.append(
-            '<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s"/>' % (
+            '<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" '
+            'style="animation:try-ray %.1fs ease-in-out infinite;'
+            'animation-delay:%.2fs"/>' % (
                 cx + rx * ux, cy + ry * uy,
                 cx + (rx + reach) * ux, cy + (ry + reach) * uy,
-                RAY_COLOURS[i % len(RAY_COLOURS)]))
+                RAY_COLOURS[i % len(RAY_COLOURS)], CYCLE, delay))
     return "".join(out)
 
 
@@ -78,8 +94,8 @@ GLOW = (
     'width:260px;height:124px;margin-left:-130px;margin-top:-62px;'
     'pointer-events:none">'
     '<svg viewBox="0 0 260 124" focusable="false" '
-    'style="width:100%;height:100%;overflow:visible;stroke-width:2.4;'
-    'stroke-linecap:round;filter:drop-shadow(0 0 5px rgba(200,130,60,.45));'
+    'style="width:100%;height:100%;overflow:visible;stroke-width:2.1;'
+    'stroke-linecap:round;filter:drop-shadow(0 0 4px rgba(200,130,60,.4));'
     'animation:try-glow 2.6s ease-in-out infinite">' + _rays() + '</svg>'
     '</span>'
 )
@@ -97,10 +113,12 @@ TRY_BUTTON = (
 )
 
 KEYFRAMES = (
-    "\n  /* The hero Try It glow. opacity and scale only - both compositor-only,"
-    "\n     so this cannot cost layout on a page already doing scroll work. */"
-    "\n  @keyframes try-glow{0%,100%{opacity:.5;transform:scale(1)}"
-    "50%{opacity:1;transform:scale(1.05)}}\n"
+    "\n  /* The hero Try It glow. The group breathes; each ray lights on its own"
+    "\n     delay so the brightness travels around the ring. opacity and scale"
+    "\n     only - both compositor-only, so 28 animated rays cannot cost layout"
+    "\n     on a page already doing scroll-driven work. */"
+    "\n  @keyframes try-glow{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}"
+    "\n  @keyframes try-ray{0%,100%{opacity:.2}50%{opacity:1}}\n"
 )
 
 
