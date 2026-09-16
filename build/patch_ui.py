@@ -1628,21 +1628,28 @@ def _use_cases_as_cards(s):
 
 def _contact_email(out):
     """
-    Swap the public contact address for raveeshu@sapientpriors.io.
+    Swap the public contact address for hello@sapientpriors.com.
 
     Runs last on purpose. _careers_apply_form still searches for the export's
     own "mailto:contact@sapientpriors.com?subject=Application" to find the
     buttons it replaces, so rewriting the address any earlier would stop that
     match and quietly leave the careers page pointing at an inbox again.
 
-    Note this moves the address to a different top-level domain from everything
-    else on the site: the canonical URL, the HubSpot notification recipient and
-    the fallback address in the two API routes are all sapientpriors.com. That
-    is left alone - only the address asked for is changed.
+    A shared inbox, not a person: this address is what the footer's Support,
+    Partnerships, Press and four legal links all resolve to, and those should
+    not route to one founder's mail. It also puts the public address back on the
+    same top-level domain as everything else - the canonical URL, the HubSpot
+    notification recipient and the fallback in the two API routes are all
+    sapientpriors.com, and this was the only .io among them.
+
+    The founder cards are deliberately NOT changed. Those chips are a personal
+    address each, beside Karan's, under a heading that offers to put you in touch
+    with the founders directly; a shared inbox on one of the two and a personal
+    address on the other would read as a mistake.
     """
     import glob
     import os
-    old, new = "contact@sapientpriors.com", "raveeshu@sapientpriors.io"
+    old, new = "contact@sapientpriors.com", "hello@sapientpriors.com"
     total, files = 0, 0
     for p in sorted(glob.glob(os.path.join(out, "*.html"))):
         s = open(p, encoding="utf-8", errors="surrogateescape").read()
