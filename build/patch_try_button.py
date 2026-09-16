@@ -2,12 +2,15 @@
 """
 A "Try It" button beside Get Beta Access in the hero, with a glow around it.
 
-The Try It page had no way in. It is a real page and it has been shared by link,
-but nothing on the site pointed at it - the audit found it with no inbound links
-at all, so the only visitors were people who already had the URL.
+Points at /playground, the live demo - not /try, which is the pitch page that
+asks you to book a session. A button labelled "Try It" beside "Get Beta Access"
+promises the thing you can use now, and /try is the same kind of ask as the
+button next to it.
 
 It sits in the hero rather than the nav, in the same fill as Get Beta Access, so
 the two read as a pair of equal offers rather than a primary and a fallback.
+
+Note this leaves /try with no inbound link again - see HANDOFF.md.
 
 The glow
 --------
@@ -106,7 +109,7 @@ GLOW = (
 TRY_BUTTON = (
     '<div style="position:relative;display:inline-flex;margin-left:26px">'
     + GLOW +
-    '<a href="/try" style="position:relative;padding:12px 28px;'
+    '<a href="/playground" style="position:relative;padding:12px 28px;'
     'border-radius:10px;background:#84512E;color:#F9F9F7;font-size:.9375rem;'
     'font-weight:500;text-decoration:none;white-space:nowrap">Try It</a>'
     '</div>'
@@ -133,7 +136,7 @@ def apply(out):
             s = s[:i] + s[s.find("</a>", i) + 4:]
             removed += 1
 
-        if HERO_CTA in s and 'href="/try"' not in s:
+        if HERO_CTA in s and 'href="/playground"' not in s:
             s = s.replace(HERO_CTA, HERO_CTA + TRY_BUTTON, 1)
             added += 1
             if "@keyframes try-glow" not in s:
@@ -146,7 +149,7 @@ def apply(out):
     print("  try button: added to %d hero(s), removed from %d nav(s)"
           % (added, removed))
     if added == 0:
-        present = any('href="/try"' in io.open(p, encoding="utf-8", errors="surrogateescape").read()
+        present = any('href="/playground"' in io.open(p, encoding="utf-8", errors="surrogateescape").read()
                       for p in glob.glob(os.path.join(out, "*.html")))
         if not present:
             print("  hero CTA not found - no Try It button - CHECK")
