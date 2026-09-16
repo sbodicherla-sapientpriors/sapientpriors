@@ -217,6 +217,10 @@ def main(src):
     print('urls')
     patch_urls.apply(out)
 
+    import patch_try_button
+    print('try button')
+    patch_try_button.apply(out)
+
     import patch_head
     print('head')
     patch_head.apply(out)
