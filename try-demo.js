@@ -516,6 +516,41 @@
     return wrap;
   }
 
+  /*
+    Bring the demo into view after the gate is cleared.
+
+    Starting a session left the page exactly where it was: the card vanished,
+    the interface appeared in the same place, and on anything but a very tall
+    window the manual and the composer were below the fold. The visitor had
+    just asked for the thing and had to go looking for it.
+
+    Two frames, not one. render() rebuilds the tree and lay() sets the column
+    heights inside it; measuring before the browser has laid that out reads the
+    old geometry and scrolls to the wrong place. One frame gets the DOM, the
+    second gets it measured.
+
+    The nav offset is measured rather than assumed, because it is the fixed bar
+    that would otherwise cover the top of what we just scrolled to.
+  */
+  function reveal(mount) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        var grid = mount.querySelector("[data-try-grid]");
+        if (!grid) return;
+        var nav = 0;
+        document.querySelectorAll("div,header,nav").forEach(function (e) {
+          var cs = getComputedStyle(e), r = e.getBoundingClientRect();
+          if (cs.position === "fixed" && r.top <= 1 && r.height > 24 &&
+              r.height < 140 && r.width > window.innerWidth * 0.6) {
+            nav = Math.max(nav, r.height);
+          }
+        });
+        var y = grid.getBoundingClientRect().top + window.scrollY - (nav + 16);
+        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+      });
+    });
+  }
+
   function render(mount) {
     mount.innerHTML = "";
     /*
@@ -653,7 +688,12 @@
       var veil = el("div", "position:absolute;inset:0;display:flex;align-items:center;" +
         "justify-content:center;padding:24px");
       var holder = el("div", "width:100%;max-width:34rem");
-      gate(holder, function (u) { state.user = u; warm(); render(mount); });
+      gate(holder, function (u) {
+        state.user = u;
+        warm();
+        render(mount);
+        reveal(mount);
+      });
       veil.appendChild(holder);
       stage.appendChild(veil);
     }
